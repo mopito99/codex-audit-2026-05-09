@@ -1,0 +1,14 @@
+[Unit]
+Description=Quantum Dashboard Service
+After=network.target
+
+[Service]
+User=administrator
+Group=administrator
+WorkingDirectory=/srv/quantum_dashboard
+Environment="PATH=/srv/quantum_dashboard/venv/bin"
+ExecStart=/srv/quantum_dashboard/venv/bin/gunicorn -w 1 -b 0.0.0.0:8005 app:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

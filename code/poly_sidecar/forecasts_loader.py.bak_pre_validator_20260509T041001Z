@@ -1,0 +1,116 @@
+"""Forecasts loader · reads /home/administrator/poly_sidecar/forecasts.json
+and provides lookup by category for SF compute.
+
+Manual consensus values curated from public sources (Investing.com, Bloomberg).
+This is the bridge while investing_client.py scraping gets fixed.
+"""
+
+from __future__ import annotations
+
+import datetime as dt
+import json
+import logging
+from pathlib import Path
+from typing import Any
+
+LOGGER = logging.getLogger(__name__)
+FORECASTS_FILE = Path("/home/administrator/poly_sidecar/forecasts.json")
+
+
+def load_forecasts() -> dict[str, Any]:
+    """Load full forecasts.json. Returns empty dict if missing/invalid."""
+    if not FORECASTS_FILE.exists():
+        LOGGER.warning(f"forecasts.json not found at {FORECASTS_FILE}")
+        return {"events": []}
+    try:
+        return json.loads(FORECASTS_FILE.read_text())
+    except (json.JSONDecodeError, OSError) as exc:
+        LOGGER.warning(f"forecasts.json load error: {exc}")
+        return {"events": []}
+
+
+def get_forecast_for_event(
+    category: str,
+    release_date: str,
+) -> dict[str, Any] | None:
+    """Find forecast entry matching category + release_date (ISO YYYY-MM-DD).
+
+    Returns dict with `forecasts`, `previous`, `primary_metric_for_sf` or None.
+    """
+    data = load_forecasts()
+    for ev in data.get("events", []):
+        if ev.get("category") == category and ev.get("release_date") == release_date:
+            return ev
+    return None
+
+
+def get_active_forecast(category: str) -> dict[str, Any] | None:
+    """Find the most recent forecast for category that is either today or future.
+
+    Used to retrieve the upcoming forecast value for SF compute.
+    """
+    today = dt.date.today().isoformat()
+    data = load_forecasts()
+    candidates = [
+        ev for ev in data.get("events", [])
+        if ev.get("category") == category
+    ]
+    # Prefer today/future events
+    upcoming = [ev for ev in candidates if ev.get("release_date", "1970-01-01") >= today]
+    if upcoming:
+        return min(upcoming, key=lambda e: e["release_date"])
+    # Fallback: most recent past
+    if candidates:
+        return max(candidates, key=lambda e: e["release_date"])
+    return None
+
+
+def get_forecast_value(category: str, release_date: str | None = None) -> float | None:
+    """Get the primary metric forecast value for SF compute.
+
+    For CPI: cpi_yoy_pct.
+    For NFP: nfp_change_thousands.
+    For unemployment: unemployment_rate_pct.
+    """
+    if release_date:
+        ev = get_forecast_for_event(category, release_date)
+    else:
+        ev = get_active_forecast(category)
+    if not ev:
+        return None
+    primary = ev.get("primary_metric_for_sf")
+    if not primary:
+        return None
+    return ev.get("forecasts", {}).get(primary)
+
+
+def list_all_forecasts_summary() -> list[dict[str, Any]]:
+    data = load_forecasts()
+    out = []
+    for ev in data.get("events", []):
+        primary = ev.get("primary_metric_for_sf")
+        out.append({
+            "category": ev.get("category"),
+            "release_date": ev.get("release_date"),
+            "primary_metric": primary,
+            "forecast_value": ev.get("forecasts", {}).get(primary) if primary else None,
+            "actual_known": ev.get("actual_known"),
+        })
+    return out
+
+
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    print("=== forecasts.json summary ===")
+    for s in list_all_forecasts_summary():
+        print(f"  {s}")
+    print()
+    print("=== active forecast lookups ===")
+    for cat in ("CPI", "NFP", "PCE", "FOMC"):
+        ev = get_active_forecast(cat)
+        if ev:
+            primary = ev.get("primary_metric_for_sf")
+            val = ev.get("forecasts", {}).get(primary)
+            print(f"  {cat}: release_date={ev['release_date']} forecast({primary})={val}")
+        else:
+            print(f"  {cat}: no forecast")

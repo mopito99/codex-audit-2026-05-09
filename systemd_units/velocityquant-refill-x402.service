@@ -1,0 +1,9 @@
+[Unit]
+Description=VelocityQuant Auto-refill x402 USDC (every 15 min, GaL85 → 8BZjAp51)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=administrator
+ExecStart=/home/administrator/liquidator/refill_wrapper.sh x402
+TimeoutStartSec=120s

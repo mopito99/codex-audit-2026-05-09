@@ -1,0 +1,16 @@
+{
+  "n_total": 50,
+  "n_ok": 50,
+  "n_timeouts": 0,
+  "n_infra_fails": 0,
+  "min_ms": 774,
+  "max_ms": 1916,
+  "p50_ms": 1360,
+  "p95_ms": 1802,
+  "p99_ms": 1916,
+  "criteria": {
+    "p50_lt_800ms": false,
+    "p99_lt_1200ms": false
+  },
+  "VERDICT": "FAIL"
+}

@@ -1,0 +1,178 @@
+May 06 09:58:04 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 09:58:04 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 09:58:04 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 09:58:04 cuandeoro systemd[1]: vq-poly-api.service: Consumed 1min 6.401s CPU time, 34.2M memory peak, 0B memory swap peak.
+May 06 09:58:04 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 10:27:00 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 10:27:00 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 10:27:00 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 10:27:00 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3.048s CPU time, 33.6M memory peak, 0B memory swap peak.
+May 06 10:27:00 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:28:12 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 11:28:12 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 11:28:12 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:28:12 cuandeoro systemd[1]: vq-poly-api.service: Consumed 7.270s CPU time.
+May 06 11:28:12 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:29:04 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 11:29:04 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 11:29:04 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:29:04 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:33:34 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 11:33:35 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 11:33:35 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:33:35 cuandeoro systemd[1]: vq-poly-api.service: Consumed 1min 45.818s CPU time, 38.6M memory peak, 0B memory swap peak.
+May 06 11:33:35 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:39:01 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 11:39:02 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 11:39:02 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:39:02 cuandeoro systemd[1]: vq-poly-api.service: Consumed 1.746s CPU time.
+May 06 11:39:02 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:50:59 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 11:50:59 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 11:50:59 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:50:59 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3.661s CPU time.
+May 06 11:50:59 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:57:09 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 11:57:10 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 11:57:10 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 11:57:10 cuandeoro systemd[1]: vq-poly-api.service: Consumed 2.225s CPU time.
+May 06 11:57:10 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:09:53 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 12:09:54 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 12:09:54 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:09:54 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3.640s CPU time.
+May 06 12:09:54 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:20:52 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 12:20:53 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 12:20:53 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:20:53 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3.365s CPU time.
+May 06 12:20:53 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:26:50 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 12:26:50 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 12:26:50 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:26:50 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3.676s CPU time.
+May 06 12:26:50 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:27:53 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 12:27:53 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 12:27:53 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:27:53 cuandeoro systemd[1]: vq-poly-api.service: Consumed 1.150s CPU time.
+May 06 12:27:53 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:28:58 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 12:28:58 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 12:28:58 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:28:58 cuandeoro systemd[1]: vq-poly-api.service: Consumed 1.251s CPU time.
+May 06 12:28:58 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:30:08 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 12:30:08 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 12:30:08 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:30:08 cuandeoro systemd[1]: vq-poly-api.service: Consumed 1.239s CPU time.
+May 06 12:30:08 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:58:19 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 12:58:19 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 12:58:19 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 12:58:19 cuandeoro systemd[1]: vq-poly-api.service: Consumed 9.870s CPU time.
+May 06 12:58:19 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 13:02:36 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 13:02:36 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 13:02:36 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 13:02:36 cuandeoro systemd[1]: vq-poly-api.service: Consumed 2.127s CPU time.
+May 06 13:02:36 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:03:03 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 16:03:03 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 16:03:03 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:03:03 cuandeoro systemd[1]: vq-poly-api.service: Consumed 1min 5.980s CPU time.
+May 06 16:03:03 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:07:07 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 16:07:07 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 16:07:07 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:07:07 cuandeoro systemd[1]: vq-poly-api.service: Consumed 2.227s CPU time.
+May 06 16:07:07 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:27:52 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 16:27:52 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 16:27:52 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:27:52 cuandeoro systemd[1]: vq-poly-api.service: Consumed 7.963s CPU time.
+May 06 16:27:52 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:32:46 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 16:32:46 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 16:32:46 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 16:32:46 cuandeoro systemd[1]: vq-poly-api.service: Consumed 2.530s CPU time.
+May 06 16:32:46 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 17:40:32 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 17:40:33 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 17:40:33 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 17:40:33 cuandeoro systemd[1]: vq-poly-api.service: Consumed 30.893s CPU time, 39.1M memory peak, 0B memory swap peak.
+May 06 17:41:09 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 17:51:16 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 17:51:16 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 17:51:16 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 17:51:16 cuandeoro systemd[1]: vq-poly-api.service: Consumed 5.469s CPU time, 37.5M memory peak, 0B memory swap peak.
+May 06 17:51:16 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 17:56:58 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 06 17:56:58 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 06 17:56:58 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 06 17:56:58 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3.682s CPU time.
+May 06 17:56:58 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:31 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 07 09:36:32 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 07 09:36:32 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:32 cuandeoro systemd[1]: vq-poly-api.service: Consumed 8min 9.562s CPU time.
+May 07 09:36:32 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:32 cuandeoro systemd[1]: vq-poly-api.service: Main process exited, code=exited, status=1/FAILURE
+May 07 09:36:32 cuandeoro systemd[1]: vq-poly-api.service: Failed with result 'exit-code'.
+May 07 09:36:37 cuandeoro systemd[1]: vq-poly-api.service: Scheduled restart job, restart counter is at 1.
+May 07 09:36:37 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:38 cuandeoro systemd[1]: vq-poly-api.service: Main process exited, code=exited, status=1/FAILURE
+May 07 09:36:38 cuandeoro systemd[1]: vq-poly-api.service: Failed with result 'exit-code'.
+May 07 09:36:43 cuandeoro systemd[1]: vq-poly-api.service: Scheduled restart job, restart counter is at 2.
+May 07 09:36:43 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:43 cuandeoro systemd[1]: vq-poly-api.service: Main process exited, code=exited, status=1/FAILURE
+May 07 09:36:43 cuandeoro systemd[1]: vq-poly-api.service: Failed with result 'exit-code'.
+May 07 09:36:48 cuandeoro systemd[1]: vq-poly-api.service: Scheduled restart job, restart counter is at 3.
+May 07 09:36:48 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:49 cuandeoro systemd[1]: vq-poly-api.service: Main process exited, code=exited, status=1/FAILURE
+May 07 09:36:49 cuandeoro systemd[1]: vq-poly-api.service: Failed with result 'exit-code'.
+May 07 09:36:54 cuandeoro systemd[1]: vq-poly-api.service: Scheduled restart job, restart counter is at 4.
+May 07 09:36:54 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:54 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 07 09:36:54 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 07 09:36:54 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:36:54 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:39:17 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 07 09:39:17 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 07 09:39:17 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 07 09:39:17 cuandeoro systemd[1]: vq-poly-api.service: Consumed 2.041s CPU time.
+May 07 09:39:17 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 05:36:07 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 08 05:36:07 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 08 05:36:07 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 05:36:07 cuandeoro systemd[1]: vq-poly-api.service: Consumed 7min 11.093s CPU time, 42.8M memory peak, 0B memory swap peak.
+May 08 05:36:07 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 13:05:34 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 08 13:05:35 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 08 13:05:35 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 13:05:35 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3min 47.590s CPU time, 39.2M memory peak, 0B memory swap peak.
+May 08 13:05:35 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 13:23:23 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 08 13:23:24 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 08 13:23:24 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 13:23:24 cuandeoro systemd[1]: vq-poly-api.service: Consumed 8.097s CPU time.
+May 08 13:23:24 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 13:24:03 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 08 13:24:03 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 08 13:24:03 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 08 13:24:03 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 09 04:15:41 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 09 04:15:41 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 09 04:15:41 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 09 04:15:41 cuandeoro systemd[1]: vq-poly-api.service: Consumed 3min 48.057s CPU time, 42.0M memory peak, 0B memory swap peak.
+May 09 04:15:41 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 09 05:22:46 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 09 05:22:46 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 09 05:22:46 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 09 05:22:46 cuandeoro systemd[1]: vq-poly-api.service: Consumed 32.737s CPU time, 41.4M memory peak, 0B memory swap peak.
+May 09 05:22:46 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 09 05:39:55 cuandeoro systemd[1]: Stopping vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090...
+May 09 05:39:55 cuandeoro systemd[1]: vq-poly-api.service: Deactivated successfully.
+May 09 05:39:55 cuandeoro systemd[1]: Stopped vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.
+May 09 05:39:55 cuandeoro systemd[1]: vq-poly-api.service: Consumed 8.829s CPU time, 40.8M memory peak, 0B memory swap peak.
+May 09 05:39:55 cuandeoro systemd[1]: Started vq-poly-api.service - VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090.

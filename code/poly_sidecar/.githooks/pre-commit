@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+# pre-commit hook — valida Spec-Commit + Signed-by-spec trailer en commits
+# que toquen archivos críticos.
+# 
+# Spec firmada Gemma r109 §3 + r110 §1 (FAIL on Signed-by-spec missing).
+
+set -euo pipefail
+
+# Files que requieren ambos trailers
+PROTECTED_PATHS=(
+    "poly_sidecar/risk_config.json"
+    "poly_sidecar/btc_feed.py"
+    "poly_sidecar/sidecar.py"
+    "poly_sidecar/cpi_audit_format.py"
+    "poly_sidecar/kill_switch.py"
+    "poly_sidecar/macro_calendar.json"
+    "poly_sidecar/fred_init.py"
+)
+
+# Detectar si commit toca paths protegidos
+needs_validation=0
+touched_paths=""
+for path in "${PROTECTED_PATHS[@]}"; do
+    if git diff --cached --name-only | grep -qF "$path"; then
+        needs_validation=1
+        touched_paths+=" $path"
+    fi
+done
+
+if [ $needs_validation -eq 0 ]; then
+    exit 0  # No protected paths touched, skip validation
+fi
+
+# Read commit message
+COMMIT_MSG_FILE="${1:-.git/COMMIT_EDITMSG}"
+if [ ! -f "$COMMIT_MSG_FILE" ]; then
+    echo "ERROR: cannot read commit message file" >&2
+    exit 1
+fi
+COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Regex 1: Spec-Commit: <sha7..40>
+SPEC_COMMIT_REGEX='^Spec-Commit:[[:space:]]+[a-f0-9]{7,40}([[:space:]]|$)'
+
+# Regex 2: Signed-by-spec: <text>
+SIGNED_BY_REGEX='^Signed-by-spec:[[:space:]]+.+$'
+
+# Validate Spec-Commit
+if ! echo "$COMMIT_MSG" | grep -qE "$SPEC_COMMIT_REGEX"; then
+    cat <<MSG >&2
+
+❌ COMMIT REJECTED — missing 'Spec-Commit:' trailer
+
+Files touched in this commit:$touched_paths
+
+Required commit message format:
+
+    <subject>
+
+    <body>
+
+    Spec-Commit: <git-sha-7-to-40-chars>
+    Signed-by-spec: <which Gemma signature applies>
+
+Example:
+    feat(risk): adjust kill_switch threshold per r109
+
+    Spec-Commit: a1b2c3d4
+    Signed-by-spec: Gemma r93 + r107 + r108 + r109
+
+Spec firmada r109 §3.
+
+MSG
+    exit 1
+fi
+
+# Validate Signed-by-spec — FAIL if missing (firma r110 §1c CHANGE WARNING → FAIL)
+if ! echo "$COMMIT_MSG" | grep -qE "$SIGNED_BY_REGEX"; then
+    cat <<MSG >&2
+
+❌ COMMIT REJECTED — missing 'Signed-by-spec:' trailer
+
+Per Gemma r110 §1c, this is a HARD requirement (was WARNING in r109).
+The audit trail requires explicit reference to which Gemma signature
+(r93/r107/r108/r109/r110/r111) authorizes this code change.
+
+Add to commit message body:
+
+    Signed-by-spec: Gemma r93 + r107 + r108 + r109 + r110 + r111
+
+MSG
+    exit 1
+fi
+
+# Validate Spec-Commit sha exists in repo
+SPEC_SHA=$(echo "$COMMIT_MSG" | grep -E "$SPEC_COMMIT_REGEX" | sed -E 's/^Spec-Commit:[[:space:]]+([a-f0-9]+).*/\1/' | head -1)
+if ! git rev-parse --verify "$SPEC_SHA^{commit}" >/dev/null 2>&1; then
+    echo "❌ COMMIT REJECTED — Spec-Commit sha '$SPEC_SHA' does not exist in repo" >&2
+    echo "   ¿Forgot to commit risk_config.json first?" >&2
+    exit 1
+fi
+
+echo "✓ Spec-Commit trailer valid: $SPEC_SHA"
+echo "✓ Signed-by-spec trailer present"
+exit 0

@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Dashboard — ProfitLab</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { background: #0f1117; color: #e5e7eb; font-family: 'Inter', system-ui, sans-serif; }
+        .glass { background: rgba(31,41,55,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(75,85,99,0.3); border-radius: 12px; }
+        .glow-green { box-shadow: 0 0 20px rgba(16,185,129,0.15); }
+        .glow-red { box-shadow: 0 0 20px rgba(239,68,68,0.15); }
+        .glow-purple { box-shadow: 0 0 20px rgba(139,92,246,0.15); }
+        .badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+        .badge-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+        .badge-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+        .badge-yellow { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+        .badge-blue { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+        .badge-purple { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+        .badge-gray { background: rgba(107,114,128,0.15); color: #9ca3af; border: 1px solid rgba(107,114,128,0.3); }
+        .tp-bar { height: 6px; border-radius: 3px; position: relative; overflow: visible; }
+        .tp-marker { position: absolute; top: -3px; width: 3px; height: 12px; border-radius: 2px; }
+        .pulse { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+        .trade-row:hover { background: rgba(55,65,81,0.4); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+        .chart-sm { height: 180px; }
+        .chart-md { height: 250px; }
+        .progress-ring { transform: rotate(-90deg); }
+        /* Tab styles */
+        .tab { cursor: pointer; padding: 8px 16px; border-radius: 8px 8px 0 0; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+        .tab.active { background: rgba(139,92,246,0.2); color: #a78bfa; border-bottom: 2px solid #8b5cf6; }
+        .tab:not(.active) { color: #6b7280; }
+        .tab:not(.active):hover { color: #9ca3af; background: rgba(55,65,81,0.3); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="min-h-screen p-3 md:p-5">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-5">
+        <div class="flex items-center gap-3">
+            <img src="/static/logo.svg" alt="Logo" class="w-8 h-8" onerror="this.style.display='none'">
+            <div>
+                <h1 class="text-xl font-bold text-white">Quantum Dashboard</h1>
+                <p class="text-xs text-gray-500">PPO Transformer · TP0/TP1/TP2 System</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <div id="bot-status" class="badge badge-green pulse">● LIVE</div>
+            <div id="clock" class="text-sm text-gray-400 font-mono"></div>
+            <div id="refresh-indicator" class="text-xs text-gray-600">↻ 15s</div>
+        </div>
+    </div>
+
+    <!-- KPI Cards Row -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-4">
+        <div class="glass p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Balance</div>
+            <div id="kpi-balance" class="text-2xl font-bold text-white mt-1">$--</div>
+            <div id="kpi-unrealized" class="text-xs text-gray-400 mt-1">Unrealized: $--</div>
+        </div>
+        <div class="glass p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">PnL Total</div>
+            <div id="kpi-pnl" class="text-2xl font-bold mt-1">$--</div>
+            <div id="kpi-pnl-pct" class="text-xs mt-1">--%</div>
+        </div>
+        <div class="glass p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Win Rate</div>
+            <div class="flex items-center gap-3 mt-1">
+                <div id="kpi-winrate" class="text-2xl font-bold text-white">--%</div>
+                <svg id="winrate-ring" width="40" height="40" class="progress-ring">
+                    <circle cx="20" cy="20" r="16" fill="none" stroke="#374151" stroke-width="4"/>
+                    <circle id="winrate-circle" cx="20" cy="20" r="16" fill="none" stroke="#10b981" stroke-width="4"
+                            stroke-dasharray="100.53" stroke-dashoffset="100.53" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div id="kpi-wl" class="text-xs text-gray-400 mt-1">W:-- L:-- BE:--</div>
+        </div>
+        <div class="glass p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Trades</div>
+            <div id="kpi-trades" class="text-2xl font-bold text-white mt-1">--</div>
+            <div id="kpi-open" class="text-xs text-gray-400 mt-1">Open: --</div>
+        </div>
+        <div class="glass p-4">
+            <div class="text-xs text-gray-500 uppercase tracking-wide">Drawdown</div>
+            <div id="kpi-dd" class="text-2xl font-bold text-red-400 mt-1">--%</div>
+            <div id="kpi-dd-bar" class="w-full bg-gray-700 rounded-full h-2 mt-2">
+                <div id="kpi-dd-fill" class="bg-red-500 h-2 rounded-full transition-all" style="width:0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TP System Cards + League -->
+    <div class="grid grid-cols-4 gap-3 mb-4">
+        <div class="glass p-4 glow-green">
+            <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 uppercase">TP0 · Safety Net</div>
+            </div>
+            <div id="tp0-count" class="text-xl font-bold text-green-400 mt-1">0 hits</div>
+            <div id="tp0-pnl" class="text-sm text-gray-400">$0.00 earned</div>
+        </div>
+        <div class="glass p-4 glow-purple">
+            <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 uppercase">TP1 · 1:1 R:R</div>
+            </div>
+            <div id="tp1-count" class="text-xl font-bold text-purple-400 mt-1">0 hits</div>
+            <div id="tp1-pnl" class="text-sm text-gray-400">$0.00 earned</div>
+        </div>
+        <div class="glass p-4">
+            <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 uppercase">TP2 · Runner</div>
+            </div>
+            <div id="tp2-count" class="text-xl font-bold text-blue-400 mt-1">0 hits</div>
+            <div id="tp2-pnl" class="text-sm text-gray-400">$0.00 earned</div>
+        </div>
+        <div class="glass p-4" id="league-card" style="border-left: 3px solid #9ca3af;">
+            <div class="flex items-center justify-between">
+                <div class="text-xs text-gray-500 uppercase">Liga Actual</div>
+                <span id="league-leverage" class="badge badge-yellow">1x</span>
+            </div>
+            <div id="league-name" class="text-xl font-bold mt-1" style="color:#9ca3af">📈 Ascenso</div>
+            <div id="league-next" class="text-xs text-gray-500 mt-1">Cargando...</div>
+        </div>
+    </div>
+
+    <!-- Main Content: Two Columns -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <!-- LEFT: Charts + Positions (2 cols) -->
+        <div class="lg:col-span-2 space-y-4">
+
+            <!-- Equity Chart -->
+            <div class="glass p-4">
+                <div class="text-sm font-semibold text-gray-300 mb-2">Equity Curve</div>
+                <div class="chart-md">
+                    <canvas id="equityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Open Positions -->
+            <div class="glass p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-sm font-semibold text-gray-300">Open Positions</div>
+                    <div id="pos-count" class="badge badge-gray">0</div>
+                </div>
+                <div id="positions-container" class="space-y-2 max-h-96 overflow-y-auto">
+                    <div class="text-center text-gray-600 text-sm py-4">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Tabs: Trades / Per Symbol / AI Decisions -->
+            <div class="glass p-4">
+                <div class="flex gap-1 mb-3 border-b border-gray-700">
+                    <div class="tab active" data-tab="trades">Trade History</div>
+                    <div class="tab" data-tab="symbols">Per Symbol</div>
+                    <div class="tab" data-tab="decisions">AI Decisions</div>
+                </div>
+
+                <!-- Trade History Tab -->
+                <div id="tab-trades" class="tab-content active">
+                    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                        <table class="w-full text-xs">
+                            <thead class="text-gray-500 uppercase sticky top-0 bg-gray-800">
+                                <tr>
+                                    <th class="text-left p-2">Time</th>
+                                    <th class="text-left p-2">Symbol</th>
+                                    <th class="text-left p-2">Side</th>
+                                    <th class="text-right p-2">Entry</th>
+                                    <th class="text-right p-2">Exit</th>
+                                    <th class="text-right p-2">PnL</th>
+                                    <th class="text-left p-2">Event</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trades-tbody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Per Symbol Tab -->
+                <div id="tab-symbols" class="tab-content">
+                    <div id="symbol-stats-grid" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
+                </div>
+
+                <!-- AI Decisions Tab -->
+                <div id="tab-decisions" class="tab-content">
+                    <div id="decisions-grid" class="grid grid-cols-2 md:grid-cols-3 gap-2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: Brain + PPO + System (1 col) -->
+        <div class="space-y-4">
+
+            <!-- 🧠 Gemma4 Autonomous Brain -->
+            <div class="glass p-4" id="brain-card" style="border-left: 3px solid #8b5cf6;">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="text-sm font-semibold text-gray-300">🧠 Gemma4 Brain</div>
+                    <span id="brain-status-badge" class="badge badge-green pulse">● ACTIVE</span>
+                </div>
+                <div id="brain-controls" class="space-y-2 text-xs">
+                    <div class="flex justify-between"><span class="text-gray-500">Trading</span><span id="brain-trading" class="font-bold">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">SHORTs</span><span id="brain-shorts" class="font-bold">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Night Mode</span><span id="brain-night" class="font-bold">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Max Positions</span><span id="brain-maxpos" class="text-white">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">SHORT Threshold</span><span id="brain-short-thresh" class="text-white">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">TP0 / TP1</span><span id="brain-tp" class="text-white">--</span></div>
+                    <hr class="border-gray-700">
+                    <div class="flex justify-between"><span class="text-gray-500">LONG WR</span><span id="brain-long-wr" class="text-green-400">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">SHORT WR</span><span id="brain-short-wr" class="text-red-400">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Day PnL</span><span id="brain-day-pnl" class="text-white">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Night PnL</span><span id="brain-night-pnl" class="text-white">--</span></div>
+                    <hr class="border-gray-700">
+                    <div class="flex justify-between"><span class="text-gray-500">Last Analysis</span><span id="brain-last" class="text-gray-400">--</span></div>
+                    <div class="flex justify-between"><span class="text-gray-500">Next Analysis</span><span id="brain-next" class="text-purple-400 font-bold">--</span></div>
+                </div>
+                <div id="brain-reasoning" class="mt-3 p-2 bg-gray-800/60 rounded text-xs text-gray-400 italic max-h-24 overflow-y-auto">
+                    Loading Gemma4 analysis...
+                </div>
+            </div>
+
+            <!-- PPO Brain Status -->
+            <div class="glass p-4 glow-purple">
+                <div class="text-sm font-semibold text-gray-300 mb-3">🤖 PPO Brain</div>
+                <div id="ppo-status" class="space-y-2 text-xs">
+                    <div class="text-gray-500">Loading training data...</div>
+                </div>
+                <div class="chart-sm mt-3">
+                    <canvas id="lossChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Training Progress Per Symbol -->
+            <div class="glass p-4">
+                <div class="text-sm font-semibold text-gray-300 mb-3">Training Per Symbol</div>
+                <div id="training-symbols" class="space-y-2 max-h-64 overflow-y-auto text-xs"></div>
+            </div>
+
+            <!-- PnL Distribution Chart -->
+            <div class="glass p-4">
+                <div class="text-sm font-semibold text-gray-300 mb-2">PnL Distribution</div>
+                <div class="chart-sm">
+                    <canvas id="pnlChart"></canvas>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="glass p-4">
+                <div class="text-sm font-semibold text-gray-300 mb-2">System</div>
+                <div id="system-info" class="space-y-1 text-xs text-gray-400">
+                    <div>Model: PPO TransformerEncoder</div>
+                    <div>Features: 56 inputs</div>
+                    <div>Sequence: 32 candles</div>
+                    <div>Training: every 12h / 36h window</div>
+                    <div id="sys-training-time">Next training: --</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ─── Charts ──────────────────────────────────────────────────
+let equityChart, lossChart, pnlChart;
+
+function initCharts() {
+    const chartDefaults = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+    };
+
+    equityChart = new Chart(document.getElementById('equityChart'), {
+        type: 'line',
+        data: { labels: [], datasets: [
+            { label: 'Equity', data: [], borderColor: '#8b5cf6', backgroundColor: 'rgba(139,92,246,0.1)',
+              fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2 },
+        ]},
+        options: { ...chartDefaults, scales: {
+            x: { display: false },
+            y: { grid: { color: 'rgba(55,65,81,0.3)' }, ticks: { color: '#9ca3af', font: { size: 10 },
+                 callback: v => '$' + v.toFixed(0) }},
+        }}
+    });
+
+    lossChart = new Chart(document.getElementById('lossChart'), {
+        type: 'line',
+        data: { labels: [], datasets: [
+            { label: 'Loss', data: [], borderColor: '#f59e0b', tension: 0.4, pointRadius: 0, borderWidth: 1.5 },
+        ]},
+        options: { ...chartDefaults, scales: {
+            x: { display: false },
+            y: { grid: { color: 'rgba(55,65,81,0.3)' }, ticks: { color: '#9ca3af', font: { size: 9 } }},
+        }}
+    });
+
+    pnlChart = new Chart(document.getElementById('pnlChart'), {
+        type: 'bar',
+        data: { labels: [], datasets: [
+            { label: 'PnL', data: [], backgroundColor: [] },
+        ]},
+        options: { ...chartDefaults, scales: {
+            x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 9 }, maxRotation: 45 }},
+            y: { grid: { color: 'rgba(55,65,81,0.3)' }, ticks: { color: '#9ca3af', font: { size: 9 },
+                 callback: v => '$' + v.toFixed(0) }},
+        }}
+    });
+}
+
+// ─── Data Fetching ───────────────────────────────────────────
+async function fetchStats() {
+    try {
+        const res = await fetch('/api/stats');
+        if (!res.ok) throw new Error('API error');
+        return await res.json();
+    } catch(e) {
+        console.error('Stats fetch error:', e);
+        return null;
+    }
+}
+
+async function fetchPPOStats() {
+    try {
+        const res = await fetch('/api/ppo-stats');
+        if (!res.ok) return null;
+        return await res.json();
+    } catch(e) { return null; }
+}
+
+async function fetchBrain() {
+    try {
+        const res = await fetch('/api/brain');
+        if (!res.ok) return null;
+        return await res.json();
+    } catch(e) { return null; }
+}
+
+function renderBrain(b) {
+    if (!b) return;
+    
+    // Trading status
+    const tradingEl = document.getElementById('brain-trading');
+    tradingEl.textContent = b.trading_enabled ? '✅ ENABLED' : '⛔ DISABLED';
+    tradingEl.className = 'font-bold ' + (b.trading_enabled ? 'text-green-400' : 'text-red-400');
+    
+    // Shorts
+    const shortsEl = document.getElementById('brain-shorts');
+    shortsEl.textContent = b.shorts_enabled ? '✅ ENABLED' : '⛔ DISABLED';
+    shortsEl.className = 'font-bold ' + (b.shorts_enabled ? 'text-green-400' : 'text-red-400');
+    
+    // Night mode
+    const nightEl = document.getElementById('brain-night');
+    const nightMap = {'full': '🌙 Full', 'long_only': '🌙 Long Only', 'off': '😴 OFF'};
+    nightEl.textContent = nightMap[b.night_mode] || b.night_mode;
+    nightEl.className = 'font-bold ' + (b.night_mode === 'off' ? 'text-red-400' : b.night_mode === 'long_only' ? 'text-yellow-400' : 'text-green-400');
+    
+    // Params
+    document.getElementById('brain-maxpos').textContent = b.max_positions;
+    document.getElementById('brain-short-thresh').textContent = 'BTC < ' + b.short_btc_threshold + '%';
+    document.getElementById('brain-tp').textContent = (b.tp0_close_pct*100).toFixed(0) + '% / ' + (b.tp1_close_pct*100).toFixed(0) + '%';
+    
+    // Performance
+    document.getElementById('brain-long-wr').textContent = b.long_wr + '%';
+    const shortWrEl = document.getElementById('brain-short-wr');
+    shortWrEl.textContent = b.short_wr + '%';
+    shortWrEl.className = b.short_wr >= 50 ? 'text-green-400' : 'text-red-400';
+    
+    const dayPnlEl = document.getElementById('brain-day-pnl');
+    dayPnlEl.textContent = (b.day_pnl >= 0 ? '+$' : '-$') + Math.abs(b.day_pnl).toFixed(2);
+    dayPnlEl.className = b.day_pnl >= 0 ? 'text-green-400' : 'text-red-400';
+    
+    const nightPnlEl = document.getElementById('brain-night-pnl');
+    nightPnlEl.textContent = (b.night_pnl >= 0 ? '+$' : '-$') + Math.abs(b.night_pnl).toFixed(2);
+    nightPnlEl.className = b.night_pnl >= 0 ? 'text-green-400' : 'text-red-400';
+    
+    // Timing
+    document.getElementById('brain-last').textContent = b.calibrated_ago;
+    document.getElementById('brain-next').textContent = '⏰ ' + b.next_calibration;
+    
+    // Reasoning
+    document.getElementById('brain-reasoning').textContent = '💬 ' + (b.reasoning || 'No analysis yet');
+    
+    // Badge color
+    const badge = document.getElementById('brain-status-badge');
+    if (!b.trading_enabled) {
+        badge.textContent = '⛔ PAUSED';
+        badge.className = 'badge badge-red';
+        document.getElementById('brain-card').style.borderLeftColor = '#ef4444';
+    } else {
+        badge.textContent = '● ACTIVE';
+        badge.className = 'badge badge-green pulse';
+        document.getElementById('brain-card').style.borderLeftColor = '#10b981';
+    }
+}
+
+// ─── Render Functions ────────────────────────────────────────
+function renderKPIs(d) {
+    const eq = d.equity || {};
+    const s = d.stats || {};
+
+    const balance = eq.balance || 0;
+    const equity = eq.equity || balance;
+    const unrealized = eq.unrealized || 0;
+    const dd = eq.drawdown || 0;
+    const pnl = balance - (eq.initial_capital || 1000);
+
+    document.getElementById('kpi-balance').textContent = '$' + equity.toFixed(2);
+    document.getElementById('kpi-unrealized').textContent = 'Unrealized: $' + unrealized.toFixed(2);
+    document.getElementById('kpi-unrealized').className = 'text-xs mt-1 ' + (unrealized >= 0 ? 'text-green-400' : 'text-red-400');
+
+    const pnlEl = document.getElementById('kpi-pnl');
+    pnlEl.textContent = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+    pnlEl.className = 'text-2xl font-bold mt-1 ' + (pnl >= 0 ? 'text-green-400' : 'text-red-400');
+
+    const pnlPctEl = document.getElementById('kpi-pnl-pct');
+    pnlPctEl.textContent = (s.pnl_pct >= 0 ? '+' : '') + (s.pnl_pct || 0).toFixed(2) + '%';
+    pnlPctEl.className = 'text-xs mt-1 ' + (s.pnl_pct >= 0 ? 'text-green-400' : 'text-red-400');
+
+    const wr = s.win_rate || 0;
+    document.getElementById('kpi-winrate').textContent = wr.toFixed(1) + '%';
+    const circle = document.getElementById('winrate-circle');
+    const circumference = 2 * Math.PI * 16;
+    circle.style.strokeDasharray = circumference;
+    circle.style.strokeDashoffset = circumference - (circumference * wr / 100);
+    circle.style.stroke = wr >= 50 ? '#10b981' : wr >= 35 ? '#f59e0b' : '#ef4444';
+
+    document.getElementById('kpi-wl').textContent = `W:${s.winning||0} L:${s.losing||0} BE:${s.be_count||0}`;
+    document.getElementById('kpi-trades').textContent = s.total_trades || 0;
+    document.getElementById('kpi-open').textContent = 'Open: ' + (d.positions || []).length;
+
+    document.getElementById('kpi-dd').textContent = dd.toFixed(2) + '%';
+    document.getElementById('kpi-dd-fill').style.width = Math.min(dd, 100) + '%';
+
+    // TP counters
+    document.getElementById('tp0-count').textContent = (s.tp0_count || 0) + ' hits';
+    document.getElementById('tp0-pnl').textContent = '$' + (s.tp0_pnl || 0).toFixed(2) + ' earned';
+    document.getElementById('tp1-count').textContent = (s.tp1_count || 0) + ' hits';
+    document.getElementById('tp1-pnl').textContent = '$' + (s.tp1_pnl || 0).toFixed(2) + ' earned';
+
+    // TP2 = CLOSE events with positive PnL (approximation)
+    const closeTrades = (d.trades || []).filter(t => t.event === 'CLOSE' && t.pnl > 0.05);
+    const tp2Pnl = closeTrades.reduce((sum, t) => sum + t.pnl, 0);
+    document.getElementById('tp2-count').textContent = closeTrades.length + ' hits';
+    document.getElementById('tp2-pnl').textContent = '$' + tp2Pnl.toFixed(2) + ' earned';
+
+    // League card
+    const lg = d.league || {};
+    const leagueCard = document.getElementById('league-card');
+    if (lg.name) {
+        leagueCard.style.borderLeftColor = lg.color || '#9ca3af';
+        document.getElementById('league-name').textContent = (lg.icon || '') + ' ' + lg.name;
+        document.getElementById('league-name').style.color = lg.color || '#9ca3af';
+        document.getElementById('league-leverage').textContent = lg.leverage + 'x';
+        let nextText = '';
+        if (lg.next && lg.next.requirements && lg.next.requirements.length > 0) {
+            nextText = '→ ' + lg.next.icon + ' ' + lg.next.name + ': ' + lg.next.requirements.join(' · ');
+        } else if (lg.next) {
+            nextText = '→ ' + lg.next.icon + ' ' + lg.next.name + ': cumple requisitos!';
+        } else {
+            nextText = '⚡ Liga máxima alcanzada';
+        }
+        document.getElementById('league-next').textContent = nextText;
+    }
+}
+
+function renderEquityChart(d) {
+    const curve = d.equity_history || [];
+    const labels = curve.map(p => {
+        const dt = new Date(p.ts);
+        return dt.toLocaleDateString('es', {month:'short', day:'numeric'}) + ' ' + dt.toLocaleTimeString('es', {hour:'2-digit', minute:'2-digit'});
+    });
+    equityChart.data.labels = labels;
+    equityChart.data.datasets[0].data = curve.map(p => p.equity);
+    equityChart.update('none');
+}
+
+function renderPositions(d) {
+    const positions = d.positions || [];
+    const container = document.getElementById('positions-container');
+    document.getElementById('pos-count').textContent = positions.length;
+
+    if (positions.length === 0) {
+        container.innerHTML = '<div class="text-center text-gray-600 text-sm py-6">No open positions</div>';
+        return;
+    }
+
+    container.innerHTML = positions.map(p => {
+        const isLong = p.direction === 'LONG';
+        const dirClass = isLong ? 'text-green-400' : 'text-red-400';
+        const dirIcon = isLong ? '▲' : '▼';
+        const pnlClass = p.pnl >= 0 ? 'text-green-400' : 'text-red-400';
+        const roi = p.roi_pct || 0;
+        const roiClass = roi >= 0 ? 'text-green-400' : 'text-red-400';
+
+        // TP progress bar
+        let tpBar = '';
+        if (p.sl && p.tp2) {
+            const range = Math.abs(p.tp2 - p.sl);
+            const progress = isLong
+                ? Math.max(0, Math.min(1, (p.current - p.sl) / range))
+                : Math.max(0, Math.min(1, (p.sl - p.current) / range));
+
+            const tp0Pos = p.tp0 && range > 0
+                ? (isLong ? Math.max(0, (p.tp0 - p.sl) / range) : Math.max(0, (p.sl - p.tp0) / range)) : 0;
+            const tp1Pos = p.tp1 && range > 0
+                ? (isLong ? Math.max(0, (p.tp1 - p.sl) / range) : Math.max(0, (p.sl - p.tp1) / range)) : 0;
+
+            tpBar = `
+                <div class="mt-2">
+                    <div class="flex justify-between text-[10px] text-gray-500 mb-1">
+                        <span>SL</span>
+                        ${p.tp0 ? '<span class="text-green-600">TP0</span>' : ''}
+                        ${p.tp1 ? '<span class="text-purple-500">TP1</span>' : ''}
+                        <span class="text-blue-400">TP2</span>
+                    </div>
+                    <div class="tp-bar bg-gray-700 w-full relative">
+                        <div class="absolute inset-0 rounded-full" style="width:${(progress*100).toFixed(1)}%;background:${progress > 0.5 ? 'linear-gradient(90deg,#374151,#10b981)' : 'linear-gradient(90deg,#374151,#ef4444)'}"></div>
+                        ${p.tp0 ? `<div class="tp-marker bg-green-500" style="left:${(tp0Pos*100).toFixed(1)}%"></div>` : ''}
+                        ${p.tp1 ? `<div class="tp-marker bg-purple-500" style="left:${(tp1Pos*100).toFixed(1)}%"></div>` : ''}
+                        <div class="absolute top-[-3px] w-2 h-3 bg-white rounded-sm shadow" style="left:${(progress*100).toFixed(1)}%"></div>
+                    </div>
+                    <div class="flex gap-1 mt-1">
+                        ${p.tp0_hit ? '<span class="badge badge-green">TP0 ✓</span>' : ''}
+                        ${p.tp1_hit ? '<span class="badge badge-purple">TP1 ✓</span>' : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        return `
+            <div class="bg-gray-800/50 rounded-lg p-3 fade-in">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="${dirClass} font-bold text-sm">${dirIcon} ${p.symbol}</span>
+                        <span class="badge ${isLong?'badge-green':'badge-red'}">${p.direction}</span>
+                        <span class="badge badge-gray">${p.leverage}x</span>
+                    </div>
+                    <div class="text-right">
+                        <span class="${pnlClass} font-bold text-sm">${p.pnl >= 0?'+':''}$${p.pnl.toFixed(2)}</span>
+                        <span class="${roiClass} text-xs ml-1">(${roi >= 0?'+':''}${roi.toFixed(2)}%)</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-4 gap-2 mt-2 text-xs text-gray-400">
+                    <div>Entry: <span class="text-white">${fmtPrice(p.entry)}</span></div>
+                    <div>Current: <span class="text-white">${fmtPrice(p.current)}</span></div>
+                    <div>SL: <span class="text-red-400">${p.sl ? fmtPrice(p.sl) : '—'}</span></div>
+                    <div>Margin: <span class="text-white">$${p.margin.toFixed(2)}</span></div>
+                </div>
+                ${tpBar}
+            </div>
+        `;
+    }).join('');
+}
+
+function renderTrades(d) {
+    const trades = (d.trades || []).slice(0, 100);
+    const tbody = document.getElementById('trades-tbody');
+    tbody.innerHTML = trades.map(t => {
+        const pnlClass = t.pnl > 0.05 ? 'text-green-400' : t.pnl < -0.05 ? 'text-red-400' : 'text-gray-400';
+        const eventBadge = {
+            'OPEN': 'badge-blue', 'CLOSE': t.pnl > 0 ? 'badge-green' : 'badge-red',
+            'TP0': 'badge-green', 'TP1': 'badge-purple', 'BE': 'badge-yellow',
+        }[t.event] || 'badge-gray';
+        const time = new Date(t.close_time);
+        const timeStr = time.toLocaleDateString('es',{month:'short',day:'numeric'}) + ' ' + time.toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+        return `<tr class="trade-row border-b border-gray-800/50">
+            <td class="p-2 text-gray-400">${timeStr}</td>
+            <td class="p-2 text-white font-medium">${t.symbol}</td>
+            <td class="p-2"><span class="${t.side==='LONG'?'text-green-400':'text-red-400'}">${t.side}</span></td>
+            <td class="p-2 text-right text-gray-300">${fmtPrice(t.entry)}</td>
+            <td class="p-2 text-right text-gray-300">${t.exit ? fmtPrice(t.exit) : '—'}</td>
+            <td class="p-2 text-right ${pnlClass} font-medium">${t.pnl ? (t.pnl>0?'+':'') + '$' + t.pnl.toFixed(2) : '—'}</td>
+            <td class="p-2"><span class="badge ${eventBadge}">${t.event}</span></td>
+        </tr>`;
+    }).join('');
+}
+
+function renderSymbolStats(d) {
+    const stats = (d.stats || {}).symbol_stats || {};
+    const grid = document.getElementById('symbol-stats-grid');
+    const symbols = Object.keys(stats).sort((a,b) => stats[b].pnl - stats[a].pnl);
+
+    if (symbols.length === 0) {
+        grid.innerHTML = '<div class="text-gray-600 text-sm col-span-3 text-center py-4">No completed trades yet</div>';
+        return;
+    }
+
+    grid.innerHTML = symbols.map(sym => {
+        const s = stats[sym];
+        const wr = s.trades > 0 ? (s.wins / s.trades * 100) : 0;
+        const pnlClass = s.pnl >= 0 ? 'text-green-400' : 'text-red-400';
+        return `
+            <div class="bg-gray-800/40 rounded-lg p-3 text-xs">
+                <div class="flex items-center justify-between mb-1">
+                    <span class="text-white font-bold text-sm">${sym.replace('-USDT','')}</span>
+                    <span class="${pnlClass} font-bold">${s.pnl>=0?'+':''}$${s.pnl.toFixed(2)}</span>
+                </div>
+                <div class="flex justify-between text-gray-400">
+                    <span>${s.trades} trades</span>
+                    <span>WR: ${wr.toFixed(0)}%</span>
+                </div>
+                <div class="w-full bg-gray-700 rounded-full h-1.5 mt-2">
+                    <div class="h-1.5 rounded-full ${s.pnl>=0?'bg-green-500':'bg-red-500'}" style="width:${Math.min(wr,100)}%"></div>
+                </div>
+                <div class="flex gap-1 mt-1 text-[10px]">
+                    <span class="text-green-400">W:${s.wins}</span>
+                    <span class="text-red-400">L:${s.losses}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderDecisions(d) {
+    const decisions = d.decisions || [];
+    const grid = document.getElementById('decisions-grid');
+
+    if (decisions.length === 0) {
+        grid.innerHTML = '<div class="text-gray-600 text-sm col-span-3 text-center py-4">No recent decisions</div>';
+        return;
+    }
+
+    grid.innerHTML = decisions.map(dec => {
+        const recClass = dec.recommendation === 'LONG' ? 'badge-green' : dec.recommendation === 'SHORT' ? 'badge-red' : 'badge-gray';
+        const probs = dec.agent_probs || [0,0,0];
+        const conf = (dec.confidence * 100).toFixed(0);
+        return `
+            <div class="bg-gray-800/40 rounded-lg p-3 text-xs">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white font-bold">${dec.symbol.replace('-USDT','')}</span>
+                    <span class="badge ${recClass}">${dec.recommendation}</span>
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between"><span class="text-gray-500">HOLD</span><span>${(probs[0]*100).toFixed(1)}%</span></div>
+                    <div class="flex justify-between"><span class="text-green-500">LONG</span><span>${(probs[1]*100).toFixed(1)}%</span></div>
+                    <div class="flex justify-between"><span class="text-red-500">SHORT</span><span>${(probs[2]*100).toFixed(1)}%</span></div>
+                </div>
+                <div class="mt-2 text-gray-500">Conf: ${conf}%</div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderPPOStats(ppo) {
+    if (!ppo || ppo.error) {
+        document.getElementById('ppo-status').innerHTML = '<div class="text-gray-500">PPO data unavailable</div>';
+        return;
+    }
+
+    const symbols = ppo.symbols || {};
+    const syms = Object.keys(symbols);
+    const totalUpdates = syms.reduce((s,k) => s + (symbols[k].updates||0), 0);
+    const avgLoss = syms.length > 0 ? syms.reduce((s,k) => s + (symbols[k].avg_loss||0), 0) / syms.length : 0;
+
+    // If no PPO training yet, show decision engine stats instead
+    if (totalUpdates === 0 && syms.length === 0) {
+        const decisionCount = (window._lastStats?.decisions || []).length;
+        const activeSyms = (window._lastStats?.ticker || []).length;
+        document.getElementById('ppo-status').innerHTML = `
+            <div class="flex justify-between"><span class="text-gray-500">Status</span><span class="text-yellow-400 font-bold">Collecting Data</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Decision Symbols</span><span class="text-purple-400 font-bold">${decisionCount}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Active Tokens</span><span class="text-white">${activeSyms}</span></div>
+            <div class="text-gray-600 mt-2 text-[10px]">PPO will train after accumulating enough experiences per symbol</div>
+        `;
+    } else {
+        document.getElementById('ppo-status').innerHTML = `
+            <div class="flex justify-between"><span class="text-gray-500">Total Updates</span><span class="text-purple-400 font-bold">${totalUpdates}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Avg Loss</span><span class="text-yellow-400">${avgLoss.toFixed(4)}</span></div>
+            <div class="flex justify-between"><span class="text-gray-500">Active Symbols</span><span class="text-white">${syms.length}</span></div>
+        `;
+    }
+
+    // Training symbols list
+    const trainDiv = document.getElementById('training-symbols');
+    if (syms.length > 0) {
+        trainDiv.innerHTML = syms.sort().map(sym => {
+            const s = symbols[sym];
+            const lastTrained = s.last_trained ? new Date(s.last_trained).toLocaleString('es',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : '--';
+            return `
+                <div class="flex items-center justify-between py-1 border-b border-gray-800/50">
+                    <span class="text-white font-medium">${sym.replace('-USDT','')}</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-purple-400">#${s.updates}</span>
+                        <span class="text-gray-500">${lastTrained}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    } else {
+        // Show active tokens from ticker as placeholder
+        const tokens = (window._lastStats?.ticker || []).map(t => t.symbol);
+        trainDiv.innerHTML = tokens.slice(0, 10).map(sym => `
+            <div class="flex items-center justify-between py-1 border-b border-gray-800/50">
+                <span class="text-gray-400 font-medium">${sym.replace('-USDT','')}</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-600">awaiting</span>
+                </div>
+            </div>
+        `).join('') || '<div class="text-gray-600 text-center py-2">No tokens active</div>';
+    }
+
+    // Next training countdown: first try ppo_training_log, then fallback to /api/training_status
+    const TRAIN_INTERVAL_MS = 2 * 3600 * 1000;  // 2h in ms
+    let nextTrainMs = null;
+    syms.forEach(sym => {
+        const lt = symbols[sym].last_trained;
+        if (lt) {
+            const candidate = new Date(lt).getTime() + TRAIN_INTERVAL_MS;
+            if (nextTrainMs === null || candidate < nextTrainMs) nextTrainMs = candidate;
+        }
+    });
+    const sysEl = document.getElementById('sys-training-time');
+    if (nextTrainMs) {
+        const diffMs = nextTrainMs - Date.now();
+        if (diffMs <= 0) {
+            sysEl.textContent = 'Next training: now ⚡';
+            sysEl.style.color = '#34d399';
+        } else {
+            const h = Math.floor(diffMs / 3600000);
+            const m = Math.floor((diffMs % 3600000) / 60000);
+            sysEl.textContent = `Next training: ${h}h ${m}m`;
+            sysEl.style.color = '#9ca3af';
+        }
+    } else {
+        // Fallback: fetch from /api/training_status (heartbeat-based)
+        fetch('/api/training_status').then(r => r.json()).then(ts => {
+            if (ts.next_training) {
+                const diffMs = new Date(ts.next_training).getTime() - Date.now();
+                if (diffMs <= 0) {
+                    sysEl.textContent = 'Next training: now ⚡';
+                    sysEl.style.color = '#34d399';
+                } else {
+                    const h = Math.floor(diffMs / 3600000);
+                    const m = Math.floor((diffMs % 3600000) / 60000);
+                    sysEl.textContent = `Next training: ${h}h ${m}m`;
+                    sysEl.style.color = '#9ca3af';
+                }
+            } else {
+                sysEl.textContent = 'Next training: scheduled';
+                sysEl.style.color = '#9ca3af';
+            }
+        }).catch(() => {
+            sysEl.textContent = 'Next training: scheduled';
+            sysEl.style.color = '#9ca3af';
+        });
+    }
+
+    // Loss chart
+    const curve = ppo.training_curve || [];
+    if (curve.length > 0) {
+        lossChart.data.labels = curve.map((p,i) => i);
+        lossChart.data.datasets[0].data = curve.map(p => p.loss);
+        lossChart.update('none');
+    }
+}
+
+function renderPnLChart(d) {
+    const trades = (d.trades || []).filter(t => t.event === 'CLOSE');
+    const recent = trades.slice(0, 30).reverse();
+
+    pnlChart.data.labels = recent.map(t => t.symbol.replace('-USDT',''));
+    pnlChart.data.datasets[0].data = recent.map(t => t.pnl);
+    pnlChart.data.datasets[0].backgroundColor = recent.map(t =>
+        t.pnl > 0.05 ? 'rgba(16,185,129,0.6)' : t.pnl < -0.05 ? 'rgba(239,68,68,0.6)' : 'rgba(107,114,128,0.4)'
+    );
+    pnlChart.update('none');
+}
+
+// ─── Helpers ─────────────────────────────────────────────────
+function fmtPrice(p) {
+    if (!p || p === 0) return '—';
+    if (p >= 1000) return p.toFixed(2);
+    if (p >= 1) return p.toFixed(4);
+    return p.toFixed(6);
+}
+
+function updateClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('es', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' UTC';
+}
+
+// ─── Tabs ────────────────────────────────────────────────────
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+});
+
+// ─── Main Loop ───────────────────────────────────────────────
+initCharts();
+updateClock();
+setInterval(updateClock, 1000);
+
+async function refresh() {
+    const indicator = document.getElementById('refresh-indicator');
+    indicator.textContent = '↻ ...';
+    indicator.className = 'text-xs text-purple-400';
+
+    const [stats, ppo, brain] = await Promise.all([fetchStats(), fetchPPOStats(), fetchBrain()]);
+
+    if (stats) {
+        window._lastStats = stats;  // Store for PPO fallback display
+        renderKPIs(stats);
+        renderEquityChart(stats);
+        renderPositions(stats);
+        renderTrades(stats);
+        renderSymbolStats(stats);
+        renderDecisions(stats);
+        renderPnLChart(stats);
+    }
+    if (ppo) {
+        renderPPOStats(ppo);
+    }
+    if (brain) {
+        renderBrain(brain);
+    }
+
+    indicator.textContent = '↻ 15s';
+    indicator.className = 'text-xs text-gray-600';
+}
+
+refresh();
+setInterval(refresh, 15000);
+</script>
+
+</body>
+</html>

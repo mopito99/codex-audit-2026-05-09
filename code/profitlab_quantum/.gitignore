@@ -1,0 +1,13 @@
+.env
+*.env.*
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+*.bak
+*.bak.*
+*.log
+*.db
+data/
+.DS_Store
+models/checkpoints/

@@ -1,0 +1,10 @@
+[Unit]
+Description=VelocityQuant R74 V3 Hourly Tracker (auto-fill H1-H6 + auto-rollback Gemma matrix)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=administrator
+WorkingDirectory=/home/administrator/liquidator
+ExecStart=/home/administrator/liquidator/v3_hourly_tracker.sh
+TimeoutStartSec=180s

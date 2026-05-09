@@ -1,0 +1,12 @@
+[Unit]
+Description=Trading Bot Service
+After=network.target
+
+[Service]
+User=administrator
+WorkingDirectory=/nvme0n1-disk/srv/profitlab_prime
+ExecStart=/usr/bin/python3 main.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

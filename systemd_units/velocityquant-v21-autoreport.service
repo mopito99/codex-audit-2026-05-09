@@ -1,0 +1,10 @@
+[Unit]
+Description=VelocityQuant R74 V2.1 Auto Report Generator (one-shot at end of measurement window)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=administrator
+WorkingDirectory=/home/administrator/liquidator
+ExecStart=/bin/bash -c '/home/administrator/liquidator/gen_r74_v2_report.sh > /home/administrator/liquidator/data/V21_OFFICIAL_REPORT_$(date -u +%%Y%%m%%dT%%H%%M%%SZ).md 2>&1'
+TimeoutStartSec=180s

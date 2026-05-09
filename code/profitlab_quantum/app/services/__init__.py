@@ -1,0 +1,1 @@
+from .fundamentals import get_crypto_fundamentals

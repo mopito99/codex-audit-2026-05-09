@@ -1,0 +1,41 @@
+# VelocityQuant — Pool Registry (R64 BLOCKING-resolved)
+# Hot-reloadable via notify watcher. Edits trigger re-parse without restart.
+# Validation: fail-safe — if file is invalid, daemon keeps previous snapshot.
+#
+# R64 A2.3: this is now the SINGLE source of truth for cyclic pools.
+# Legacy CYCLIC_POOLS env var is REJECTED at startup if present.
+#
+# R64 A4.1: each pool MUST declare a tier (major/midcap/longtail). The tier
+# selects the Pyth depeg threshold per-pool:
+#   - major:    40 bps  (SOL/USDC, USDC/USDT — high-liquidity, tight peg)
+#   - midcap:   100 bps (mSOL, JitoSOL, JUP, PYTH, etc.)
+#   - longtail: 200 bps (low-liquidity, volatile pegs, default)
+
+[global]
+probe_usd = 100.0
+cycle_path = ['USDC', 'SOL', 'USDC']
+scan_interval_ms = 200
+
+# SOL/USDC Orca Whirlpool — reference pool. Used in shadow validation pre-LIVE.
+# Tier=major → strictest depeg threshold (40 bps). Cap reflects Phase 1 hot
+# wallet allocation ($200 isolated probe per Gemma R64 B4 BLOCKING).
+[[pool]]
+label = 'orca_sol_usdc_phase1'
+address = 'Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE'
+kind = 'orca'
+cap_usd = 100.0
+score = 0.85
+tier = 'major'
+enabled = true
+
+# Raydium CLMM SOL/USDC — second leg of the cyclic arb (USDC→SOL on Orca,
+# SOL→USDC on Raydium = closed cycle). Required for cycle_finder to detect
+# cross-pool gaps. tier=major (same liquidity profile as Orca).
+[[pool]]
+label = 'raydium_sol_usdc_phase1'
+address = '8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj'
+kind = 'raydium'
+cap_usd = 100.0
+score = 0.85
+tier = 'major'
+enabled = true

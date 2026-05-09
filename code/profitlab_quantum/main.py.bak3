@@ -1,0 +1,864 @@
+import asyncio
+import logging
+import pandas as pd
+import os
+import sys
+import fcntl
+import subprocess
+import time
+from app.config import (
+    TOKENS,
+    TRADING_TOKENS,
+    TIMEFRAME,
+    INITIAL_CAPITAL,
+    USE_WS_FEED,
+    USE_ORDERBOOK,
+    ORDERBOOK_LIMIT,
+    BINGX_FEE_TAKER,
+    BINGX_SLIPPAGE_BPS,
+    PPO_CHUNK_UPDATE_EVERY_HOURS,
+)
+from app.data.bingx import BingXReader
+from app.data.bingx_ws import BingXSwapWebSocket
+from app.engine import QuantumEngine
+from app.db import get_db, engine as db_engine
+from sqlalchemy import text
+import json
+from pathlib import Path
+
+
+def _compute_microstructure_from_depth(depth: dict, *, top_n: int = 10) -> dict:
+    """Derive lightweight institutional microstructure features from an orderbook snapshot."""
+
+    def _to_levels(side):
+        out = []
+        for lvl in (side or [])[:top_n]:
+            try:
+                px = float(lvl[0])
+                sz = float(lvl[1])
+                if px > 0 and sz >= 0:
+                    out.append((px, sz))
+            except Exception:
+                continue
+        return out
+
+    bids = _to_levels(depth.get("bids"))
+    asks = _to_levels(depth.get("asks"))
+
+    best_bid = bids[0][0] if bids else None
+    best_ask = asks[0][0] if asks else None
+
+    mid = None
+    spread_bps = None
+    if best_bid is not None and best_ask is not None and best_bid > 0 and best_ask > 0:
+        mid = 0.5 * (best_bid + best_ask)
+        if mid > 0:
+            spread_bps = ((best_ask - best_bid) / mid) * 10000.0
+
+    bid_usd = float(sum(px * sz for px, sz in bids)) if bids else 0.0
+    ask_usd = float(sum(px * sz for px, sz in asks)) if asks else 0.0
+
+    denom = bid_usd + ask_usd
+    imbalance = float((bid_usd - ask_usd) / denom) if denom > 0 else 0.0
+
+    return {
+        "mid": float(mid) if mid is not None else None,
+        "spread_bps": float(spread_bps) if spread_bps is not None else None,
+        "bid_depth_usd": float(bid_usd),
+        "ask_depth_usd": float(ask_usd),
+        "imbalance": float(imbalance),
+        "top_n": int(top_n),
+        "ts": int(depth.get("T") or 0) if isinstance(depth, dict) else 0,
+    }
+
+
+def _apply_slippage(price: float, side: str, *, bps: float) -> float:
+    """Apply a simple slippage model in bps.
+
+    For entry/exit fills:
+    - LONG entry (buy): worse price (up)
+    - LONG exit (sell): worse price (down)
+    - SHORT entry (sell): worse price (down)
+    - SHORT exit (buy): worse price (up)
+    """
+    if price <= 0:
+        return price
+    slip = float(bps) / 10000.0
+    s = (side or "").upper()
+    if s in ("LONG_ENTRY", "SHORT_EXIT"):
+        return float(price) * (1.0 + slip)
+    if s in ("LONG_EXIT", "SHORT_ENTRY"):
+        return float(price) * (1.0 - slip)
+    return float(price)
+
+
+def _write_heartbeat(payload: dict) -> None:
+    """Write a small heartbeat file for external watchdogs (systemd/cron/uptime checks)."""
+    try:
+        hb_dir = Path("/tmp/profitlab_quantum")
+        hb_dir.mkdir(parents=True, exist_ok=True)
+        tmp_path = hb_dir / "heartbeat.json.tmp"
+        final_path = hb_dir / "heartbeat.json"
+        tmp_path.write_text(json.dumps(payload, sort_keys=True))
+        tmp_path.replace(final_path)
+    except Exception:
+        pass
+
+
+def acquire_single_instance_lock(lock_path: str):
+    """Prevent running multiple bot instances concurrently."""
+    os.makedirs(os.path.dirname(lock_path), exist_ok=True)
+    lock_file = open(lock_path, "w")
+    try:
+        fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print(f"Another ProfitLab Quantum bot instance is already running (lock: {lock_path}).")
+        sys.exit(0)
+    lock_file.write(str(os.getpid()))
+    lock_file.flush()
+    return lock_file
+
+# Setup Logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.FileHandler("quantum.log"),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("Quantum.Main")
+
+# SQL constant for paper_trades INSERT (used by TP1, SL/TP exit, open, BE)
+_SQL_INSERT_TRADE = text("""
+    INSERT INTO paper_trades (
+        timestamp, symbol, action, price, size, margin, leverage, reason,
+        event, entry_price, exit_price, pnl_usd, sl, tp
+    )
+    VALUES (
+        :timestamp, :symbol, :action, :price, :size, :margin, :leverage, :reason,
+        :event, :entry_price, :exit_price, :pnl_usd, :sl, :tp
+    )
+""")
+
+
+# ── Position management helpers (extracted for readability) ────────
+
+
+def _handle_tp1_partial(db, engine_instance, token, current_price, pos_row):
+    """Handle TP1 partial close (25% at +2.0%). Returns updated dict or None."""
+    side = str(pos_row.side)
+    tp1_price = float(pos_row.tp1_price) if hasattr(pos_row, 'tp1_price') and pos_row.tp1_price is not None else None
+    tp1_hit = bool(pos_row.tp1_hit) if hasattr(pos_row, 'tp1_hit') and pos_row.tp1_hit is not None else False
+
+    if tp1_hit or tp1_price is None:
+        return None
+
+    hit_tp1 = ((side == "LONG" and current_price >= tp1_price) or
+               (side == "SHORT" and current_price <= tp1_price))
+    if not hit_tp1:
+        return None
+
+    entry_price = float(pos_row.entry_price)
+    qty = float(pos_row.qty)
+    notional_usd = float(pos_row.notional_usd)
+    tp = float(pos_row.tp) if pos_row.tp is not None else None
+
+    close_qty = qty * 0.25
+    close_notional = notional_usd * 0.25
+
+    if side == "LONG":
+        exit_fill = _apply_slippage(float(tp1_price), "LONG_EXIT", bps=float(BINGX_SLIPPAGE_BPS))
+        pnl_partial = (exit_fill - entry_price) * close_qty
+    else:
+        exit_fill = _apply_slippage(float(tp1_price), "SHORT_EXIT", bps=float(BINGX_SLIPPAGE_BPS))
+        pnl_partial = (entry_price - exit_fill) * close_qty
+
+    fee_open_partial = close_notional * float(BINGX_FEE_TAKER)
+    fee_close_partial = close_notional * float(BINGX_FEE_TAKER)
+    pnl_partial = float(pnl_partial) - float(fee_open_partial) - float(fee_close_partial)
+
+    new_balance = float(engine_instance.portfolio_value) + float(pnl_partial)
+    engine_instance.portfolio_value = new_balance
+
+    new_sl = entry_price * 1.001 if side == "LONG" else entry_price * 0.999
+    remaining_qty = qty - close_qty
+    remaining_notional = notional_usd - close_notional
+
+    db.execute(
+        text("""
+            UPDATE paper_positions
+            SET qty = :qty, notional_usd = :notional, tp1_hit = TRUE, sl = :sl
+            WHERE symbol = :symbol
+        """),
+        {"qty": float(remaining_qty), "notional": float(remaining_notional),
+         "sl": float(new_sl), "symbol": token},
+    )
+
+    db.execute(
+        _SQL_INSERT_TRADE,
+        {
+            "timestamp": pd.Timestamp.now(), "symbol": token, "action": side,
+            "price": float(tp1_price), "size": float(close_notional),
+            "margin": float(pos_row.margin_usd) * 0.25,
+            "leverage": float(pos_row.leverage),
+            "reason": "TP1 Partial Close (25%)", "event": "TP1",
+            "entry_price": float(entry_price), "exit_price": float(exit_fill),
+            "pnl_usd": float(pnl_partial), "sl": float(new_sl),
+            "tp": float(tp) if tp is not None else None,
+        },
+    )
+    db.commit()
+
+    logger.info(
+        f"TP1 HIT [{token}]: Closed 25% @ {tp1_price:.4f} | "
+        f"PnL: ${pnl_partial:.2f} | SL moved to BE: {new_sl:.4f}"
+    )
+
+    return {
+        "qty": remaining_qty,
+        "notional_usd": remaining_notional,
+        "sl": new_sl,
+        "tp1_hit": True,
+    }
+
+
+def _handle_sl_tp_exit(db, engine_instance, token, current_price, pos_row,
+                       side, entry_price, qty, notional_usd, sl, tp):
+    """Check and execute SL/TP exit. Returns True if position was closed."""
+    hit_sl = False
+    hit_tp = False
+
+    if side == "LONG":
+        if sl is not None and current_price <= sl:
+            hit_sl = True
+        if tp is not None and current_price >= tp:
+            hit_tp = True
+    elif side == "SHORT":
+        if sl is not None and current_price >= sl:
+            hit_sl = True
+        if tp is not None and current_price <= tp:
+            hit_tp = True
+
+    if not hit_sl and not hit_tp:
+        return False
+
+    exit_reason = "TP" if hit_tp else "SL"
+
+    if side == "LONG":
+        exit_fill = _apply_slippage(float(current_price), "LONG_EXIT", bps=float(BINGX_SLIPPAGE_BPS))
+        pnl_usd = (exit_fill - entry_price) * qty
+        notional_close = float(qty) * float(exit_fill)
+    else:
+        exit_fill = _apply_slippage(float(current_price), "SHORT_EXIT", bps=float(BINGX_SLIPPAGE_BPS))
+        pnl_usd = (entry_price - exit_fill) * qty
+        notional_close = float(qty) * float(exit_fill)
+
+    fee_open = float(notional_usd) * float(BINGX_FEE_TAKER)
+    fee_close = float(notional_close) * float(BINGX_FEE_TAKER)
+    pnl_usd = float(pnl_usd) - float(fee_open) - float(fee_close)
+
+    db.execute(
+        text("DELETE FROM paper_positions WHERE symbol = :symbol"),
+        {"symbol": token},
+    )
+
+    # Cooldown on SL (15 minutes)
+    if exit_reason == "SL":
+        try:
+            cooldown_ms = 15 * 60 * 1000
+            engine_instance._cooldown_until_ts_ms = int(time.time() * 1000) + cooldown_ms
+            logger.info(f"Cooldown activated for {token}: 15 min after SL")
+        except Exception:
+            pass
+
+    new_balance = float(engine_instance.portfolio_value) + float(pnl_usd)
+    engine_instance.portfolio_value = new_balance
+
+    # Equity tracking
+    peak_row = db.execute(
+        text("SELECT balance, peak FROM paper_equity WHERE symbol = :symbol"),
+        {"symbol": token},
+    ).fetchone()
+    prev_peak = float(peak_row.peak) if peak_row is not None else float(engine_instance.capital)
+    new_peak = max(prev_peak, new_balance)
+
+    db.execute(
+        text("""
+            INSERT INTO paper_equity (symbol, balance, peak, updated_at)
+            VALUES (:symbol, :balance, :peak, :updated_at)
+            ON CONFLICT (symbol) DO UPDATE SET
+                balance = EXCLUDED.balance,
+                peak = EXCLUDED.peak,
+                updated_at = EXCLUDED.updated_at
+        """),
+        {
+            "symbol": token, "balance": float(new_balance),
+            "peak": float(new_peak), "updated_at": pd.Timestamp.now(),
+        },
+    )
+
+    db.execute(
+        _SQL_INSERT_TRADE,
+        {
+            "timestamp": pd.Timestamp.now(), "symbol": token, "action": side,
+            "price": float(current_price), "size": float(notional_usd),
+            "margin": float(pos_row.margin_usd), "leverage": float(pos_row.leverage),
+            "reason": f"Auto close ({exit_reason})", "event": "CLOSE",
+            "entry_price": float(entry_price), "exit_price": float(exit_fill),
+            "pnl_usd": float(pnl_usd),
+            "sl": float(sl) if sl is not None else None,
+            "tp": float(tp) if tp is not None else None,
+        },
+    )
+    db.commit()
+
+    # PPO Reward for trade result
+    try:
+        pnl_pct = float(pnl_usd) / float(pos_row.margin_usd) if pos_row.margin_usd else 0
+        if exit_reason == "TP":
+            trade_reward = 5.0 + (pnl_pct * 50.0)
+            logger.info(f"PPO REWARD [TP]: {token} +{trade_reward:.2f}")
+        else:
+            trade_reward = -2.0 + (pnl_pct * 30.0)
+            logger.info(f"PPO REWARD [SL]: {token} {trade_reward:.2f}")
+
+        if (hasattr(engine_instance, "prev_state")
+                and engine_instance.prev_state is not None
+                and hasattr(engine_instance.agent, "remember")):
+            engine_instance.agent.remember(
+                engine_instance.prev_state,
+                engine_instance.prev_action or 0,
+                float(trade_reward),
+                True,  # done=True (episode ended)
+                engine_instance.prev_log_prob,
+                engine_instance.prev_value,
+                int(time.time() * 1000),
+            )
+    except Exception as e:
+        logger.debug(f"Failed to send trade reward: {e}")
+
+    return True
+
+
+def _handle_breakeven(db, token, current_price, side, entry_price, sl, tp,
+                      notional_usd, margin_usd, leverage):
+    """Check and activate break-even SL move when ROI > 1.0%."""
+    should_be = False
+    new_sl = None
+    current_roi = 0.0
+
+    if side == "LONG" and entry_price > 0:
+        current_roi = (current_price - entry_price) / entry_price
+        if current_roi >= 0.010:
+            target_sl = entry_price * 1.001
+            if (sl is None or target_sl > sl) and target_sl < current_price:
+                new_sl = target_sl
+                should_be = True
+    elif side == "SHORT" and entry_price > 0:
+        current_roi = (entry_price - current_price) / entry_price
+        if current_roi >= 0.010:
+            target_sl = entry_price * 0.999
+            if (sl is None or target_sl < sl) and target_sl > current_price:
+                new_sl = target_sl
+                should_be = True
+
+    if not should_be or new_sl is None:
+        return
+
+    logger.info(
+        f"BE ACTIVATED [{token}]: ROI={current_roi*100:.2f}% | Moved SL to {new_sl:.4f}"
+    )
+    db.execute(
+        text("UPDATE paper_positions SET sl = :sl WHERE symbol = :symbol"),
+        {"sl": float(new_sl), "symbol": token},
+    )
+    db.execute(
+        text("""
+            INSERT INTO paper_trades (
+                timestamp, symbol, action, price, size, margin, leverage, reason,
+                event, entry_price, sl, tp
+            )
+            VALUES (
+                :timestamp, :symbol, :action, :price, :size, :margin, :leverage, :reason,
+                :event, :entry_price, :sl, :tp
+            )
+        """),
+        {
+            "timestamp": pd.Timestamp.now(), "symbol": token, "action": side,
+            "price": float(current_price), "size": float(notional_usd),
+            "margin": float(margin_usd), "leverage": float(leverage),
+            "reason": "Break Even Trigger (ROI > 1.0%)", "event": "BE",
+            "entry_price": float(entry_price), "sl": float(new_sl),
+            "tp": float(tp) if tp is not None else None,
+        },
+    )
+    db.commit()
+
+
+def _handle_open_position(db, token, action_str, position_size, info, current_price):
+    """Open a new paper trading position with TP1 partial setup."""
+    margin_usd = float(info.get("risk", {}).get("margin_usd", 0.0) or 0.0)
+    leverage = float(info.get("risk", {}).get("leverage", 1.0) or 1.0)
+    sl = info.get("orders", {}).get("sl")
+    tp = info.get("orders", {}).get("tp")
+
+    if action_str == "LONG":
+        entry_fill = _apply_slippage(float(current_price), "LONG_ENTRY", bps=float(BINGX_SLIPPAGE_BPS))
+    else:
+        entry_fill = _apply_slippage(float(current_price), "SHORT_ENTRY", bps=float(BINGX_SLIPPAGE_BPS))
+
+    qty = (float(position_size) / entry_fill) if entry_fill else 0.0
+
+    TP1_PCT = 0.020  # 2.0% for TP1 partial (v8)
+    if action_str == "LONG":
+        tp1_price = entry_fill * (1 + TP1_PCT)
+    else:
+        tp1_price = entry_fill * (1 - TP1_PCT)
+
+    logger.info(
+        f"OPEN [{token}]: {action_str} | Notional: ${position_size:.2f} | "
+        f"Margin: ${margin_usd:.2f} | Lev: {leverage:.2f}x | SL: {sl} | "
+        f"TP1: {tp1_price:.4f} | TP: {tp} | Price: {entry_fill} "
+        f"(slip_bps={BINGX_SLIPPAGE_BPS}) | Fee(taker)={BINGX_FEE_TAKER}"
+    )
+
+    db.execute(
+        text("""
+            INSERT INTO paper_positions (
+                symbol, side, entry_price, notional_usd, margin_usd, leverage,
+                qty, sl, tp, tp1_price, tp1_hit, open_time
+            )
+            VALUES (
+                :symbol, :side, :entry_price, :notional_usd, :margin_usd, :leverage,
+                :qty, :sl, :tp, :tp1_price, FALSE, :open_time
+            )
+            ON CONFLICT (symbol) DO UPDATE SET
+                side = EXCLUDED.side,
+                entry_price = EXCLUDED.entry_price,
+                notional_usd = EXCLUDED.notional_usd,
+                margin_usd = EXCLUDED.margin_usd,
+                leverage = EXCLUDED.leverage,
+                qty = EXCLUDED.qty,
+                sl = EXCLUDED.sl,
+                tp = EXCLUDED.tp,
+                tp1_price = EXCLUDED.tp1_price,
+                tp1_hit = FALSE,
+                open_time = EXCLUDED.open_time
+        """),
+        {
+            "symbol": token, "side": action_str,
+            "entry_price": float(entry_fill),
+            "notional_usd": float(position_size),
+            "margin_usd": float(margin_usd),
+            "leverage": float(leverage),
+            "qty": float(qty),
+            "sl": float(sl) if sl is not None else None,
+            "tp": float(tp) if tp is not None else None,
+            "tp1_price": float(tp1_price),
+            "open_time": pd.Timestamp.now(),
+        },
+    )
+
+    db.execute(
+        _SQL_INSERT_TRADE,
+        {
+            "timestamp": pd.Timestamp.now(), "symbol": token,
+            "action": action_str,
+            "price": float(entry_fill),
+            "size": float(position_size),
+            "margin": float(margin_usd),
+            "leverage": float(leverage),
+            "reason": "Quantum Agent Signal", "event": "OPEN",
+            "entry_price": float(entry_fill),
+            "exit_price": None, "pnl_usd": None,
+            "sl": float(sl) if sl is not None else None,
+            "tp": float(tp) if tp is not None else None,
+        },
+    )
+    db.commit()
+
+async def main():
+    # Ensure single instance
+    _lock = acquire_single_instance_lock("/tmp/profitlab_quantum/bot.lock")
+    logger.info("Starting Quantum Bot (Paper Trading Mode)...")
+
+    # Write an immediate heartbeat so watchdogs pass even during startup.
+    _write_heartbeat(
+        {
+            "pid": int(os.getpid()),
+            "ts_utc": pd.Timestamp.utcnow().isoformat(),
+            "phase": "starting",
+            "timeframe": str(TIMEFRAME),
+            "use_ws_feed": bool(USE_WS_FEED),
+            "use_orderbook": bool(USE_ORDERBOOK),
+        }
+    )
+    
+    # Initialize BingX Reader
+    bingx = BingXReader()
+    
+    # Initialize Engines (One per token)
+    # Capital se reparte solo entre los que tradean; train-only reciben $0 (no abren posiciones)
+    capital_per_token = INITIAL_CAPITAL / len(TRADING_TOKENS)
+    engines = {token: QuantumEngine(initial_capital=capital_per_token if token in TRADING_TOKENS else 0.0, symbol=token) for token in TOKENS}
+    
+    logger.info(f"Initialized {len(engines)} engines with ${capital_per_token:.2f} each.")
+    train_only = [t for t in TOKENS if t not in TRADING_TOKENS]
+    logger.info(f"TRADING ({len(TRADING_TOKENS)}): {TRADING_TOKENS}")
+    logger.info(f"TRAIN-ONLY ({len(train_only)}): {train_only}")
+
+    # Load persisted equity per symbol (so CPPI/drawdown is real across restarts)
+    db = get_db()
+    try:
+        rows = db.execute(text("SELECT symbol, balance, peak FROM paper_equity")).fetchall()
+        equity_map = {r.symbol: (float(r.balance), float(r.peak)) for r in rows}
+        for token, engine_instance in engines.items():
+            if token in equity_map:
+                bal, _peak = equity_map[token]
+                engine_instance.portfolio_value = float(bal)
+    except Exception as e:
+        logger.warning(f"Equity load skipped: {e}")
+    finally:
+        db.close()
+
+    # WS-driven loop: we receive kline updates (low latency), and on each new candle we
+    # fetch REST klines to build full feature frames for the engine.
+    # If WS fails, we fall back to the previous REST polling behavior.
+
+    last_kline_start_ms: dict[str, int | None] = dict.fromkeys(TOKENS, None)
+    last_processed_at_utc: dict[str, str | None] = dict.fromkeys(TOKENS, None)
+    _live_prices: dict[str, float] = dict.fromkeys(TOKENS, 0.0)
+
+    # --- Watchdog heartbeat (must not depend on receiving WS events) ---
+    ws_last_event_monotonic: float | None = None
+
+    def _heartbeat_payload() -> dict:
+        now_utc = pd.Timestamp.utcnow().isoformat()
+        age_s = None
+        if ws_last_event_monotonic is not None:
+            age_s = float(time.monotonic() - ws_last_event_monotonic)
+        
+        # Get market status from the first engine
+        ms = {}
+        training_info = {}
+        
+        if engines and len(engines) > 0:
+            first_engine = list(engines.values())[0]
+            if hasattr(first_engine, "market_context"):
+                try:
+                    ms = first_engine.market_context.get_status().__dict__
+                except Exception:
+                    pass
+            
+            # Training info
+            last_train_ms = getattr(first_engine, "_last_train_ts_ms", None)
+            if last_train_ms:
+                last_train_dt = pd.Timestamp(last_train_ms, unit='ms', tz='UTC')
+                next_train_dt = last_train_dt + pd.Timedelta(hours=float(PPO_CHUNK_UPDATE_EVERY_HOURS))
+                training_info = {
+                    "last_training": last_train_dt.isoformat(),
+                    "next_training": next_train_dt.isoformat(),
+                    "status": "idle",
+                    "phase": "idle"
+                }
+            else:
+                # Not trained yet
+                # If not trained yet, next training is effectively "now" + interval (or just now if we want to force it)
+                # But engine initializes _last_train_ts_ms to NOW on startup if None.
+                # So we should see last_train_ms set shortly after startup.
+                training_info = {
+                    "last_training": None,
+                    "next_training": pd.Timestamp.utcnow().isoformat(),
+                    "status": "idle",
+                    "phase": "idle"
+                }
+
+        return {
+            "pid": int(os.getpid()),
+            "ts_utc": now_utc,
+            "timeframe": str(TIMEFRAME),
+            "use_ws_feed": bool(USE_WS_FEED),
+            "use_orderbook": bool(USE_ORDERBOOK),
+            "ws_last_event_age_s": age_s,
+            "last_processed_at_utc": dict(last_processed_at_utc),
+            "live_prices": dict(_live_prices),
+            "market_status": ms,
+            "training_status": training_info,
+        }
+
+    async def _heartbeat_loop() -> None:
+        while True:
+            try:
+                _write_heartbeat(_heartbeat_payload())
+            except Exception as e:
+                logger.error(f"Heartbeat loop error: {e}")
+            await asyncio.sleep(30)
+
+    _heartbeat_task = asyncio.create_task(_heartbeat_loop())
+    _write_heartbeat(_heartbeat_payload())
+
+    async def process_symbol_on_new_candle(token: str, current_forming_kline_start_ms: int | None):
+        engine_instance = engines[token]
+        logger.info(f"Processing {token} (new candle)...")
+
+        df = await bingx.get_klines(token, interval=TIMEFRAME, limit=220)
+        if df is None or df.empty:
+            logger.warning(f"No data for {token}")
+            return
+
+        # Ensure we only act on CLOSED candles when WS tells us the current forming candle start.
+        if current_forming_kline_start_ms is not None and "time" in df.columns:
+            df = df[df["time"] < int(current_forming_kline_start_ms)].copy()
+        if df.empty:
+            logger.warning(f"No closed candles for {token} after filtering")
+            return
+
+        # Higher timeframe context (1h)
+        htf_df = await bingx.get_klines(token, interval="1h", limit=300)
+
+        current_price = float(df["close"].iloc[-1])
+        _live_prices[token] = current_price
+
+        # Microstructure snapshot (orderbook)
+        micro = None
+        if USE_ORDERBOOK:
+            depth = await bingx.get_depth(token, limit=int(ORDERBOOK_LIMIT))
+            if depth:
+                micro = _compute_microstructure_from_depth(depth, top_n=min(10, int(ORDERBOOK_LIMIT)))
+
+        # 1) Position management (TP1 partial + SL/TP exit + BE trailing)
+        db = get_db()
+        try:
+            pos_row = db.execute(
+                text("SELECT * FROM paper_positions WHERE symbol = :symbol"),
+                {"symbol": token},
+            ).fetchone()
+
+            if pos_row is not None:
+                side = str(pos_row.side)
+                entry_price = float(pos_row.entry_price)
+                qty = float(pos_row.qty)
+                notional_usd = float(pos_row.notional_usd)
+                sl = float(pos_row.sl) if pos_row.sl is not None else None
+                tp = float(pos_row.tp) if pos_row.tp is not None else None
+
+                # TP1 Partial Close
+                tp1_result = _handle_tp1_partial(db, engine_instance, token, current_price, pos_row)
+                if tp1_result is not None:
+                    qty = tp1_result['qty']
+                    notional_usd = tp1_result['notional_usd']
+                    sl = tp1_result['sl']
+
+                # SL/TP Full Exit
+                closed = _handle_sl_tp_exit(
+                    db, engine_instance, token, current_price, pos_row,
+                    side, entry_price, qty, notional_usd, sl, tp)
+
+                if not closed:
+                    # Break-Even Trailing
+                    _handle_breakeven(
+                        db, token, current_price, side, entry_price, sl, tp,
+                        notional_usd, float(pos_row.margin_usd), float(pos_row.leverage))
+        finally:
+            db.close()
+
+        # 2) Run Engine Step (signal generation)
+        action, position_size, info = engine_instance.step(df, htf_data=htf_df, symbol=token, microstructure=micro)
+
+        # 3) Log Decision Context & Open New Position
+        db = get_db()
+        try:
+            features_json = json.dumps(info.get("features", {}))
+            probs_json = json.dumps(info.get("probs", []))
+            risk_json = json.dumps(info.get("risk", {}))
+
+            db.execute(
+                text("""
+                    INSERT INTO decision_logs (timestamp, symbol, features, agent_probs, risk_metrics)
+                    VALUES (:timestamp, :symbol, :features, :agent_probs, :risk_metrics)
+                """),
+                {
+                    "timestamp": pd.Timestamp.utcnow(), "symbol": token,
+                    "features": features_json, "agent_probs": probs_json,
+                    "risk_metrics": risk_json,
+                },
+            )
+            db.commit()
+
+            # If a position is still open we do not open another one.
+            still_open = db.execute(
+                text("SELECT 1 FROM paper_positions WHERE symbol = :symbol"),
+                {"symbol": token},
+            ).fetchone()
+            if still_open is not None:
+                return
+
+            # Train-only tokens run engine.step() but never trade
+            if token not in TRADING_TOKENS:
+                logger.info(f"TRAIN-ONLY [{token}]: Signal={['HOLD','LONG','SHORT'][action]} -- skipping trade (not in top 10)")
+                return
+
+            # 4) Open new position
+            action_str = ["HOLD", "LONG", "SHORT"][action]
+            if action != 0 and float(position_size) > 0.0:
+                _handle_open_position(db, token, action_str, position_size, info, current_price)
+        finally:
+            db.close()
+
+        # Track processing time per symbol
+        try:
+            last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+        except Exception:
+            pass
+
+    async def ws_loop():
+        ws = BingXSwapWebSocket(symbols=TOKENS, interval=TIMEFRAME)
+        logger.info(f"Using WS feed: {ws.ws_url} | interval={TIMEFRAME}")
+
+        # If we don't get any kline events for a while, assume WS is blocked/unreliable and fall back.
+        # IMPORTANT: an `async for` loop can't detect “no messages” because it never iterates;
+        # we must enforce an explicit timeout on awaiting the next message.
+        nonlocal ws_last_event_monotonic
+        last_any_event_at = time.monotonic()
+        ws_last_event_monotonic = last_any_event_at
+
+        stream = ws.stream()
+        while True:
+            try:
+                evt = await asyncio.wait_for(stream.__anext__(), timeout=120)
+            except asyncio.TimeoutError:
+                raise RuntimeError("No WS events received for >120s")
+            except StopAsyncIteration:
+                # Stream ended unexpectedly; trigger reconnect/fallback.
+                raise RuntimeError("WS stream ended")
+
+            last_any_event_at = time.monotonic()
+            ws_last_event_monotonic = last_any_event_at
+
+            prev = last_kline_start_ms.get(evt.symbol)
+            if prev is None:
+                last_kline_start_ms[evt.symbol] = evt.kline_start_ms
+                # Seed initial processing so we don't wait for the next candle rollover
+                # (otherwise last_processed_at_utc stays null for up to one full timeframe).
+                try:
+                    await process_symbol_on_new_candle(evt.symbol, evt.kline_start_ms)
+                except Exception as e:
+                    logger.error(f"WS-driven initial processing error for {evt.symbol}: {e}")
+                continue
+
+            # New candle detected: start time changed.
+            if int(evt.kline_start_ms) != int(prev):
+                last_kline_start_ms[evt.symbol] = evt.kline_start_ms
+                try:
+                    await process_symbol_on_new_candle(evt.symbol, evt.kline_start_ms)
+                except Exception as e:
+                    logger.error(f"WS-driven processing error for {evt.symbol}: {e}")
+
+    async def rest_polling_loop():
+        last_processed_candle = dict.fromkeys(TOKENS, None)
+        while True:
+            for token, engine_instance in engines.items():
+                logger.info(f"Processing {token}...")
+                df = await bingx.get_klines(token, interval=TIMEFRAME, limit=200)
+                if df is None or df.empty:
+                    logger.warning(f"No data for {token}")
+                    continue
+                try:
+                    latest_candle_time = df.index[-1]
+                except Exception:
+                    latest_candle_time = None
+                if latest_candle_time is None:
+                    continue
+                if last_processed_candle.get(token) == latest_candle_time:
+                    continue
+                last_processed_candle[token] = latest_candle_time
+
+                # In REST-only mode, we don't know whether the last candle is still forming.
+                # Keep the previous behavior and let the engine work with the REST payload.
+                await process_symbol_on_new_candle(token, None)
+            await asyncio.sleep(30)
+
+    while True:
+        try:
+            if USE_WS_FEED:
+                try:
+                    await ws_loop()
+                except Exception as e:
+                    logger.error(f"WS loop failed; falling back to REST polling: {e}")
+                    await asyncio.sleep(2)
+                    await rest_polling_loop()
+            else:
+                await rest_polling_loop()
+        except Exception as e:
+            logger.error(f"Main loop error: {e}")
+            await asyncio.sleep(30)
+
+if __name__ == "__main__":
+    # Create tables if not exists
+    with db_engine.connect() as conn:
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS paper_trades (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP,
+                symbol VARCHAR(20),
+                action VARCHAR(10),
+                price FLOAT,
+                size FLOAT,
+                margin FLOAT,
+                leverage FLOAT,
+                reason TEXT
+            );
+        """))
+
+        # Ensure new columns exist for already-created tables
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS margin FLOAT;"))
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS leverage FLOAT;"))
+
+        # Extended trade fields for SL/TP and full-close events
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS event VARCHAR(10);"))
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS entry_price FLOAT;"))
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS exit_price FLOAT;"))
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS pnl_usd FLOAT;"))
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS sl FLOAT;"))
+        conn.execute(text("ALTER TABLE paper_trades ADD COLUMN IF NOT EXISTS tp FLOAT;"))
+
+        # Open positions table (single position per symbol)
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS paper_positions (
+                symbol VARCHAR(20) PRIMARY KEY,
+                side VARCHAR(10),
+                entry_price FLOAT,
+                notional_usd FLOAT,
+                margin_usd FLOAT,
+                leverage FLOAT,
+                qty FLOAT,
+                sl FLOAT,
+                tp FLOAT,
+                open_time TIMESTAMP
+            );
+        """))
+
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS paper_equity (
+                symbol VARCHAR(20) PRIMARY KEY,
+                balance FLOAT,
+                peak FLOAT,
+                updated_at TIMESTAMP
+            );
+        """))
+        
+        # Table for storing detailed decision context for the Strategy Dashboard
+        conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS decision_logs (
+                id SERIAL PRIMARY KEY,
+                timestamp TIMESTAMP,
+                symbol VARCHAR(20),
+                features JSONB,
+                agent_probs JSONB,
+                risk_metrics JSONB
+            );
+        """))
+        conn.commit()
+
+    asyncio.run(main())

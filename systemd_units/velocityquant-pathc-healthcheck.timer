@@ -1,0 +1,11 @@
+[Unit]
+Description=Run VelocityQuant Path C Health Check every 30 min
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=30min
+AccuracySec=10s
+Unit=velocityquant-pathc-healthcheck.service
+
+[Install]
+WantedBy=timers.target

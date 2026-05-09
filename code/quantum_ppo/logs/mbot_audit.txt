@@ -1,0 +1,268 @@
+# DIAGNÓSTICO AUDITOR — Suite MBOT (Panel + Strategy/Bot3 + Bitunix)
+
+---
+
+## RESUMEN EJECUTIVO
+
+Los tres bots comparten ~95% del mismo código (copy-paste architecture). Los bugs encontrados se repiten en los tres. Hay **4 bugs críticos**, **6 bugs graves** y **múltiples fantasmas silenciosos** que pueden corromper el estado financiero en producción.
+
+---
+
+## SECCIÓN 1 — BUGS CRÍTICOS
+
+### 🔴 CRÍTICO #1 — Race condition no resuelta en `get_status()` + `_tp_monitor_loop()`
+
+**Ubicación:** Todos los bots. `_tp_executing_symbols` es un `set` Python plano (no thread-safe bajo asyncio cuando la coroutine se llama concurrentemente).
+
+**El problema:**
+```python
+# _tp_monitor_loop llama get_status() cada 60s
+# El dashboard también llama get_status() cada ~5-10s
+# Ambas son coroutines que corren en el mismo event loop
+```
+
+El guard `_tp_executing_symbols.add(symbol)` protege contra dos coroutines *ejecutando simultáneamente el bloque TP*, PERO dentro de `get_status()` hay múltiples `await` antes del `add()`. Entre el check `symbol in _tp_executing_symbols` y el `_tp_executing_symbols.add(symbol)` existe un **gap async** donde otra coroutine puede entrar:
+
+```python
+if symbol in _tp_executing_symbols:   # <-- check
+    pass
+else:
+    _tp_executing_symbols.add(symbol)  # <-- add
+    try:
+        ...
+        reduce_result = await core.client.reduce_position(...)  # YIELD POINT
+```
+
+Si dos llamadas a `get_status()` llegan antes de que la primera haga `await`, **ambas pasan el check** y ambas ejecutan `reduce_position`. Resultado: **se cierra el 30% dos veces** → posición reducida al 49% en lugar del 70%.
+
+**Impacto financiero directo.** No hay `asyncio.Lock()` protegiendo el bloque completo TP1/TP2.
+
+---
+
+### 🔴 CRÍTICO #2 — `_lr_range_timeout_loop()` con `asyncio.Lock()` instanciado DENTRO del loop
+
+**Ubicación:** Todos los bots.
+
+```python
+async def _lr_range_timeout_loop():
+    await asyncio.sleep(20)
+    lock = asyncio.Lock()   # <-- SE CREA UNA VEZ, OK
+    while True:
+        try:
+            async with lock:  # OK nominalmente
+                ...
+```
+
+El lock se crea fuera del `while True`, lo cual es correcto. PERO el problema real es que el lock solo previene que **esta función** se reentré a sí misma. Si `get_status()` también cierra trades del mismo símbolo simultáneamente (sección `_auto_reconcile_trades`), no hay coordinación entre ambas. Dos rutas de cierre pueden ejecutarse en paralelo sobre el mismo trade: `_lr_range_timeout_loop` y `_auto_reconcile_trades`.
+
+Resultado posible: **doble close en exchange** + **doble commit en DB** con `status != "OPEN"` en el segundo commit (se protege el segundo con el check `if not db_t or db_t.status != "OPEN"`), pero la primera orden de cierre ya se envió al exchange.
+
+---
+
+### 🔴 CRÍTICO #3 — `_auto_reconcile_trades` se llama DOS VECES por ciclo en todos los bots
+
+**Ubicación:** Al final de `get_status()` en todos los bots.
+
+```python
+# Sección 2.5 — dentro del if positions_ok:
+# ... lógica de reconcile inline con bingx_order_id check ...
+
+# Luego al FINAL de get_status():
+await _auto_reconcile_trades(open_symbols, positions_ok)
+```
+
+La función `_auto_reconcile_trades` (al final) cierra trades por `symbol_variants` sin el filtro `bingx_order_id`. La sección inline 2.5 cierra solo trades con `bingx_order_id`. Esto significa que en cada ciclo de 10 segundos, dos reconciliaciones diferentes corren sobre la misma tabla, **con diferentes criterios**, dentro de la misma transacción de sesión async. El riesgo: una posición abierta legítima puede ser marcada CLOSED si hay cualquier inconsistencia de cache entre las dos pasadas.
+
+---
+
+### 🔴 CRÍTICO #4 — `_baremo_scheduler_loop()` busca estrategia "WEEKLY" que no existe en Bot3/Bitunix
+
+**Ubicación:** Bot3 (`/srv/bot3_prime/main.py`) y Bitunix (`/srv/bot3_prime_bitunix/main.py`).
+
+```python
+# En el código de ambos bots:
+# Comentario dice "Weekly removed" pero el loop sigue activo:
+async def _baremo_scheduler_loop():
+    ...
+    strategy = core.strategies.get("WEEKLY")
+    if not strategy:
+        logger.warning("Baremo scheduler: WEEKLY strategy not ready; will retry.")
+```
+
+El bot loggea una advertencia cada `BAREMO_INTERVAL_SEC` (cada 12 horas). Esto es un **bug silencioso de configuración**: el baremo nunca corre en Bot3/Bitunix pero el scheduler sigue consumiendo ciclos y generando ruido en logs. Más grave: `api_run_baremo` lanza `HTTPException(503)` cuando alguien lo llama desde el panel, confundiendo al operador.
+
+---
+
+## SECCIÓN 2 — BUGS GRAVES
+
+### 🟠 GRAVE #1 — `get_status()` es una función de 800+ líneas que actúa como controlador de trading, monitor UI, ejecutor de órdenes y reconciliador de DB simultáneamente
+
+**El problema arquitectural con consecuencias reales:**
+- Cada llamada al dashboard (cada ~5-10s) ejecuta lógica de trading real
+- Si el dashboard tiene un error de red y reintenta rápido, pueden dispararse múltiples TP executions
+- El `status_cache` con `CACHE_TTL = 10` es la única protección, pero se invalida (`timestamp = 0`) dentro de la propia función durante las escrituras TP — lo que puede causar que la siguiente llamada inmediata vuelva a entrar al bloque de ejecución
+
+**Consecuencia:** El patrón `status_cache["timestamp"] = 0` dentro del TP execution block + el `_tp_monitor_loop` que llama `get_status()` cada 60s = posible doble ejecución dentro de los primeros 60 segundos de un TP touch.
+
+---
+
+### 🟠 GRAVE #2 — Inconsistencia en `_detect_reversal()`: se usa `REVERSAL_LH_COUNT` para AMBAS condiciones (bullish y bearish)
+
+**Ubicación:** Todos los bots.
+
+```python
+is_bullish = (
+    consecutive_hl >= REVERSAL_LH_COUNT   # <-- usa LH_COUNT para Higher Lows
+    and current_price > sma8
+    and retrace_up >= REVERSAL_RETRACE_PCT
+)
+```
+
+La variable `REVERSAL_LH_COUNT` se llama "Lower Highs Count" pero se aplica también al conteo de Higher Lows. Esto no es un error de lógica fatal, pero es un **bug semántico** que hace imposible configurar umbrales diferentes para reversiones alcistas vs bajistas. Si un operador sube `REVERSAL_LH_COUNT` para reducir falsos bajistas, también endurece el filtro alcista.
+
+---
+
+### 🟠 GRAVE #3 — `_tg_dedupe_cache` crece indefinidamente (memory leak)
+
+**Ubicación:** Todos los bots.
+
+```python
+_tg_dedupe_cache: dict[str, dict] = {}
+# Se añaden entradas pero nunca se limpian las expiradas
+```
+
+El diccionario crece con cada mensaje Telegram único. En un bot que corre 24/7 enviando alertas de reversión, range-close, TP touches, etc., esto puede acumular miles de entradas. No hay TTL de limpieza ni límite de tamaño. Con el tiempo → **leak de memoria gradual**.
+
+---
+
+### 🟠 GRAVE #4 — Inconsistencia de `pos_side` en el bloque TP1/TP2
+
+**Ubicación:** Todos los bots, dentro de `get_status()`.
+
+```python
+pos_side = "LONG" if side == "BUY" else "SHORT"
+```
+
+Pero `side` en este contexto puede ser `"LONG"` o `"SHORT"` (viene de BingX `positionSide`), no `"BUY"` o `"SELL"`. El resultado: cuando `side == "LONG"`, `pos_side` es `"SHORT"` (la condición `side == "BUY"` es `False`).
+
+Esto significa que `reduce_position(symbol, 0.30, "SHORT")` se llama en una posición LONG. Si el exchange acepta esto, **cierra la posición contraria o devuelve error**. Si devuelve error silencioso, el bot queda en estado inconsistente con `tp1_done = True` pero sin haber ejecutado la reducción.
+
+**Verificación:** El mismo código en la sección de TP2 tiene la misma inconsistencia.
+
+---
+
+### 🟠 GRAVE #5 — `cancel_trade` (endpoint manual) no verifica que el close tuvo éxito en el exchange antes de actualizar la DB
+
+**Ubicación:** Todos los bots.
+
+```python
+try:
+    await core.client.close_position(symbol)
+except Exception:
+    pass   # <-- Error silenciado
+
+close_ts_ms = int(time.time() * 1000)
+await asyncio.sleep(3)
+# Se actualiza DB como cerrado sin verificar que BingX lo cerró
+```
+
+Si `close_position` falla (rate limit, network error), el trade se marca como CLOSED/WIN/LOSS en la DB pero sigue abierto en el exchange. El `_auto_reconcile_trades` posterior puede re-abrirlo como ghost trade, creando un loop de creación/cierre.
+
+---
+
+### 🟠 GRAVE #6 — `orphan_position_cache` no tiene TTL efectivo
+
+**Ubicación:** Todos los bots.
+
+```python
+orphan_position_cache: dict[str, dict] = {}
+CACHE_TTL = 10  # Este TTL es para status_cache, NO para orphan_position_cache
+```
+
+El `orphan_position_cache` almacena `{"meta": ..., "ts": now_dt}` pero **nunca se verifica el campo `ts`** para expirar entradas antiguas. Solo se limpia cuando el símbolo sale de `open_symbols`. Si un símbolo tiene un glitch temporal y desaparece de las posiciones abiertas un ciclo y vuelve, el cache stale puede inyectar flags de TP/BE incorrectos (`tp1_done=True`) en un trade nuevo.
+
+---
+
+## SECCIÓN 3 — FANTASMAS SILENCIOSOS
+
+### 👻 FANTASMA #1 — Doble reconciliación contradictoria por divergencia de criterios
+
+La sección inline 2.5 en `get_status()` solo cierra trades con `bingx_order_id` no nulo:
+```python
+if not getattr(t, "bingx_order_id", None):
+    continue
+```
+
+Pero `_auto_reconcile_trades()` al final cierra TODO trade OPEN sin `bingx_order_id`. Un trade creado por `BINGX_SYNC` (auto-created) tiene `bingx_order_id = None` y puede ser cerrado prematuramente por la segunda pasada mientras la primera lo protege.
+
+---
+
+### 👻 FANTASMA #2 — `_classify_status(pnl)` clasifica PnL=0 como "BE" pero el reversal monitor usa `"WIN" if pnl > 0 else "LOSS"` directamente
+
+```python
+# _classify_status:
+return "BE"  # cuando pnl == 0
+
+# En _reversal_monitor_loop:
+db_trade.status = "WIN" if (db_trade.pnl or 0) > 0 else "LOSS"  # no usa _classify_status
+```
+
+Un trade cerrado exactamente en break-even (PnL=0) será "BE" en algunas rutas y "LOSS" en otras (reversal monitor). Las estadísticas del panel mostrarán inconsistencias.
+
+---
+
+### 👻 FANTASMA #3 — Hardcode de `INITIAL_BALANCE_2026 = 186.499` en los tres bots
+
+```python
+INITIAL_BALANCE_2026 = 186.499
+jan1_key = "01-01-2026"
+if jan1_key not in by_day:
+    by_day[jan1_key] = INITIAL_BALANCE_2026
+```
+
+Este valor hardcodeado aparece en Panel, Bot3 y Bitunix. Si cada bot tiene una cuenta diferente, los charts de equity mostrarán un punto de inicio falso de $186.499 para todos. No hay env var para configurarlo.
+
+---
+
+### 👻 FANTASMA #4 — `_tp_last_attempt_cache` nunca se limpia
+
+```python
+_tp_last_attempt_cache: dict[str, float] = {}
+# Crece con cada símbolo que toca TP1/TP2, nunca se vacía
+```
+
+En un bot activo durante meses con muchos símbolos distintos, este dict crece. Menor impacto que `_tg_dedupe_cache` pero el mismo patrón de leak.
+
+---
+
+### 👻 FANTASMA #5 — `pos_side != "LONG"` en cálculo de PnL TP1/TP2 usa string comparison frágil
+
+```python
+_pnl_tp1 = (_tp1_p_val - float(t.entry_price)) * _tp1_qty_cls
+if pos_side != "LONG":
+    _pnl_tp1 = -_pnl_tp1
+```
+
+Si por cualquier razón `pos_side` llega como `"SHORT "` (con espacio), `"short"`, o `"SELL"`, la condición falla silenciosamente y el PnL se calcula invertido. Dado el bug #4 anterior donde `pos_side` puede ser calculado incorrectamente, este es un amplificador de error.
+
+---
+
+### 👻 FANTASMA #6 — `api_strategies_db_stats` busca `Trade.status == "closed"` (minúscula) pero el sistema guarda `"WIN"`, `"LOSS"`, `"CLOSED"` (mayúsculas)
+
+**Ubicación:** Los tres bots.
+
+```python
+).where(
+    Trade.strategy == strategy,
+    Trade.status == "closed",   # <-- minúscula, nunca matchea
+    Trade.close_time >= since
+)
+```
+
+Esta query **siempre devuelve 0 trades** para todas las estrategias. El endpoint `/api/strategies-db-stats` está efectivamente roto en producción desde siempre. Los totales del dashboard de estrategias muestran cero para todo.
+
+---
+
+### 👻 FANTASMA #7 — Bitunix `_reversal_monitor_loop` usa `pos.get("avgPrice")` con fallback chain diferente al resto
+
+**Solo en Bitunix** (`bot3_

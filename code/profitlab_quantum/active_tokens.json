@@ -1,0 +1,38 @@
+{
+    "active_tokens": [
+        {"symbol": "BTC-USDT", "leverage": 20.0, "trade": true, "rank": 1, "tier": "major"},
+        {"symbol": "ETH-USDT", "leverage": 20.0, "trade": true, "rank": 2, "tier": "major"},
+        {"symbol": "XRP-USDT", "leverage": 20.0, "trade": true, "rank": 3, "tier": "major"},
+        {"symbol": "BNB-USDT", "leverage": 20.0, "trade": true, "rank": 4, "tier": "major"},
+        {"symbol": "SOL-USDT", "leverage": 20.0, "trade": true, "rank": 5, "tier": "major"},
+        {"symbol": "ADA-USDT", "leverage": 20.0, "trade": true, "rank": 6, "tier": "major"},
+        {"symbol": "DOGE-USDT", "leverage": 15.0, "trade": true, "rank": 7, "tier": "major"},
+        {"symbol": "AVAX-USDT", "leverage": 20.0, "trade": true, "rank": 8, "tier": "major"},
+        {"symbol": "TRX-USDT", "leverage": 20.0, "trade": true, "rank": 9, "tier": "major"},
+        {"symbol": "LINK-USDT", "leverage": 20.0, "trade": true, "rank": 10, "tier": "major"},
+        {"symbol": "DOT-USDT", "leverage": 20.0, "trade": true, "rank": 11, "tier": "major"},
+        {"symbol": "TON-USDT", "leverage": 15.0, "trade": true, "rank": 12, "tier": "major"},
+        {"symbol": "SUI-USDT", "leverage": 20.0, "trade": true, "rank": 13, "tier": "major"},
+        {"symbol": "SHIB-USDT", "leverage": 10.0, "trade": true, "rank": 14, "tier": "meme"},
+        {"symbol": "XLM-USDT", "leverage": 20.0, "trade": true, "rank": 15, "tier": "major"},
+        {"symbol": "HBAR-USDT", "leverage": 15.0, "trade": true, "rank": 16, "tier": "major"},
+        {"symbol": "BCH-USDT", "leverage": 20.0, "trade": true, "rank": 17, "tier": "major"},
+        {"symbol": "LTC-USDT", "leverage": 20.0, "trade": true, "rank": 18, "tier": "major"},
+        {"symbol": "UNI-USDT", "leverage": 20.0, "trade": true, "rank": 19, "tier": "major"},
+        {"symbol": "NEAR-USDT", "leverage": 20.0, "trade": true, "rank": 20, "tier": "major"}
+    ],
+    "major_tokens_fixed": [
+        "BTC-USDT", "ETH-USDT", "XRP-USDT", "BNB-USDT", "SOL-USDT",
+        "ADA-USDT", "DOGE-USDT", "AVAX-USDT", "TRX-USDT", "LINK-USDT",
+        "DOT-USDT", "TON-USDT", "SUI-USDT", "XLM-USDT", "HBAR-USDT",
+        "BCH-USDT", "LTC-USDT", "UNI-USDT", "NEAR-USDT"
+    ],
+    "candidates": [
+        "BTC-USDT", "ETH-USDT", "XRP-USDT", "BNB-USDT", "SOL-USDT",
+        "ADA-USDT", "DOGE-USDT", "AVAX-USDT", "TRX-USDT", "LINK-USDT",
+        "DOT-USDT", "TON-USDT", "SUI-USDT", "SHIB-USDT", "XLM-USDT",
+        "HBAR-USDT", "BCH-USDT", "LTC-USDT", "UNI-USDT", "NEAR-USDT"
+    ],
+    "last_update": "2026-04-22T02:27:00+00:00",
+    "note": "Top 20 by market cap (no stablecoins). 19 majors + SHIB as meme."
+}

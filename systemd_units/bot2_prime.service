@@ -1,0 +1,15 @@
+[Unit]
+Description=Bot2 Prime Trading Bot (Marco)
+After=network.target
+
+[Service]
+Type=simple
+User=administrator
+WorkingDirectory=/srv/bot2_prime
+EnvironmentFile=/srv/bot2_prime/.env
+ExecStart=/srv/bot2_prime/venv/bin/python main.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

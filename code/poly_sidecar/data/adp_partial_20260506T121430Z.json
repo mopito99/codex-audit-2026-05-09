@@ -1,0 +1,9 @@
+{
+  "ts_utc": "2026-05-06T12:14:30.539423+00:00",
+  "status": "ADP_NOT_RELEASED_YET",
+  "forecast": 99000.0,
+  "previous_original": 62000.0,
+  "btc_at_check": 82327.8,
+  "tau_at_check": 0.50999,
+  "mode_at_check": "NORMAL"
+}

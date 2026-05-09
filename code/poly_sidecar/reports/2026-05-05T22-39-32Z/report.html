@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Informe VelocityQuant — 2026-05-05</title>
+<style>
+  body { background:#0d1117; color:#c9d1d9; font-family:-apple-system,sans-serif;
+         margin:0; padding:24px; line-height:1.5; }
+  h1, h2, h3 { color:#fff; margin-top:1.5em; }
+  h1 { font-size:1.4rem; margin-top:0; }
+  h2 { font-size:1.1rem; border-bottom:1px solid #30363d; padding-bottom:6px; }
+  .muted { color:#8b949e; font-size:.85rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin:14px 0; }
+  .card { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:14px; }
+  .card h3 { margin:0 0 6px 0; font-size:.7rem; text-transform:uppercase; color:#8b949e; letter-spacing:.5px; }
+  .big { font-size:1.6rem; font-weight:600; font-variant-numeric:tabular-nums; }
+  table { width:100%; border-collapse:collapse; background:#161b22; border:1px solid #30363d;
+           border-radius:8px; overflow:hidden; margin:12px 0; }
+  th, td { padding:7px 10px; text-align:left; font-size:.83rem; border-bottom:1px solid #30363d;
+            font-variant-numeric:tabular-nums; }
+  th { background:#1f2630; color:#8b949e; font-weight:500; text-transform:uppercase;
+        font-size:.68rem; letter-spacing:.5px; }
+  tr:last-child td { border-bottom:none; }
+  tr.highlight td { background:rgba(88,166,255,0.08); }
+  .cat { font-size:.68rem; padding:1px 6px; background:#1f2630; border-radius:3px; color:#8b949e; }
+  .alert { background:rgba(248,81,73,0.12); border:1px solid #f85149; border-radius:6px;
+            padding:12px; margin:12px 0; }
+  .pos { color:#3fb950; }
+  .neg { color:#f85149; }
+  code { background:#0d1117; padding:1px 5px; border-radius:3px; font-size:.85rem; }
+  .footer { margin-top:30px; color:#8b949e; font-size:.75rem; border-top:1px solid #30363d;
+             padding-top:12px; }
+  .sub { color:#8b949e; font-size:.85rem; margin-bottom:14px; }
+  .links a { color:#58a6ff; text-decoration:none; margin-right:14px; }
+  .links a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<h1>Informe operativo VelocityQuant — 2026-05-05</h1>
+<div class="sub">
+  Report ID: <code>2026-05-05T22-39-32Z</code> · Generado: 2026-05-05T22:39:32.110870+00:00
+  <div class="links" style="margin-top:6px;">
+    <a href="report.md" download>📄 descargar .md (para Gemma)</a>
+    <a href="report.json" download>🗂 descargar .json</a>
+    <a href="../">← volver al índice</a>
+  </div>
+</div>
+
+<h2>1. Sidecar Polymarket — ahora</h2>
+<div class="grid">
+  <div class="card"><h3>τ_final</h3>
+    <div class="big" style="color:#3fb950">0.346</div></div>
+  <div class="card"><h3>τ_crypto</h3>
+    <div class="big">0.346</div></div>
+  <div class="card"><h3>τ_macro</h3>
+    <div class="big">0.346</div></div>
+  <div class="card"><h3>ρ Polymarket↔BTC</h3>
+    <div class="big">—</div></div>
+  <div class="card"><h3>Mode</h3>
+    <div class="big" style="font-size:1.2rem">CAUTELA</div>
+    <div class="muted">polymarket endpoints stale</div></div>
+  <div class="card"><h3>BTC spot</h3>
+    <div class="big">$81,014</div></div>
+</div>
+
+<h2>2. Macro events</h2>
+
+<h3 style="font-size:.95rem">Próximos 24h (FMP)</h3>
+<table><thead><tr>
+  <th>Hora UTC</th><th>Evento</th><th>Cat</th><th>Prev</th><th>Forecast</th>
+</tr></thead><tbody><tr><td>2026-05-06 12:15:00</td><td>ADP Employment Change (Apr)</td><td><span class='cat'>NFP</span></td><td>62.0</td><td>99.0</td></tr></tbody></table>
+
+<h3 style="font-size:.95rem">Reacciones últimas 6h (Investing)</h3>
+<table><thead><tr>
+  <th>UTC</th><th>Evento</th><th>Cat</th><th>Actual</th><th>Fcst</th><th>SF</th>
+</tr></thead><tbody><tr><td colspan='6' class='muted'>sin reacciones en últimas 6h</td></tr></tbody></table>
+
+<h2>3. V3.5 SHADOW Newark — actividad por ventana UTC</h2>
+<table><thead><tr>
+  <th>Ventana</th><th>Evts</th><th>w_send</th><th>%</th><th>CB blk</th>
+  <th>p_max</th><th>p_sum</th><th>lat p50</th><th>lat p99</th><th>slag</th>
+</tr></thead><tbody>
+        <tr class="">
+          <td><b>00-08 Asia</b></td>
+          <td>143,800</td>
+          <td>22,997</td>
+          <td>16.0%</td>
+          <td>107,657</td>
+          <td>$0.1572</td>
+          <td>$2531.30</td>
+          <td>1,718</td>
+          <td>26,184</td>
+          <td>150</td>
+        </tr>
+        
+        <tr class="">
+          <td><b>08-13 Londres solo</b></td>
+          <td>90,000</td>
+          <td>14,116</td>
+          <td>15.7%</td>
+          <td>74,783</td>
+          <td>$0.1494</td>
+          <td>$1563.23</td>
+          <td>1,568</td>
+          <td>21,732</td>
+          <td>171</td>
+        </tr>
+        
+        <tr class="highlight">
+          <td><b>13-16 LDN x NY</b></td>
+          <td>53,923</td>
+          <td>9,488</td>
+          <td>17.6%</td>
+          <td>43,382</td>
+          <td>$0.0761</td>
+          <td>$931.25</td>
+          <td>850</td>
+          <td>10,358</td>
+          <td>43</td>
+        </tr>
+        
+        <tr class="">
+          <td><b>16-21 NY post-LDN</b></td>
+          <td>90,000</td>
+          <td>10,225</td>
+          <td>11.4%</td>
+          <td>78,702</td>
+          <td>$0.1721</td>
+          <td>$1598.52</td>
+          <td>1,371</td>
+          <td>16,867</td>
+          <td>96</td>
+        </tr>
+        
+        <tr class="">
+          <td><b>21-24 cierre</b></td>
+          <td>29,844</td>
+          <td>3,276</td>
+          <td>11.0%</td>
+          <td>26,135</td>
+          <td>$0.1844</td>
+          <td>$545.76</td>
+          <td>1,077</td>
+          <td>12,471</td>
+          <td>54</td>
+        </tr>
+        </tbody></table>
+<div class="muted">would_send=true son oportunidades que pasan filtros pre-CB. CB blocked = circuit breaker interno V3.5.
+La fila <span style="color:#58a6ff">resaltada</span> es el solape Londres × Wall Street.</div>
+
+<div class="footer">
+VelocityQuant report_generator v1.0 · 2026-05-05T22-39-32Z<br>
+Datos: Newark V3.5 SHADOW <code>cyclic_shadow.jsonl</code> · sidecar Polymarket+FMP+Investing+Pyth en Dallas.<br>
+Este informe NO se borra. Histórico en <code>/poly/reports/</code>.
+</div>
+
+</body>
+</html>

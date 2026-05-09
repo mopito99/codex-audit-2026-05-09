@@ -1,0 +1,733 @@
+{
+  "version": "1.0+kurtosis_migration_2026-05-05",
+  "updated_at": "2026-05-05T03:00:00Z",
+  "comment": "VelocityQuant V4-Alpha + τ Polymarket — calendario + config estática validada por Gemma 4. Contratos snapshotted 2026-05-05 02:50 UTC.",
+  "tau_formula": {
+    "weights": {
+      "delta_prob": 0.4,
+      "vol_zscore": 0.4,
+      "implied_vol": 0.2,
+      "_comment": "Re-balanced 2026-05-05 11:30 UTC by Gemma — VolZ peso subido 0.3→0.4 por fake-calm regime mayo 2026"
+    },
+    "category_weights": {
+      "crypto": 0.6,
+      "macro": 0.4,
+      "_comment": "τ_macro subido 0.3→0.4 por extreme CPI sensitivity +210% post-2021"
+    },
+    "aggregation": "max_per_category",
+    "delta_prob_baseline": "avg_4h",
+    "vol_zscore_window_hours": 24,
+    "vol_zscore_fidelity_minutes": 5,
+    "implied_vol_proxy": "spread_over_midpoint",
+    "rho_window_hours": 4,
+    "rho_fidelity_minutes": 5,
+    "rho_divergence_threshold": -0.7,
+    "polling_interval_seconds": 300,
+    "heartbeat_max_age_seconds": 600
+  },
+  "sigmoid_params": {
+    "_comment": "VolZScore ajustado 2026-05-05 11:30 UTC por Gemma — k 2→3 + x0 1.0→0.75 para detectar fake-calm regime mayo 2026",
+    "delta_prob": {
+      "k": 10.0,
+      "x0": 0.1
+    },
+    "vol_zscore": {
+      "k": 3.0,
+      "x0": 0.75
+    },
+    "implied_vol": {
+      "k": 50.0,
+      "x0": 0.02
+    }
+  },
+  "tau_to_cb": {
+    "th_adjustment_max_subtract": 6,
+    "min_threshold_floor": 2,
+    "size_floor_min_bundle": 0.1,
+    "fallback_when_stale": {
+      "tau_value": 0.0,
+      "force_cautela": true,
+      "th_base_plus": 1
+    }
+  },
+  "ventana_temporal_weights_utc": {
+    "12:30-13:00": 0.7,
+    "13:00-13:30": 1.5,
+    "13:30-14:30": 1.2,
+    "14:30-20:00": 1.0,
+    "20:00-13:30": 0.5,
+    "Fri_21:00-22:00_CME": 1.3
+  },
+  "btc_historical_distribution_12y": {
+    "comment": "Spec original V4-Alpha §4.7. Mantengo como referencia pero el motor usa btc_response_profile_per_event con valores segmentados de Gemma 4 (re-calibration round 2026-05-05 09:30 UTC).",
+    "pre_event": {
+      "volume_vs_baseline_drop_min_pct": 0.2,
+      "volume_vs_baseline_drop_max_pct": 0.4,
+      "spread_vs_baseline_mult_min": 1.5,
+      "spread_vs_baseline_mult_max": 2.0
+    },
+    "spike_T0_to_T5min": {
+      "btc_move_mean_pct": 1.2,
+      "btc_move_std_pct": 0.8,
+      "p_move_above_2sigma": 0.175,
+      "lag_solana_spike_pct_min": 200,
+      "lag_solana_spike_pct_max": 500
+    },
+    "repricing_T5_to_T30min": {
+      "mean_reversion_min_pct": 0.3,
+      "mean_reversion_max_pct": 0.5
+    }
+  },
+  "btc_response_profile_per_event": {
+    "comment": "Entregable 1 firmado por Gemma 4 2026-05-05 (re-calibration round). Usa estos valores segmentados en lugar del btc_historical_distribution_12y plano. persistence_factor define cuánto del move inicial sobrevive más allá de T+30min (1.0 = trend completo, 0 = full reversion).",
+    "FOMC": {
+      "btc_move_mean_pct": 1.85,
+      "btc_move_std_pct": 1.1,
+      "p_move_above_2sigma": 0.18,
+      "mean_reversion_pct_T5_T30": 0.32,
+      "regime_note": "Trending/Directional",
+      "persistence_factor": 0.75
+    },
+    "CPI": {
+      "btc_move_mean_pct": 1.45,
+      "btc_move_std_pct": 0.85,
+      "p_move_above_2sigma": 0.25,
+      "mean_reversion_pct_T5_T30": 0.48,
+      "regime_note": "High Volatility Shock",
+      "persistence_factor": 0.55
+    },
+    "NFP": {
+      "btc_move_mean_pct": 0.9,
+      "btc_move_std_pct": 0.6,
+      "p_move_above_2sigma": 0.12,
+      "mean_reversion_pct_T5_T30": 0.62,
+      "regime_note": "Mean Reverting Noise",
+      "persistence_factor": 0.3
+    },
+    "PCE": {
+      "btc_move_mean_pct": 0.75,
+      "btc_move_std_pct": 0.5,
+      "p_move_above_2sigma": 0.1,
+      "mean_reversion_pct_T5_T30": 0.51,
+      "regime_note": "Confirmation/Low Impact",
+      "persistence_factor": 0.4
+    }
+  },
+  "trigger_sf_per_event": {
+    "comment": "Entregable 3A Gemma. |SF| umbral mínimo para activar MODE=CAUTELA. Diferenciado por evento — CPI más sensible (régimen post-2021), NFP filtra ruido headline.",
+    "FOMC": 1.2,
+    "CPI": 1.0,
+    "NFP": 1.3,
+    "PCE": 1.1,
+    "default": 1.0
+  },
+  "capture_window_per_event": {
+    "comment": "Entregable 3B Gemma. capture_window_min ajustado a mean_reversion observada por evento. NFP corto (alta reversión 62%), FOMC largo (baja reversión 32%, esperar trend).",
+    "FOMC": 30,
+    "CPI": 15,
+    "NFP": 10,
+    "PCE": 20,
+    "default": 20
+  },
+  "comparator_go_criteria": {
+    "comment": "Entregable 3C Gemma. Para activar LIVE EXECUTE Dom 11 22:00 UTC, V4-Alpha SHADOW debe cumplir las 3 condiciones tras NFP+CPI tests.",
+    "v4_drawdown_max_pct_of_v35": 0.9,
+    "v4_hit_rate_min_delta_pct": 3.0,
+    "max_mode_transitions_per_day": 4,
+    "logic": "all_three_required (AND)"
+  },
+  "btc_consensus_logic": {
+    "_comment": "Q5 Gemma firma 2026-05-05 11:30 UTC — weighted_median 3-source para BTC reaction histórica y spot consensus (eliminar Pyth blindness).",
+    "approach": "consensus",
+    "algorithm": "weighted_median",
+    "sources": [
+      "Coinbase",
+      "Kraken",
+      "Pyth"
+    ],
+    "weights": [
+      0.5,
+      0.3,
+      0.2
+    ],
+    "outlier_rejection_threshold_pct": 0.5,
+    "min_sources_required": 2,
+    "fallback_if_lt_min": "MODE=CAUTELA"
+  },
+  "coinbase_implementation": {
+    "_comment": "Q2 Gemma firma — hybrid WS ticker + REST candles para capturar spikes T0",
+    "method": "hybrid",
+    "ws_channel": "ticker",
+    "ws_url": "wss://advanced-trade-ws.coinbase.com",
+    "ws_product_id": "BTC-USD",
+    "rest_endpoint": "https://api.coinbase.com/api/v3/brokerage/products/BTC-USD/candles",
+    "rest_granularity": "ONE_MINUTE",
+    "timestamp_format": "ms",
+    "cache_ttl_seconds": 60
+  },
+  "oracle_routing_table": {
+    "_comment": "Tier 1 (Gemma primary) → Tier 2 (API fallback) → Tier 3 (default static). Firmado Gemma 2026-05-05 r89. gemma_oracle.py implementa este routing con priority_queue 5s buffer.",
+    "btc_spot_price": {
+      "tier1_gemma_capable": false,
+      "tier2_fallback": "Coinbase Advanced Trade API (WS+REST hybrid)",
+      "tier3_default": "last cached price < 60s",
+      "ttl_refresh": "5min cycle"
+    },
+    "btc_historical_event_reaction": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "Coinbase / Kraken historical candles",
+      "tier3_default": "btc_response_profile_per_event in calendar",
+      "ttl_refresh": "weekly"
+    },
+    "fred_sigma_robust": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "fred_init.py with MAD",
+      "tier3_default": "V4-Alpha §4-bis.10 defaults",
+      "ttl_refresh": "weekly"
+    },
+    "polymarket_midpoint": {
+      "tier1_gemma_capable": false,
+      "tier2_fallback": "Polymarket CLOB API",
+      "tier3_default": "cached midpoint",
+      "ttl_refresh": "1h"
+    },
+    "polymarket_history": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "Polymarket CLOB prices-history",
+      "tier3_default": "static historical mean",
+      "ttl_refresh": "daily"
+    },
+    "fmp_economic_calendar": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "FMP API /stable/economic-calendar",
+      "tier3_default": "manual macro_calendar.json",
+      "ttl_refresh": "daily"
+    },
+    "investing_actual_values": {
+      "tier1_gemma_capable": false,
+      "tier2_fallback": "investpy / Investing.com",
+      "tier3_default": "previous value",
+      "ttl_refresh": "on-demand"
+    },
+    "btc_response_profile_per_event": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "historical mean of T+5min",
+      "tier3_default": "spec V4-Alpha §4.7",
+      "ttl_refresh": "weekly"
+    },
+    "trigger_sf_per_event": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "static SF from spec",
+      "tier3_default": "1.0σ default",
+      "ttl_refresh": "weekly"
+    },
+    "capture_window_per_event": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "standard 5min window",
+      "tier3_default": "300s",
+      "ttl_refresh": "weekly"
+    },
+    "comparator_go_criteria": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "hardcoded thresholds",
+      "tier3_default": "DD ≤90% V3.5, HR +3%, transitions ≤4/día",
+      "ttl_refresh": "weekly"
+    },
+    "sigmoid_params": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "standard logistic params",
+      "tier3_default": "k=1, x0=0",
+      "ttl_refresh": "weekly"
+    },
+    "tau_formula_weights": {
+      "tier1_gemma_capable": true,
+      "tier2_fallback": "equal weights",
+      "tier3_default": "V4-Alpha §5.2 weights",
+      "ttl_refresh": "weekly"
+    }
+  },
+  "rust_implementation_spec": {
+    "_comment": "Q1 Gemma firma — Source-Validator + delta-update",
+    "state_pattern": "Arc<RwLock<MacroState>>",
+    "validated_source_fields": [
+      "value",
+      "sources_contributing",
+      "confidence_score",
+      "timestamp",
+      "is_stale"
+    ],
+    "refresh_interval_seconds": 10,
+    "refresh_pattern": "delta_update_then_recompute_tau_rho",
+    "consensus_method_btc": "weighted_median",
+    "outlier_rejection_threshold_pct": 0.5,
+    "min_sources_required": 2
+  },
+  "event_multipliers": {
+    "FOMC": 3.0,
+    "CPI": 2.5,
+    "Geopolitical_Election": 2.5,
+    "NFP": 2.0,
+    "PCE": 1.8,
+    "BoJ_BoE": 1.8,
+    "ECB": 1.5,
+    "GDP": 1.2,
+    "ISM": 1.2,
+    "JOLTS": 1.0
+  },
+  "macro_events_calendar": [
+    {
+      "id": "fomc_2026_05",
+      "ts": "2026-05-08T18:00:00Z",
+      "type": "FOMC",
+      "impact": "CRITICAL",
+      "event_multiplier": 3.0,
+      "name": "FOMC Rate Decision May 2026",
+      "consensus": null,
+      "previous": null,
+      "windows": {
+        "cautela_start": "T-60min",
+        "freeze_start": "T-5min",
+        "freeze_end": "T+2min",
+        "capture_end": "T+20min"
+      }
+    },
+    {
+      "id": "cpi_us_april_2026_release",
+      "ts": "2026-05-13T12:30:00Z",
+      "type": "CPI",
+      "impact": "HIGH",
+      "event_multiplier": 2.5,
+      "name": "US CPI April 2026 Release",
+      "windows": {
+        "cautela_start": "T-30min",
+        "freeze_start": "T-5min",
+        "freeze_end": "T+2min",
+        "capture_end": "T+20min"
+      }
+    }
+  ],
+  "polymarket_contracts_initial_set": {
+    "comment": "Snapshot 2026-05-05 02:50 UTC. token_ids son strings (uint256). Para CLOB usar el primer elemento del array (YES outcome). Refrescar cada semana para detectar nuevos contratos relevantes.",
+    "macro": [
+      {
+        "category": "FOMC",
+        "event_id": "101772",
+        "market_id": "906973",
+        "title": "Fed Decision in June?",
+        "slug": "will-the-fed-decrease-interest-rates-by-25-bps-aft",
+        "end_date": "2026-06-17",
+        "vol24h_at_capture_usd": 925375,
+        "yes_token_id": "65193234666628291664907888364936366210889305490897648116746073820519263548476",
+        "no_token_id": "28290293140018107764072370767749010110409017615323596573647425138985988593200"
+      },
+      {
+        "category": "FOMC_RATE_CUT",
+        "event_id": "106884",
+        "market_id": "949495",
+        "title": "Fed rate cut by June 2026 meeting?",
+        "slug": "fed-rate-cut-by-june-2026-meeting",
+        "end_date": "2026-06-17",
+        "vol24h_at_capture_usd": 16456,
+        "yes_token_id": "36209573008978970585450419316941249216001556298548579804182609641681769351835",
+        "no_token_id": "92543936057805227559878526277749911113690688310000219713571176010393727192590"
+      },
+      {
+        "category": "CPI",
+        "event_id": "364599",
+        "market_id": "1937952",
+        "title": "April Inflation US - Annual",
+        "slug": "will-annual-inflation-increase-by-3pt1-in-april",
+        "end_date": "2026-05-12",
+        "vol24h_at_capture_usd": 6270,
+        "yes_token_id": "44968113850777172576365083069032691153998168383275053894164980180364233611973",
+        "no_token_id": "39678262165653976244193723578472099270803063222273503404794206162879355006288"
+      },
+      {
+        "category": "INFLATION_FORWARD",
+        "event_id": "80773",
+        "market_id": "680950",
+        "title": "How high will inflation get in 2026?",
+        "slug": "will-inflation-reach-more-than-4-in-2026-669",
+        "end_date": "2026-12-31",
+        "vol24h_at_capture_usd": 3792,
+        "yes_token_id": "77809380206760496358055332023206786694120788116551923604170177964424180121482",
+        "no_token_id": "106318720808383838350232661991142011357620427939736042423455604487806219988373"
+      }
+    ],
+    "crypto": [
+      {
+        "category": "BTC_MONTHLY",
+        "event_id": "438065",
+        "market_id": "2132770",
+        "title": "What price will Bitcoin hit in May?",
+        "slug": "will-bitcoin-reach-115k-in-may-2026",
+        "end_date": "2026-06-01",
+        "vol24h_at_capture_usd": 1591984,
+        "yes_token_id": "112483319947998004647217080905496446170602622172526076558318834324541958653454",
+        "no_token_id": "16748857912398914355191833003518205315915666088521477047521226979492030162264"
+      },
+      {
+        "category": "BTC_DAILY",
+        "event_id": "427985",
+        "market_id": "2107026",
+        "title": "Bitcoin above ___ on May 5?",
+        "slug": "bitcoin-above-66k-on-may-5",
+        "end_date": "2026-05-05",
+        "vol24h_at_capture_usd": 1342819,
+        "yes_token_id": "83953500446299522232824004724582727354296470410791899736240113366914448725908",
+        "no_token_id": "57807680961609100048501354811754652718316693180952660572678638382405899500568"
+      },
+      {
+        "category": "SOL_MONTHLY",
+        "event_id": "438067",
+        "market_id": "2132808",
+        "title": "What price will Solana hit in May?",
+        "slug": "will-solana-reach-170-in-may-2026",
+        "end_date": "2026-06-01",
+        "vol24h_at_capture_usd": 45579,
+        "yes_token_id": "89699850596039628362961715556400389101444247278827609860085474057602682594966",
+        "no_token_id": "78309167013790243787661367322293439384488434135235515861374699495054548198520"
+      },
+      {
+        "category": "SOL_DAILY",
+        "event_id": "428005",
+        "market_id": "2107089",
+        "title": "Solana above ___ on May 5?",
+        "slug": "solana-above-30-on-may-5",
+        "end_date": "2026-05-05",
+        "vol24h_at_capture_usd": 3919,
+        "yes_token_id": "65197498069052649300700309581099440843930238128574906133674792447932343506374",
+        "no_token_id": "72276521949857209163387049134169009834479382353039366463697241283995230819452"
+      }
+    ]
+  },
+  "fred_calibration": {
+    "last_run_utc": "2026-05-05T07:19:50.651906Z",
+    "events": {
+      "FOMC": {
+        "fred_series_id": "FEDFUNDS",
+        "calculation": "delta_bps",
+        "frequency": "monthly",
+        "description": "Fed Funds Effective Rate",
+        "historical_surprise_mu": 0.0,
+        "historical_surprise_sigma": 2.07564,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 2.482517,
+          "sigma_arithmetic": 17.102674,
+          "mu_median": 0.0,
+          "mad": 1.0,
+          "sigma_robust_1_4826_mad": 1.4826,
+          "robustness_ratio": 11.5356,
+          "sigma_robust_1_4826_mad_only": 1.4826,
+          "kappa_kurtosis_factor": 1.4,
+          "sigma_robust_kurtosis_adj": 2.07564,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 4.0,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 144,
+        "n_changes": 143,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 4.0,
+        "kappa_factor": 1.4,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "CPI": {
+        "fred_series_id": "CPIAUCSL",
+        "calculation": "yoy_pct",
+        "frequency": "monthly",
+        "description": "CPI All Urban Consumers (annual change)",
+        "historical_surprise_mu": 2.456096,
+        "historical_surprise_sigma": 1.232426,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 2.962632,
+          "sigma_arithmetic": 2.120379,
+          "mu_median": 2.456096,
+          "mad": 0.791676,
+          "sigma_robust_1_4826_mad": 1.173739,
+          "robustness_ratio": 1.8065,
+          "sigma_robust_1_4826_mad_only": 1.173739,
+          "kappa_kurtosis_factor": 1.05,
+          "sigma_robust_kurtosis_adj": 1.232426,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 0.5,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 142,
+        "n_changes": 130,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 0.5,
+        "kappa_factor": 1.05,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "PCE": {
+        "fred_series_id": "PCEPILFE",
+        "calculation": "mom_pct",
+        "frequency": "monthly",
+        "description": "PCE Excluding Food and Energy (Core PCE)",
+        "historical_surprise_mu": 0.180771,
+        "historical_surprise_sigma": 0.115016,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 0.213059,
+          "sigma_arithmetic": 0.145375,
+          "mu_median": 0.180771,
+          "mad": 0.077577,
+          "sigma_robust_1_4826_mad": 0.115016,
+          "robustness_ratio": 1.264,
+          "sigma_robust_1_4826_mad_only": 0.115016,
+          "kappa_kurtosis_factor": 1.0,
+          "sigma_robust_kurtosis_adj": 0.115016,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 0.0,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 143,
+        "n_changes": 142,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 0.0,
+        "kappa_factor": 1.0,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "NFP": {
+        "fred_series_id": "PAYEMS",
+        "calculation": "delta_absolute",
+        "frequency": "monthly",
+        "description": "Total Nonfarm Payrolls (delta abs in thousands)",
+        "historical_surprise_mu": 206500.0,
+        "historical_surprise_sigma": 219187.584,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 141718.31,
+          "sigma_arithmetic": 1807760.152,
+          "mu_median": 206.5,
+          "mad": 88000.0,
+          "sigma_robust_1_4826_mad": 130468.79999999999,
+          "robustness_ratio": 13.8559,
+          "sigma_robust_1_4826_mad_only": 130468.8,
+          "kappa_kurtosis_factor": 1.68,
+          "sigma_robust_kurtosis_adj": 219187.584,
+          "unit_fix_x1000_applied": true,
+          "kurtosis_excess_estimated_from_ratio": 6.8,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 143,
+        "n_changes": 142,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 6.8,
+        "kappa_factor": 1.68,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=True, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "JOLTS": {
+        "fred_series_id": "JTSJOL",
+        "calculation": "delta_absolute",
+        "frequency": "monthly",
+        "description": "Job Openings: Total Nonfarm",
+        "historical_surprise_mu": 10000.0,
+        "historical_surprise_sigma": 360271.8,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 15141.844000000001,
+          "sigma_arithmetic": 382656.478,
+          "mu_median": 10.0,
+          "mad": 243000.0,
+          "sigma_robust_1_4826_mad": 360271.8,
+          "robustness_ratio": 1.0621,
+          "sigma_robust_1_4826_mad_only": 360271.8,
+          "kappa_kurtosis_factor": 1.0,
+          "sigma_robust_kurtosis_adj": 360271.8,
+          "unit_fix_x1000_applied": true,
+          "kurtosis_excess_estimated_from_ratio": 0.0,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 142,
+        "n_changes": 141,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 0.0,
+        "kappa_factor": 1.0,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=True, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "GDP": {
+        "fred_series_id": "GDPC1",
+        "calculation": "qoq_pct",
+        "frequency": "quarterly",
+        "description": "Real GDP (QoQ change)",
+        "historical_surprise_mu": 0.681878,
+        "historical_surprise_sigma": 0.372723,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 0.621952,
+          "sigma_arithmetic": 1.69352,
+          "mu_median": 0.681878,
+          "mad": 0.218607,
+          "sigma_robust_1_4826_mad": 0.324107,
+          "robustness_ratio": 5.2252,
+          "sigma_robust_1_4826_mad_only": 0.324107,
+          "kappa_kurtosis_factor": 1.15,
+          "sigma_robust_kurtosis_adj": 0.372723,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 1.5,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 48,
+        "n_changes": 47,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 1.5,
+        "kappa_factor": 1.15,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "ISM": {
+        "fred_series_id": null,
+        "calculation": "default",
+        "historical_surprise_mu": null,
+        "historical_surprise_sigma": 1.0,
+        "n_observations": 0,
+        "period_years": 12,
+        "note": "FRED no expone esta serie — usar default V4-Alpha",
+        "audit": {
+          "sigma_robust_1_4826_mad_only": 1.0,
+          "kappa_kurtosis_factor": 1.0,
+          "sigma_robust_kurtosis_adj": 1.0,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 0.0,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "kurtosis_excess": 0.0,
+        "kappa_factor": 1.0,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "JOLTS_QUITS": {
+        "fred_series_id": "JTSQUR",
+        "calculation": "delta_absolute",
+        "frequency": "monthly",
+        "description": "JOLTS Quits Rate",
+        "historical_surprise_mu": 0.0,
+        "historical_surprise_sigma": 0.14826,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 0.000709,
+          "sigma_arithmetic": 0.111404,
+          "mu_median": 0.0,
+          "mad": 0.1,
+          "sigma_robust_1_4826_mad": 0.14826,
+          "robustness_ratio": 0.7514,
+          "sigma_robust_1_4826_mad_only": 0.14826,
+          "kappa_kurtosis_factor": 1.0,
+          "sigma_robust_kurtosis_adj": 0.14826,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 0.0,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 142,
+        "n_changes": 141,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 0.0,
+        "kappa_factor": 1.0,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "UNEMPLOYMENT": {
+        "fred_series_id": "UNRATE",
+        "calculation": "delta_points",
+        "frequency": "monthly",
+        "description": "Unemployment Rate",
+        "historical_surprise_mu": 0.0,
+        "historical_surprise_sigma": 0.170499,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": -0.014184,
+          "sigma_arithmetic": 0.938354,
+          "mu_median": 0.0,
+          "mad": 0.1,
+          "sigma_robust_1_4826_mad": 0.14826,
+          "robustness_ratio": 6.3291,
+          "sigma_robust_1_4826_mad_only": 0.14826,
+          "kappa_kurtosis_factor": 1.15,
+          "sigma_robust_kurtosis_adj": 0.170499,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 1.5,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 142,
+        "n_changes": 141,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 1.5,
+        "kappa_factor": 1.15,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      },
+      "RETAIL_SALES": {
+        "fred_series_id": "RSXFS",
+        "calculation": "mom_pct",
+        "frequency": "monthly",
+        "description": "Retail Sales (Excl Food Services)",
+        "historical_surprise_mu": 0.28499,
+        "historical_surprise_sigma": 0.854415,
+        "robust_estimator": "median + 1.4826*MAD*kappa(K) [migrated from MAD-only]",
+        "audit": {
+          "mu_arithmetic": 0.407278,
+          "sigma_arithmetic": 2.329055,
+          "mu_median": 0.28499,
+          "mad": 0.501126,
+          "sigma_robust_1_4826_mad": 0.74297,
+          "robustness_ratio": 3.1348,
+          "sigma_robust_1_4826_mad_only": 0.74297,
+          "kappa_kurtosis_factor": 1.15,
+          "sigma_robust_kurtosis_adj": 0.854415,
+          "unit_fix_x1000_applied": false,
+          "kurtosis_excess_estimated_from_ratio": 1.5,
+          "kurtosis_estimation_method": "heuristic_from_robustness_ratio_pending_fred_recompute"
+        },
+        "n_observations": 143,
+        "n_changes": 142,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05",
+        "kurtosis_excess": 1.5,
+        "kappa_factor": 1.15,
+        "migration_notes": "Migrated 2026-05-05: unit_fix_x1000=False, K estimated heuristically (pending FRED recompute Wed 6)"
+      }
+    }
+  },
+  "migration_log": [
+    {
+      "ts_utc": "2026-05-05T20:21:30.008446+00:00",
+      "type": "sigma_fred_kurtosis_unit_fix",
+      "applied_to_series": [
+        "FOMC",
+        "CPI",
+        "PCE",
+        "NFP",
+        "JOLTS",
+        "GDP",
+        "ISM",
+        "JOLTS_QUITS",
+        "UNEMPLOYMENT",
+        "RETAIL_SALES"
+      ],
+      "in_thousands_fixed": [
+        "NFP",
+        "JOLTS"
+      ],
+      "kappa_formula": "1.0 + (K_pearson-3)/10 for 3<K<=10, log for K>10",
+      "notes": "Pending FRED API recompute to replace heuristic K estimation"
+    }
+  ]
+}

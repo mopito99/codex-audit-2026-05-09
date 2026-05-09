@@ -1,0 +1,20 @@
+[0;1;32m●[0m nginx.service - A high performance web server and a reverse proxy server
+     Loaded: loaded (]8;;file://srv804223/usr/lib/systemd/system/nginx.service/usr/lib/systemd/system/nginx.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: [0;1;32mactive (running)[0m since Sat 2025-12-27 21:42:51 CET; 1 week 1 day ago
+       Docs: ]8;;man:nginx(8)man:nginx(8)]8;;
+   Main PID: 1336 (nginx)
+      Tasks: 9 (limit: 38467)
+     Memory: 22.1M (peak: 42.0M)
+        CPU: 1min 18.647s
+     CGroup: /system.slice/nginx.service
+             ├─[0;38;5;245m  1336 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"[0m
+             ├─[0;38;5;245m710162 "nginx: worker process"[0m
+             ├─[0;38;5;245m710163 "nginx: worker process"[0m
+             ├─[0;38;5;245m710164 "nginx: worker process"[0m
+             ├─[0;38;5;245m710165 "nginx: worker process"[0m
+             ├─[0;38;5;245m710166 "nginx: worker process"[0m
+             ├─[0;38;5;245m710167 "nginx: worker process"[0m
+             ├─[0;38;5;245m710168 "nginx: worker process"[0m
+             └─[0;38;5;245m710169 "nginx: worker process"[0m
+
+Notice: journal has been rotated since unit was started, output may be incomplete.

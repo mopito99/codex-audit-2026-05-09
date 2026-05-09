@@ -1,0 +1,50 @@
+{
+  "ts_utc": "2026-05-05T20:30:00Z",
+  "purpose": "Pool depth check for V4-Alpha capital sizing - response to ChatGPT audit pregunta #4",
+  "source": "DexScreener API (public, no auth)",
+  "query": "SOL USDC chain=solana dex=raydium|orca",
+  "top_pools_solana_sol_usdc": [
+    {"dex": "raydium", "address": "BbvoZrqhgiAEh9pwU8HLtGLhAXw9ZZKXQDWgzRhAxwo4", "liquidity_usd": 1795112258, "volume_24h_usd": 220405, "price_usd": 85.48},
+    {"dex": "raydium", "address": "5Rceqe9Vj7HxafGiPzPgYz3WDNXCMLGLZ4miDgjd8Cfg", "liquidity_usd": 176847270, "volume_24h_usd": 220369, "price_usd": 84.29},
+    {"dex": "raydium", "address": "9Kfaag7ZkrNmXYeuQ2ymJKZnsvbeaiSrMpjZ1MDiV7ny", "liquidity_usd": 18030738, "volume_24h_usd": 22, "price_usd": 86.52},
+    {"dex": "raydium", "address": "GhhUiNcoFKEtZ9RTGd1DgHHouDAJrW9DDADmX13jdGEY", "liquidity_usd": 7050178, "volume_24h_usd": 220375, "price_usd": 78.36}
+  ],
+  "slippage_analysis": {
+    "capital_v4alpha_2k": {
+      "capital_usd": 2000,
+      "pct_of_top_pool": 0.000111,
+      "estimated_slippage_pct": "<0.01",
+      "estimated_slippage_bps": "<1",
+      "comment": "Pool depth >>> capital. Slippage estructural negligible."
+    },
+    "capital_live_initial_300": {
+      "capital_usd": 300,
+      "pct_of_top_pool": 0.0000167,
+      "estimated_slippage_pct": "<0.001",
+      "comment": "Para LIVE inicial $300, slippage essentially zero en top pool."
+    },
+    "capital_micro_live_50": {
+      "capital_usd": 50,
+      "pct_of_top_pool": 0.00000028,
+      "estimated_slippage_pct": "<0.0001",
+      "comment": "Micro-LIVE test (ChatGPT recommendation): trivial."
+    }
+  },
+  "implications_for_model": {
+    "f_slippage_chatgpt_estimate": "0.85-0.97",
+    "f_slippage_real_top_pool": "0.99-1.00",
+    "f_slippage_revised_for_v4alpha": 0.99,
+    "comment": "f_slippage estaba subestimado en r97. ChatGPT 0.85-0.97 era pesimista. Para pools top SOL/USDC con depth $1.8B, slippage es trivial para capital <$10k. Esto es FAVORABLE para el modelo, pero ojo: V3.5 SHADOW puede estar usando 'phase1' que es un pool concentrated liquidity con depth menor — verificar con bot config."
+  },
+  "limitations": [
+    "DexScreener reporta TVL agregado, no depth a precio actual (que sería más restrictivo)",
+    "Impact en concentrated liquidity (CL) pools depende de range activo del LP, no solo TVL",
+    "Bot V3.5 'raydium_sol_usdc_phase1' identifier interno: hay que verificar pool address exacto en /home/ubuntu/liquidator_rs/ config para validar que es uno de los top pools",
+    "Volumen 24h de algunos pools es solo $22 → puede ser pool con depth presentado pero sin actividad real (LP estancado)"
+  ],
+  "follow_up_actions": [
+    "Mié 6: SSH Newark + leer config para resolver 'raydium_sol_usdc_phase1' a pool address concreta",
+    "Mié 6: simular swap $2k contra pool real usando clmm_math.rs local para slippage real (vs DexScreener estimate)",
+    "Si pool específico tiene depth <$10M, revisar f_slippage al alza"
+  ]
+}

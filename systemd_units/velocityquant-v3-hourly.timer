@@ -1,0 +1,11 @@
+[Unit]
+Description=Run V3 hourly tracker every 60 min for 6h post-deploy
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=60min
+AccuracySec=10s
+Unit=velocityquant-v3-hourly.service
+
+[Install]
+WantedBy=timers.target

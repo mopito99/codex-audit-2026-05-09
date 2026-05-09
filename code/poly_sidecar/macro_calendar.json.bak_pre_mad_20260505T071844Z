@@ -1,0 +1,348 @@
+{
+  "version": "1.0",
+  "updated_at": "2026-05-05T03:00:00Z",
+  "comment": "VelocityQuant V4-Alpha + τ Polymarket — calendario + config estática validada por Gemma 4. Contratos snapshotted 2026-05-05 02:50 UTC.",
+  "tau_formula": {
+    "weights": {
+      "delta_prob": 0.5,
+      "vol_zscore": 0.3,
+      "implied_vol": 0.2
+    },
+    "category_weights": {
+      "crypto": 0.7,
+      "macro": 0.3
+    },
+    "aggregation": "max_per_category",
+    "delta_prob_baseline": "avg_4h",
+    "vol_zscore_window_hours": 24,
+    "vol_zscore_fidelity_minutes": 5,
+    "implied_vol_proxy": "spread_over_midpoint",
+    "rho_window_hours": 4,
+    "rho_fidelity_minutes": 5,
+    "rho_divergence_threshold": -0.7,
+    "polling_interval_seconds": 300,
+    "heartbeat_max_age_seconds": 600
+  },
+  "sigmoid_params": {
+    "delta_prob": {
+      "k": 10.0,
+      "x0": 0.1
+    },
+    "vol_zscore": {
+      "k": 2.0,
+      "x0": 1.0
+    },
+    "implied_vol": {
+      "k": 50.0,
+      "x0": 0.02
+    }
+  },
+  "tau_to_cb": {
+    "th_adjustment_max_subtract": 6,
+    "min_threshold_floor": 2,
+    "size_floor_min_bundle": 0.1,
+    "fallback_when_stale": {
+      "tau_value": 0.0,
+      "force_cautela": true,
+      "th_base_plus": 1
+    }
+  },
+  "ventana_temporal_weights_utc": {
+    "12:30-13:00": 0.7,
+    "13:00-13:30": 1.5,
+    "13:30-14:30": 1.2,
+    "14:30-20:00": 1.0,
+    "20:00-13:30": 0.5,
+    "Fri_21:00-22:00_CME": 1.3
+  },
+  "btc_historical_distribution_12y": {
+    "comment": "Validado por Gemma 4 spec V4-Alpha §4.7. Estático para HFT.",
+    "pre_event": {
+      "volume_vs_baseline_drop_min_pct": 0.2,
+      "volume_vs_baseline_drop_max_pct": 0.4,
+      "spread_vs_baseline_mult_min": 1.5,
+      "spread_vs_baseline_mult_max": 2.0
+    },
+    "spike_T0_to_T5min": {
+      "btc_move_mean_pct": 1.2,
+      "btc_move_std_pct": 0.8,
+      "p_move_above_2sigma": 0.175,
+      "lag_solana_spike_pct_min": 200,
+      "lag_solana_spike_pct_max": 500
+    },
+    "repricing_T5_to_T30min": {
+      "mean_reversion_min_pct": 0.3,
+      "mean_reversion_max_pct": 0.5
+    }
+  },
+  "event_multipliers": {
+    "FOMC": 3.0,
+    "CPI": 2.5,
+    "Geopolitical_Election": 2.5,
+    "NFP": 2.0,
+    "PCE": 1.8,
+    "BoJ_BoE": 1.8,
+    "ECB": 1.5,
+    "GDP": 1.2,
+    "ISM": 1.2,
+    "JOLTS": 1.0
+  },
+  "macro_events_calendar": [
+    {
+      "id": "fomc_2026_05",
+      "ts": "2026-05-08T18:00:00Z",
+      "type": "FOMC",
+      "impact": "CRITICAL",
+      "event_multiplier": 3.0,
+      "name": "FOMC Rate Decision May 2026",
+      "consensus": null,
+      "previous": null,
+      "windows": {
+        "cautela_start": "T-60min",
+        "freeze_start": "T-5min",
+        "freeze_end": "T+2min",
+        "capture_end": "T+20min"
+      }
+    },
+    {
+      "id": "cpi_us_april_2026_release",
+      "ts": "2026-05-13T12:30:00Z",
+      "type": "CPI",
+      "impact": "HIGH",
+      "event_multiplier": 2.5,
+      "name": "US CPI April 2026 Release",
+      "windows": {
+        "cautela_start": "T-30min",
+        "freeze_start": "T-5min",
+        "freeze_end": "T+2min",
+        "capture_end": "T+20min"
+      }
+    }
+  ],
+  "polymarket_contracts_initial_set": {
+    "comment": "Snapshot 2026-05-05 02:50 UTC. token_ids son strings (uint256). Para CLOB usar el primer elemento del array (YES outcome). Refrescar cada semana para detectar nuevos contratos relevantes.",
+    "macro": [
+      {
+        "category": "FOMC",
+        "event_id": "101772",
+        "market_id": "906973",
+        "title": "Fed Decision in June?",
+        "slug": "will-the-fed-decrease-interest-rates-by-25-bps-aft",
+        "end_date": "2026-06-17",
+        "vol24h_at_capture_usd": 925375,
+        "yes_token_id": "65193234666628291664907888364936366210889305490897648116746073820519263548476",
+        "no_token_id": "28290293140018107764072370767749010110409017615323596573647425138985988593200"
+      },
+      {
+        "category": "FOMC_RATE_CUT",
+        "event_id": "106884",
+        "market_id": "949495",
+        "title": "Fed rate cut by June 2026 meeting?",
+        "slug": "fed-rate-cut-by-june-2026-meeting",
+        "end_date": "2026-06-17",
+        "vol24h_at_capture_usd": 16456,
+        "yes_token_id": "36209573008978970585450419316941249216001556298548579804182609641681769351835",
+        "no_token_id": "92543936057805227559878526277749911113690688310000219713571176010393727192590"
+      },
+      {
+        "category": "CPI",
+        "event_id": "364599",
+        "market_id": "1937952",
+        "title": "April Inflation US - Annual",
+        "slug": "will-annual-inflation-increase-by-3pt1-in-april",
+        "end_date": "2026-05-12",
+        "vol24h_at_capture_usd": 6270,
+        "yes_token_id": "44968113850777172576365083069032691153998168383275053894164980180364233611973",
+        "no_token_id": "39678262165653976244193723578472099270803063222273503404794206162879355006288"
+      },
+      {
+        "category": "INFLATION_FORWARD",
+        "event_id": "80773",
+        "market_id": "680950",
+        "title": "How high will inflation get in 2026?",
+        "slug": "will-inflation-reach-more-than-4-in-2026-669",
+        "end_date": "2026-12-31",
+        "vol24h_at_capture_usd": 3792,
+        "yes_token_id": "77809380206760496358055332023206786694120788116551923604170177964424180121482",
+        "no_token_id": "106318720808383838350232661991142011357620427939736042423455604487806219988373"
+      }
+    ],
+    "crypto": [
+      {
+        "category": "BTC_MONTHLY",
+        "event_id": "438065",
+        "market_id": "2132770",
+        "title": "What price will Bitcoin hit in May?",
+        "slug": "will-bitcoin-reach-115k-in-may-2026",
+        "end_date": "2026-06-01",
+        "vol24h_at_capture_usd": 1591984,
+        "yes_token_id": "112483319947998004647217080905496446170602622172526076558318834324541958653454",
+        "no_token_id": "16748857912398914355191833003518205315915666088521477047521226979492030162264"
+      },
+      {
+        "category": "BTC_DAILY",
+        "event_id": "427985",
+        "market_id": "2107026",
+        "title": "Bitcoin above ___ on May 5?",
+        "slug": "bitcoin-above-66k-on-may-5",
+        "end_date": "2026-05-05",
+        "vol24h_at_capture_usd": 1342819,
+        "yes_token_id": "83953500446299522232824004724582727354296470410791899736240113366914448725908",
+        "no_token_id": "57807680961609100048501354811754652718316693180952660572678638382405899500568"
+      },
+      {
+        "category": "SOL_MONTHLY",
+        "event_id": "438067",
+        "market_id": "2132808",
+        "title": "What price will Solana hit in May?",
+        "slug": "will-solana-reach-170-in-may-2026",
+        "end_date": "2026-06-01",
+        "vol24h_at_capture_usd": 45579,
+        "yes_token_id": "89699850596039628362961715556400389101444247278827609860085474057602682594966",
+        "no_token_id": "78309167013790243787661367322293439384488434135235515861374699495054548198520"
+      },
+      {
+        "category": "SOL_DAILY",
+        "event_id": "428005",
+        "market_id": "2107089",
+        "title": "Solana above ___ on May 5?",
+        "slug": "solana-above-30-on-may-5",
+        "end_date": "2026-05-05",
+        "vol24h_at_capture_usd": 3919,
+        "yes_token_id": "65197498069052649300700309581099440843930238128574906133674792447932343506374",
+        "no_token_id": "72276521949857209163387049134169009834479382353039366463697241283995230819452"
+      }
+    ]
+  },
+  "fred_calibration": {
+    "last_run_utc": "2026-05-05T06:48:58.365911Z",
+    "events": {
+      "FOMC": {
+        "fred_series_id": "FEDFUNDS",
+        "calculation": "delta_bps",
+        "frequency": "monthly",
+        "description": "Fed Funds Effective Rate",
+        "historical_surprise_mu": 2.482517,
+        "historical_surprise_sigma": 17.102674,
+        "n_observations": 144,
+        "n_changes": 143,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "CPI": {
+        "fred_series_id": "CPIAUCSL",
+        "calculation": "yoy_pct",
+        "frequency": "monthly",
+        "description": "CPI All Urban Consumers (annual change)",
+        "historical_surprise_mu": 2.962632,
+        "historical_surprise_sigma": 2.120379,
+        "n_observations": 142,
+        "n_changes": 130,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "PCE": {
+        "fred_series_id": "PCEPILFE",
+        "calculation": "mom_pct",
+        "frequency": "monthly",
+        "description": "PCE Excluding Food and Energy (Core PCE)",
+        "historical_surprise_mu": 0.213059,
+        "historical_surprise_sigma": 0.145375,
+        "n_observations": 143,
+        "n_changes": 142,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "NFP": {
+        "fred_series_id": "PAYEMS",
+        "calculation": "delta_absolute",
+        "frequency": "monthly",
+        "description": "Total Nonfarm Payrolls (delta abs in thousands)",
+        "historical_surprise_mu": 141.71831,
+        "historical_surprise_sigma": 1807.760152,
+        "n_observations": 143,
+        "n_changes": 142,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "JOLTS": {
+        "fred_series_id": "JTSJOL",
+        "calculation": "delta_absolute",
+        "frequency": "monthly",
+        "description": "Job Openings: Total Nonfarm",
+        "historical_surprise_mu": 15.141844,
+        "historical_surprise_sigma": 382.656478,
+        "n_observations": 142,
+        "n_changes": 141,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "GDP": {
+        "fred_series_id": "GDPC1",
+        "calculation": "qoq_pct",
+        "frequency": "quarterly",
+        "description": "Real GDP (QoQ change)",
+        "historical_surprise_mu": 0.621952,
+        "historical_surprise_sigma": 1.69352,
+        "n_observations": 48,
+        "n_changes": 47,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "ISM": {
+        "fred_series_id": null,
+        "calculation": "default",
+        "historical_surprise_mu": null,
+        "historical_surprise_sigma": 1.0,
+        "n_observations": 0,
+        "period_years": 12,
+        "note": "FRED no expone esta serie — usar default V4-Alpha"
+      },
+      "JOLTS_QUITS": {
+        "fred_series_id": "JTSQUR",
+        "calculation": "delta_absolute",
+        "frequency": "monthly",
+        "description": "JOLTS Quits Rate",
+        "historical_surprise_mu": 0.000709,
+        "historical_surprise_sigma": 0.111404,
+        "n_observations": 142,
+        "n_changes": 141,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "UNEMPLOYMENT": {
+        "fred_series_id": "UNRATE",
+        "calculation": "delta_points",
+        "frequency": "monthly",
+        "description": "Unemployment Rate",
+        "historical_surprise_mu": -0.014184,
+        "historical_surprise_sigma": 0.938354,
+        "n_observations": 142,
+        "n_changes": 141,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      },
+      "RETAIL_SALES": {
+        "fred_series_id": "RSXFS",
+        "calculation": "mom_pct",
+        "frequency": "monthly",
+        "description": "Retail Sales (Excl Food Services)",
+        "historical_surprise_mu": 0.407278,
+        "historical_surprise_sigma": 2.329055,
+        "n_observations": 143,
+        "n_changes": 142,
+        "period_years": 12,
+        "period_start": "2014-05-08",
+        "period_end": "2026-05-05"
+      }
+    }
+  }
+}

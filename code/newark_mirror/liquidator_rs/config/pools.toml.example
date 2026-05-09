@@ -1,0 +1,28 @@
+# VelocityQuant — Pool Registry config (Pieza 4 R59)
+# Hot-reloadable: editar este archivo dispara reload sin restart daemon.
+# Validation: fail-safe — si el archivo es invalid, mantiene snapshot anterior.
+#
+# Comportamiento:
+#   - Pools enabled=false: ignorados
+#   - cap_usd: capital máximo USD asignado a este pool específico
+#   - score: prioridad ranking (0-1) — mayor = más prioritario para allocation
+#   - kind: 'orca' | 'raydium' (futuro: 'meteora')
+
+[global]
+probe_usd = 1.0
+cycle_path = ['USDC', 'SOL', 'USDC']
+scan_interval_ms = 200
+
+# Pool legacy SOL/USDC mainnet (G88 bot-trap — descartado para LIVE pero útil
+# para validar pipeline en paper)
+[[pool]]
+label = 'orca_sol_usdc_legacy'
+address = 'Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE'
+kind = 'orca'
+cap_usd = 200.0
+score = 0.10
+enabled = false
+
+# Long-tail pools — placeholders (a llenar tras pool_scanner output)
+# Ejemplo: tras run de pool_scanner.py top 3 selected
+# Se editaría aquí y el daemon hot-reloadea sin restart.

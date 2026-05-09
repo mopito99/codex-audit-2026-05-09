@@ -1,0 +1,20 @@
+[Unit]
+Description=VelocityQuant Polymarket Sidecar — FastAPI (uvicorn) on :8090
+After=network-online.target vq-poly-sidecar.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=administrator
+Group=administrator
+WorkingDirectory=/home/administrator/poly_sidecar
+ExecStart=/home/administrator/poly_sidecar/venv/bin/uvicorn health_api:app --host 127.0.0.1 --port 8090 --log-level warning
+Restart=on-failure
+RestartSec=5s
+StandardOutput=append:/home/administrator/poly_sidecar/data/api.log
+StandardError=append:/home/administrator/poly_sidecar/data/api.log
+
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

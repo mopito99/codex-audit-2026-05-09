@@ -1,0 +1,10 @@
+[Unit]
+Description=VelocityQuant Path C Health Check (R74 V2.1)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=administrator
+WorkingDirectory=/home/administrator/liquidator
+ExecStart=/bin/bash -c 'TS=$(date -u +%%Y%%m%%dT%%H%%M%%SZ); /home/administrator/liquidator/health_check_pathc.sh > /home/administrator/liquidator/data/healthcheck_$TS.md 2>&1'
+TimeoutStartSec=120s

@@ -1,0 +1,42 @@
+{
+  "_comment": "Consensus forecasts for upcoming macro releases. Manually curated from public sources (Investing.com, Bloomberg, ForexFactory). Update before each event. Used by fmp_compat.py to compute SF = (actual - forecast) / sigma_robust.",
+  "_version": 1,
+  "_updated_at_utc": "2026-05-08T13:55:00Z",
+  "_updated_by": "Marco (consensus from Investing.com calendar)",
+  "events": [
+    {
+      "category": "CPI",
+      "release_date": "2026-05-12",
+      "release_time_utc": "12:30",
+      "data_period": "April 2026",
+      "forecasts": {
+        "cpi_yoy_pct": 3.3,
+        "cpi_mom_pct": 0.6,
+        "core_cpi_yoy_pct": 2.6,
+        "core_cpi_mom_pct": 0.4
+      },
+      "previous": {
+        "cpi_mom_pct": 0.9,
+        "core_cpi_mom_pct": 0.2
+      },
+      "primary_metric_for_sf": "cpi_yoy_pct",
+      "source": "Investing.com calendar copy-paste 2026-05-08 13:55 UTC"
+    },
+    {
+      "category": "NFP",
+      "release_date": "2026-05-08",
+      "release_time_utc": "12:30",
+      "data_period": "April 2026",
+      "forecasts": {
+        "nfp_change_thousands": 62
+      },
+      "previous": {
+        "nfp_change_thousands": 178
+      },
+      "primary_metric_for_sf": "nfp_change_thousands",
+      "actual_known": 115,
+      "actual_known_source": "BLS API CES0000000001 fetched 2026-05-08 12:55 UTC",
+      "source": "FMP cached pre-crash + BLS retroactive"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+                                         Table "public.paper_trades"
+   Column    |            Type             | Collation | Nullable |                 Default                  
+-------------+-----------------------------+-----------+----------+------------------------------------------
+ id          | integer                     |           | not null | nextval('paper_trades_id_seq'::regclass)
+ timestamp   | timestamp without time zone |           |          | 
+ symbol      | character varying(20)       |           |          | 
+ action      | character varying(10)       |           |          | 
+ price       | double precision            |           |          | 
+ size        | double precision            |           |          | 
+ reason      | text                        |           |          | 
+ margin      | double precision            |           |          | 
+ leverage    | double precision            |           |          | 
+ event       | character varying(10)       |           |          | 
+ entry_price | double precision            |           |          | 
+ exit_price  | double precision            |           |          | 
+ pnl_usd     | double precision            |           |          | 
+ sl          | double precision            |           |          | 
+ tp          | double precision            |           |          | 
+Indexes:
+    "paper_trades_pkey" PRIMARY KEY, btree (id)
+

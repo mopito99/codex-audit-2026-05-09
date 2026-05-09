@@ -1,0 +1,155 @@
+{
+  "version": "1.0",
+  "signed_by": "Gemma 4 r92 2026-05-06",
+  "signed_at_utc": "2026-05-06T09:10:00Z",
+  "comment": "Configuración de riesgo + sizing + kill switches separada de macro_calendar.json (spec cuant). Firmada r92 post-audit ChatGPT. Permite cambios operativos sin re-firma cuant.",
+
+  "normal_degraded": {
+    "comment": "L1-only stale (404 markets vencidos = ruido benigno). Dynamic size_factor escalado por error rate. Firmado Gemma r91+ con default 0.70 + bounds [0.55, 0.85].",
+    "size_factor_default": 0.70,
+    "size_factor_bounds": [0.55, 0.85],
+    "thresholds_errors_per_min": {
+      "tier_a_low": 1.0,
+      "tier_b_medium": 5.0,
+      "tier_c_high": 15.0
+    },
+    "size_factors_by_tier": {
+      "below_tier_a": 0.85,
+      "tier_a_to_b": 0.70,
+      "tier_b_to_c": 0.60,
+      "above_tier_c": 0.55
+    },
+    "audit_log_on_change": true,
+    "_audit_format": "L1_Degradation_Event: {old_sf} -> {new_sf} (err_404_per_min={rate})"
+  },
+
+  "stale_hierarchy": {
+    "comment": "Spec r91+ jerarquía L1-L4 firmada Gemma 2026-05-06. Distingue ruido benigno (404) vs falla infrastructure (5xx/timeout) vs sidecar muerto (heartbeat).",
+    "L1_404_per_min_threshold": 1.0,
+    "L2_5xx_per_min_threshold": 0.6,
+    "L3_timeout_per_min_threshold": 1.0,
+    "L4_heartbeat_age_seconds": 600,
+    "L1_action": "log_warn_no_cautela",
+    "L2_action": "cautela_temporal",
+    "L2_cautela_hold_minutes": 10,
+    "L3_action": "cautela_temporal",
+    "L3_cautela_hold_minutes": 15,
+    "L4_action": "defensivo_hold",
+    "L4_defensivo_hold_minutes": 60,
+    "window_seconds": 300
+  },
+
+  "risk_limits": {
+    "comment": "Firmado Gemma r93/r107 — preventivo BTC move outlier durante eventos macro. Si BTC consensus_weighted_median se mueve >X% en window minutes durante NFP/CPI/FOMC, fuerza Mode CRITICAL bloqueando autorizaciones hasta intervención manual. Auto-recovery a CAUTELA condicional. Evita 'catch-the-knife' en outliers macro extremos.",
+    "kill_switch_pause_btc_move_pct": 2.5,
+    "window_minutes": 5,
+    "force_mode_on_trigger": "CRITICAL",
+    "block_new_authorizations_until_manual": true,
+    "applies_during_macro_event_windows": ["NFP", "CPI", "FOMC", "PCE"],
+    "btc_price_source_required": "btc_consensus_weighted_median",
+    "btc_price_source_rejected": "single_pyth_or_single_source",
+    "macro_event_window_pre_minutes": 15,
+    "macro_event_window_post_minutes": 30,
+    "auto_recovery": {
+      "enabled": true,
+      "min_minutes_since_trigger": 60,
+      "max_btc_volatility_pct_for_recovery": 0.5,
+      "volatility_window_minutes": 30,
+      "no_macro_event_in_next_hour_required": true,
+      "auto_recovery_target_mode": "CAUTELA",
+      "_signed_r107_4d": "Gemma exige target=CAUTELA (NO direct NORMAL). Lógica τ/ρ estándar gestiona CAUTELA→NORMAL después."
+    },
+    "manual_ack_path": "/home/administrator/poly_sidecar/data/kill_switch_ack",
+    "manual_ack_priority_over_auto": true,
+    "_signed_by": "Gemma r93/r107 — preventivo NFP Vie 8 catch-the-knife + auto-recovery condicional"
+  },
+
+  "kill_switches": {
+    "comment": "Hard switches auto-pause inmediato. Soft = alerta sin pause. Per-trade = límites por operación. Spec r92 firmada.",
+    "hard": {
+      "drawdown_pct": 30,
+      "drawdown_pct_action": "auto_pause_disable_LIQ_CYCLIC_EXECUTE_LIVE",
+      "consecutive_losing_days": 3,
+      "consecutive_loss_per_day_usd": 50,
+      "bundle_failure_rate_1h_pct": 90,
+      "sigma_fred_error_divergence_pct": 50,
+      "wallet_balance_discrepancy_usd": 5
+    },
+    "soft": {
+      "win_rate_24h_below_pct": 0.5,
+      "tau_cycle_p99_seconds": 8.0,
+      "slippage_avg_1h_pct": 1.0,
+      "macro_layer_stale_seconds": 600
+    },
+    "per_trade": {
+      "max_loss_usd": 5,
+      "max_tip_usd": 0.05,
+      "daily_max_loss_usd": 30,
+      "max_capital_at_risk_pct": 100,
+      "min_capital_in_wallet_usd": 50
+    }
+  },
+
+  "burn_in": {
+    "comment": "Spec r92 firmada Gemma. 72h post-upgrade Chainstack + NFP+CPI stress tests. Decision tree A/B/C para spike handling.",
+    "minimum_duration_hours": 72,
+    "minimum_n_samples": 500000,
+    "stress_tests_required": ["NFP_2026-05-08", "CPI_2026-05-12"],
+    "criteria_pass_all_AND": {
+      "p99_scan_tick_under_ms": 5000,
+      "p99_max_in_window_under_ms": 8000,
+      "back_pressure_drops_max": 0,
+      "stream_reconnect_events_max": 0,
+      "slot_lag_p95_max": 10
+    },
+    "decision_tree_post_event_spike": {
+      "case_A_macro_driven": {
+        "criteria": "spike_in_window_T-1min_to_T+15min_ONLY AND p99_recovers_under_5000ms_by_T+30min AND back_pressure_drops==0",
+        "action": "PARTIAL_RESET_discard_event_window_only",
+        "burn_in_continues": true
+      },
+      "case_B_infrastructure_driven": {
+        "criteria": "spike_persists_after_T+30min OR back_pressure_drops>0 OR stream_reconnects>0",
+        "action": "FULL_RESET_72h_restart",
+        "live_blocked_pending_debug": true
+      },
+      "case_C_ambiguous": {
+        "criteria": "between_A_and_B",
+        "action": "EXTEND_burn_in_48h_additional",
+        "evaluate_against_next_macro_event": true
+      }
+    }
+  },
+
+  "audit_log": {
+    "comment": "Spec r92/r93 firmada Gemma 2026-05-06. JSONL append-only separado de cyclic_shadow.jsonl. Log every SF + flag mode_transition. Rotation 90d firmada r93.",
+    "enabled": true,
+    "path": "/home/administrator/poly_sidecar/data/risk_audit.jsonl",
+    "log_every_sf_calculation": true,
+    "log_mode_transitions": true,
+    "include_decision_chain_microsecond": true,
+    "include_runtime_version": true,
+    "post_decision_capture_offsets_minutes": [5, 30, 60],
+    "retention_policy": "rotate_every_90_days",
+    "rotation_days": 90,
+    "_signed_by": "Gemma r93 — rotation_90d firmada para preservar performance jq + análisis"
+  },
+
+  "live_authorization": {
+    "comment": "Cronograma post r91+/r92. LIVE NO antes de Lun 12 audit completo. Realista Mar-Mié 13/14 si NFP+CPI ambos pass.",
+    "current_state": "SHADOW_ONLY",
+    "execute_live_flag_env": "LIQ_CYCLIC_EXECUTE_LIVE",
+    "current_flag_value": false,
+    "blocked_reasons_until_live_authorized": [
+      "p99_scan_tick_must_be_under_5000ms_sustained_24h",
+      "burn_in_72h_must_complete",
+      "NFP_2026-05-08_stress_test_must_pass",
+      "CPI_2026-05-12_stress_test_must_pass",
+      "audit_report_CPI_must_show_all_criteria_pass",
+      "Marco_explicit_authorization_required"
+    ],
+    "earliest_realistic_LIVE_date": "2026-05-13",
+    "initial_capital_usd": 300,
+    "wallet_for_LIVE": "hot200 (firmado Gemma r91+)"
+  }
+}

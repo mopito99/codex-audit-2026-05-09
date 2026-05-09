@@ -1,0 +1,16 @@
+[Unit]
+Description=ProfitLab Quantum Web Panel (FastAPI/Uvicorn)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/profitlab_quantum
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/srv/profitlab_quantum/.env
+ExecStart=/srv/profitlab_quantum/venv/bin/uvicorn web.main:app --app-dir /srv/profitlab_quantum --host 127.0.0.1 --port 8001 --workers 2
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target

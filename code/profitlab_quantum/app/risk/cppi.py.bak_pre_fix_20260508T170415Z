@@ -1,0 +1,101 @@
+import numpy as np
+import pandas as pd
+
+class RiskManager:
+    def __init__(
+        self,
+        cppi_multiplier: float = 2.5,
+        floor_percentage: float = 0.90,
+        target_volatility: float = 0.20,
+        risk_target: float = 0.12,
+        vol_multiplier: float = 1.0,
+        use_sqrt_vol: bool = True,
+    ):
+        """
+        Initialize the Risk Manager.
+        
+        :param cppi_multiplier: The multiplier for the cushion (m). Aggressiveness factor.
+        :param floor_percentage: The percentage of initial capital to protect (e.g., 0.97 for 97% to target <3% DD).
+        :param target_volatility: The annualized target volatility (e.g., 0.20 for 20%).
+        :param risk_target: Fraction of capital to risk per unit of volatility targeting (report-style Risk_Target).
+        :param vol_multiplier: Scaling factor in the denominator (report-style Multiplicador).
+        :param use_sqrt_vol: Whether to use sqrt(vol) in the denominator (inverse-sqrt scaling).
+        """
+        self.cppi_multiplier = cppi_multiplier
+        self.floor_percentage = floor_percentage
+        self.target_volatility = target_volatility
+        self.risk_target = risk_target
+        self.vol_multiplier = vol_multiplier
+        self.use_sqrt_vol = use_sqrt_vol
+        self.initial_capital = None
+        self.floor_value = None
+
+    def set_initial_capital(self, capital: float):
+        self.initial_capital = capital
+        self.floor_value = capital * self.floor_percentage
+
+    def calculate_cppi_allocation(self, current_portfolio_value: float) -> float:
+        """
+        Calculate the maximum risky allocation based on CPPI.
+        
+        Allocation = m * (PortfolioValue - Floor)
+        """
+        if self.initial_capital is None:
+            raise ValueError("Initial capital not set.")
+            
+        cushion = current_portfolio_value - self.floor_value
+        if cushion < 0:
+            # If we are below floor, we should technically be 0 risk.
+            # But to allow recovery, we can allow a tiny allocation if portfolio > 0
+            if current_portfolio_value > 0:
+                return current_portfolio_value * 0.5 # Allow 50% of remaining capital as margin
+            return 0.0
+            
+        risky_allocation = self.cppi_multiplier * cushion
+        
+        # Cap allocation at 20x of portfolio value (Max Leverage 20x)
+        return min(risky_allocation, current_portfolio_value * 20.0)
+
+    def calculate_vol_targeting_position(self, current_volatility: float, capital: float) -> float:
+        """
+        Calculate position size (notional exposure) based on report-style Volatility Targeting.
+
+        S_t = (Capital * Risk_Target) / (Vol_t * Multiplicador)
+        OR
+        S_t = (Capital * Risk_Target) / (sqrt(Vol_t) * Multiplicador) if use_sqrt_vol is True
+        """
+        if current_volatility <= 0:
+            return 0.0 # Avoid division by zero, assume extreme risk
+
+        vol_factor = np.sqrt(current_volatility) if self.use_sqrt_vol else current_volatility
+        denom = float(vol_factor) * float(self.vol_multiplier)
+        if denom <= 0:
+            return 0.0
+        return float(capital) * float(self.risk_target) / denom
+
+    def get_safe_position_size(self, current_portfolio_value: float, current_volatility: float) -> float:
+        """
+        Combine CPPI and Volatility Targeting to get the final safe position size.
+        
+        1. Calculate CPPI limit (The Shield) - treated as MARGIN cap.
+           Max Notional = CPPI_Margin * Max_Leverage (20x).
+        2. Calculate Vol Target size (The Stabilizer).
+        3. Take the minimum of both to ensure safety.
+        """
+        cppi_margin = self.calculate_cppi_allocation(current_portfolio_value)
+        
+        # If CPPI margin is very small (e.g. near floor), ensure we have at least minimum viable size
+        # Assuming min trade size ~$10 margin * 10x = $100 notional
+        if cppi_margin < 10.0 and current_portfolio_value > 20.0:
+             cppi_margin = 10.0
+
+        cppi_limit_notional = cppi_margin * 20.0
+        
+        vol_target_size = self.calculate_vol_targeting_position(current_volatility, current_portfolio_value)
+        
+        # The final position size is the stricter of the two constraints
+        # But ensure we don't go below min viable size if we have capital
+        safe_size = min(cppi_limit_notional, vol_target_size)
+        
+            
+        return safe_size

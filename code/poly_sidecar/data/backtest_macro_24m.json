@@ -1,0 +1,22 @@
+{
+  "generated_at_utc": "2026-05-05T07:05:05.450214+00:00",
+  "summary_by_category": {},
+  "details_by_category": {},
+  "sigma_fred_used": {
+    "FOMC": 17.102674,
+    "CPI": 2.120379,
+    "PCE": 0.145375,
+    "NFP": 1807.760152,
+    "JOLTS": 382.656478,
+    "GDP": 1.69352,
+    "ISM": 1.0,
+    "JOLTS_QUITS": 0.111404,
+    "UNEMPLOYMENT": 0.938354,
+    "RETAIL_SALES": 2.329055
+  },
+  "spec_gemma_v4alpha_\u00a747": {
+    "spike_T0_to_T5_mean_pct": 1.2,
+    "spike_T0_to_T5_std_pct": 0.8,
+    "p_move_above_2sigma": "15-20%"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "act_dim": 3,
+  "context_len": 32,
+  "d_model": 128,
+  "exported_by": "tools/export_audit_artifacts.py",
+  "nhead": 4,
+  "nlayer": 3,
+  "state_dim": 21,
+  "trained": false
+}

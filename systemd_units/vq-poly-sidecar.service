@@ -1,0 +1,20 @@
+[Unit]
+Description=VelocityQuant Polymarket Sentiment Sidecar — main loop
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=administrator
+Group=administrator
+WorkingDirectory=/home/administrator/poly_sidecar
+ExecStart=/home/administrator/poly_sidecar/venv/bin/python3 /home/administrator/poly_sidecar/sidecar.py
+Restart=on-failure
+RestartSec=10s
+
+# Resource hygiene
+Nice=5
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

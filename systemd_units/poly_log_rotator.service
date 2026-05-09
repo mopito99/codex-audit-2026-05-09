@@ -1,0 +1,11 @@
+[Unit]
+Description=VelocityQuant Polymarket Sidecar log rotator (P5.0)
+After=network.target
+
+[Service]
+Type=oneshot
+User=administrator
+Group=administrator
+ExecStart=/usr/bin/python3 /home/administrator/poly_sidecar/log_rotator.py
+StandardOutput=journal
+StandardError=journal

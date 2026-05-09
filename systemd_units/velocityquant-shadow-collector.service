@@ -1,0 +1,9 @@
+[Unit]
+Description=VelocityQuant Shadow Run Telemetry Collector
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=administrator
+ExecStart=/usr/bin/python3 /home/administrator/liquidator/shadow_collector.py
+TimeoutStartSec=30s

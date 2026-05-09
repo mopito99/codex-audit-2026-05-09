@@ -1,0 +1,8 @@
+  File "<string>", line 1
+    import json,sys; d=json.loads(sys.stdin.read() or \"{}\"); print(json.dumps(d))
+                                                       ^
+SyntaxError: unexpected character after line continuation character
+  File "<string>", line 1
+    import json,sys; d=json.loads(sys.stdin.read() or \"{}\"); print(json.dumps(d))
+                                                       ^
+SyntaxError: unexpected character after line continuation character

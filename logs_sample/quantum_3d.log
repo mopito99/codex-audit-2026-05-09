@@ -1,0 +1,1000 @@
+May 09 06:45:56 cuandeoro python[1335549]:   [PB] rsi=26.7 adx=0.0 vol=3.06 btc=+0.21% fund=-0.0042% | match=R001
+May 09 06:45:56 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:45:56 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.46
+May 09 06:45:56 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:45:56 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:45:56 cuandeoro python[1335549]: 2026-05-09 06:45:56,698 [INFO] 🔪 KILLSWITCH [BTC-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:45:56 cuandeoro python[1335549]: 2026-05-09 06:45:56,699 [INFO] Processing ETH-USDT (new candle)...
+May 09 06:45:59 cuandeoro python[1335549]:   [PB] rsi=47.1 adx=0.0 vol=1.38 btc=+0.21% fund=+0.0030% | match=None
+May 09 06:45:59 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.37
+May 09 06:45:59 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:45:59 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:45:59 cuandeoro python[1335549]: 2026-05-09 06:45:59,244 [INFO] 🔪 KILLSWITCH [ETH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:45:59 cuandeoro python[1335549]: 2026-05-09 06:45:59,245 [INFO] Processing LINK-USDT (new candle)...
+May 09 06:46:02 cuandeoro python[1335549]:   [PB] rsi=25.9 adx=0.0 vol=1.66 btc=+0.21% fund=+0.0100% | match=R001
+May 09 06:46:02 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:02 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.89
+May 09 06:46:02 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:02 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:02 cuandeoro python[1335549]: 2026-05-09 06:46:02,440 [INFO] 🔪 KILLSWITCH [LINK-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:02 cuandeoro python[1335549]: 2026-05-09 06:46:02,441 [INFO] Processing BNB-USDT (new candle)...
+May 09 06:46:05 cuandeoro python[1335549]:   [PB] rsi=21.5 adx=0.0 vol=0.98 btc=+0.21% fund=+0.0050% | match=R007
+May 09 06:46:05 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:05 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.69
+May 09 06:46:05 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:05 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:05 cuandeoro python[1335549]: 2026-05-09 06:46:05,294 [INFO] 🔪 KILLSWITCH [BNB-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:05 cuandeoro python[1335549]: 2026-05-09 06:46:05,294 [INFO] Processing DOGE-USDT (new candle)...
+May 09 06:46:07 cuandeoro python[1335549]:   [PB] rsi=57.7 adx=0.0 vol=0.38 btc=+0.21% fund=+0.0100% | match=None
+May 09 06:46:07 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 55.60
+May 09 06:46:07 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:07 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:07 cuandeoro python[1335549]: 2026-05-09 06:46:07,909 [INFO] 🔪 KILLSWITCH [DOGE-USDT] (tier=major): killswitch_cumulative_loss_$-27.94 -- skipping trade
+May 09 06:46:07 cuandeoro python[1335549]: 2026-05-09 06:46:07,910 [INFO] Processing HBAR-USDT (new candle)...
+May 09 06:46:10 cuandeoro python[1335549]:   [PB] rsi=33.3 adx=0.0 vol=2.49 btc=+0.21% fund=+0.0100% | match=R001
+May 09 06:46:10 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:10 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 45.98
+May 09 06:46:10 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:10 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:10 cuandeoro python[1335549]: 2026-05-09 06:46:10,692 [INFO] 🔪 KILLSWITCH [HBAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:10 cuandeoro python[1335549]: 2026-05-09 06:46:10,693 [INFO] Processing SOL-USDT (new candle)...
+May 09 06:46:12 cuandeoro python[1335549]:   [PB] rsi=41.7 adx=0.0 vol=0.94 btc=+0.21% fund=-0.0105% | match=None
+May 09 06:46:12 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.16
+May 09 06:46:12 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:12 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:12 cuandeoro python[1335549]: 2026-05-09 06:46:12,868 [INFO] 🔪 KILLSWITCH [SOL-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:12 cuandeoro python[1335549]: 2026-05-09 06:46:12,869 [INFO] Processing UNI-USDT (new candle)...
+May 09 06:46:15 cuandeoro python[1335549]:   [PB] rsi=32.8 adx=0.0 vol=2.09 btc=+0.21% fund=+0.0100% | match=R001
+May 09 06:46:15 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:15 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.50
+May 09 06:46:15 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:15 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:15 cuandeoro python[1335549]: 2026-05-09 06:46:15,988 [INFO] 🔪 KILLSWITCH [UNI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:16 cuandeoro python[1335549]: 2026-05-09 06:46:15,989 [INFO] Processing ADA-USDT (new candle)...
+May 09 06:46:18 cuandeoro python[1335549]:   [PB] rsi=35.5 adx=0.0 vol=1.88 btc=+0.21% fund=+0.0020% | match=R001
+May 09 06:46:18 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:18 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.18
+May 09 06:46:18 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:18 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:18 cuandeoro python[1335549]: 2026-05-09 06:46:18,599 [INFO] 🔪 KILLSWITCH [ADA-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:18 cuandeoro python[1335549]: 2026-05-09 06:46:18,600 [INFO] Processing AVAX-USDT (new candle)...
+May 09 06:46:21 cuandeoro python[1335549]:   [PB] rsi=36.1 adx=0.0 vol=1.18 btc=+0.21% fund=+0.0100% | match=None
+May 09 06:46:21 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.25
+May 09 06:46:21 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:21 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:21 cuandeoro python[1335549]: 2026-05-09 06:46:21,181 [INFO] 🔪 KILLSWITCH [AVAX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:21 cuandeoro python[1335549]: 2026-05-09 06:46:21,181 [INFO] Processing BCH-USDT (new candle)...
+May 09 06:46:23 cuandeoro python[1335549]:   [PB] rsi=29.1 adx=0.0 vol=0.95 btc=+0.21% fund=+0.0100% | match=R007
+May 09 06:46:23 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:23 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.90
+May 09 06:46:23 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:23 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:23 cuandeoro python[1335549]: 2026-05-09 06:46:23,752 [INFO] 🔪 KILLSWITCH [BCH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:23 cuandeoro python[1335549]: 2026-05-09 06:46:23,752 [INFO] Processing DOT-USDT (new candle)...
+May 09 06:46:23 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:23 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 06:46:26 cuandeoro python[1335549]:   [PB] rsi=35.7 adx=0.0 vol=0.96 btc=+0.21% fund=+0.0100% | match=R003
+May 09 06:46:26 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:26 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.96
+May 09 06:46:26 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:26 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:26 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:924: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:26 cuandeoro python[1335549]:   state.last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+May 09 06:46:26 cuandeoro python[1335549]: 2026-05-09 06:46:26,290 [INFO] Processing LTC-USDT (new candle)...
+May 09 06:46:28 cuandeoro python[1335549]:   [PB] rsi=41.7 adx=0.0 vol=1.30 btc=+0.21% fund=+0.0100% | match=None
+May 09 06:46:28 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 06:46:28 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:28 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:28 cuandeoro python[1335549]: 2026-05-09 06:46:28,474 [INFO] HEALTH-PAUSED [LTC-USDT]: Rolling WR 12% (unpauses in 97m) -- skipping trade
+May 09 06:46:28 cuandeoro python[1335549]: 2026-05-09 06:46:28,474 [INFO] Processing SHIB-USDT (new candle)...
+May 09 06:46:31 cuandeoro python[1335549]:   [PB] rsi=37.1 adx=0.0 vol=0.23 btc=+0.21% fund=+0.0100% | match=None
+May 09 06:46:31 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 81.64
+May 09 06:46:31 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:31 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:31 cuandeoro python[1335549]: 2026-05-09 06:46:31,042 [INFO] 🌙 SESSION-PAUSED [SHIB-USDT] (🐸 Memecoins): tier=meme — no trading at night
+May 09 06:46:31 cuandeoro python[1335549]: 2026-05-09 06:46:31,042 [INFO] Processing XRP-USDT (new candle)...
+May 09 06:46:33 cuandeoro python[1335549]:   [PB] rsi=32.0 adx=0.0 vol=0.94 btc=+0.21% fund=+0.0100% | match=R007
+May 09 06:46:33 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:46:33 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 49.37
+May 09 06:46:33 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:33 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:46:33 cuandeoro python[1335549]: 2026-05-09 06:46:33,416 [INFO] 🔪 KILLSWITCH [XRP-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:46:33 cuandeoro python[1335549]: 2026-05-09 06:46:33,426 [WARNING] WS connect/read failed (wss://open-api-swap.bingx.com/swap-market): Cannot write to closing transport
+May 09 06:46:53 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:46:53 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 06:50:11 cuandeoro python[1335549]: 2026-05-09 06:50:11,323 [INFO] Processing SOL-USDT (new candle)...
+May 09 06:50:14 cuandeoro python[1335549]:   [PB] rsi=43.8 adx=0.0 vol=1.31 btc=+0.17% fund=-0.0105% | match=None
+May 09 06:50:14 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.16
+May 09 06:50:14 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:14 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,099 [INFO] SYMBOL HEALTH: BTC-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,099 [INFO] SYMBOL HEALTH: ETH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,099 [INFO] SYMBOL HEALTH: BCH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,099 [INFO] SYMBOL HEALTH: XRP-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,099 [INFO] SYMBOL HEALTH: AVAX-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,099 [INFO] SYMBOL HEALTH: XLM-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,100 [INFO] SYMBOL HEALTH: HBAR-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,100 [INFO] SYMBOL HEALTH: LINK-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,100 [INFO] SYMBOL HEALTH: SUI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,100 [INFO] SYMBOL HEALTH: NEAR-USDT → TIER 3 (MINIMAL) — size 25% — Rolling WR 22%
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,100 [INFO] SYMBOL HEALTH: UNI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,100 [INFO] SymbolHealth: demoted → BTC-USDT=T2(REDUCED), ETH-USDT=T2(REDUCED), BCH-USDT=T2(REDUCED), XRP-USDT=T2(REDUCED), AVAX-USDT=T2(REDUCED), XLM-USDT=T2(REDUCED), HBAR-USDT=T2(REDUCED), LINK-USDT=T2(REDUCED), LTC-USDT=T4(PAUSED), SUI-USDT=T2(REDUCED), NEAR-USDT=T3(MINIMAL), UNI-USDT=T2(REDUCED)
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,102 [INFO] 🔪 KILLSWITCH [SOL-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:14 cuandeoro python[1335549]: 2026-05-09 06:50:14,103 [INFO] Processing BTC-USDT (new candle)...
+May 09 06:50:16 cuandeoro python[1335549]:   [PB] rsi=20.9 adx=0.0 vol=1.11 btc=+0.17% fund=-0.0042% | match=R007
+May 09 06:50:16 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:16 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.46
+May 09 06:50:16 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:16 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:16 cuandeoro python[1335549]: 2026-05-09 06:50:16,994 [INFO] 🔪 KILLSWITCH [BTC-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:16 cuandeoro python[1335549]: 2026-05-09 06:50:16,995 [INFO] Processing BNB-USDT (new candle)...
+May 09 06:50:19 cuandeoro python[1335549]:   [PB] rsi=33.3 adx=0.0 vol=0.68 btc=+0.17% fund=+0.0050% | match=R007
+May 09 06:50:19 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:19 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.69
+May 09 06:50:19 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:19 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:19 cuandeoro python[1335549]: 2026-05-09 06:50:19,233 [INFO] 🔪 KILLSWITCH [BNB-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:19 cuandeoro python[1335549]: 2026-05-09 06:50:19,235 [INFO] Processing DOT-USDT (new candle)...
+May 09 06:50:21 cuandeoro python[1335549]:   [PB] rsi=35.7 adx=0.0 vol=0.48 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:50:21 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.96
+May 09 06:50:21 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:21 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:21 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:924: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:21 cuandeoro python[1335549]:   state.last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+May 09 06:50:21 cuandeoro python[1335549]: 2026-05-09 06:50:21,523 [INFO] Processing SHIB-USDT (new candle)...
+May 09 06:50:23 cuandeoro python[1335549]:   [PB] rsi=41.1 adx=0.0 vol=0.33 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:50:23 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 81.64
+May 09 06:50:23 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:23 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:23 cuandeoro python[1335549]: 2026-05-09 06:50:23,990 [INFO] 🌙 SESSION-PAUSED [SHIB-USDT] (🐸 Memecoins): tier=meme — no trading at night
+May 09 06:50:23 cuandeoro python[1335549]: 2026-05-09 06:50:23,991 [INFO] Processing DOGE-USDT (new candle)...
+May 09 06:50:23 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:23 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 06:50:26 cuandeoro python[1335549]:   [PB] rsi=54.5 adx=0.0 vol=0.60 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:50:26 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 55.60
+May 09 06:50:26 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:26 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:26 cuandeoro python[1335549]: 2026-05-09 06:50:26,250 [INFO] 🔪 KILLSWITCH [DOGE-USDT] (tier=major): killswitch_cumulative_loss_$-27.94 -- skipping trade
+May 09 06:50:26 cuandeoro python[1335549]: 2026-05-09 06:50:26,251 [INFO] Processing XLM-USDT (new candle)...
+May 09 06:50:29 cuandeoro python[1335549]:   [PB] rsi=38.5 adx=0.0 vol=1.27 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:50:29 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.30
+May 09 06:50:29 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:29 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:29 cuandeoro python[1335549]: 2026-05-09 06:50:29,462 [INFO] 🔪 KILLSWITCH [XLM-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:29 cuandeoro python[1335549]: 2026-05-09 06:50:29,463 [INFO] Processing LINK-USDT (new candle)...
+May 09 06:50:31 cuandeoro python[1335549]:   [PB] rsi=24.6 adx=0.0 vol=0.91 btc=+0.17% fund=+0.0100% | match=R007
+May 09 06:50:31 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:31 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.89
+May 09 06:50:31 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:31 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:31 cuandeoro python[1335549]: 2026-05-09 06:50:31,754 [INFO] 🔪 KILLSWITCH [LINK-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:31 cuandeoro python[1335549]: 2026-05-09 06:50:31,755 [INFO] Processing LTC-USDT (new candle)...
+May 09 06:50:33 cuandeoro python[1335549]:   [PB] rsi=44.7 adx=0.0 vol=0.75 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:50:33 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 06:50:33 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:33 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:33 cuandeoro python[1335549]: 2026-05-09 06:50:33,998 [INFO] HEALTH-PAUSED [LTC-USDT]: Rolling WR 12% (unpauses in 93m) -- skipping trade
+May 09 06:50:33 cuandeoro python[1335549]: 2026-05-09 06:50:33,999 [INFO] Processing XRP-USDT (new candle)...
+May 09 06:50:36 cuandeoro python[1335549]:   [PB] rsi=34.2 adx=0.0 vol=0.88 btc=+0.17% fund=+0.0100% | match=R007
+May 09 06:50:36 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:36 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 49.37
+May 09 06:50:36 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:36 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:36 cuandeoro python[1335549]: 2026-05-09 06:50:36,225 [INFO] 🔪 KILLSWITCH [XRP-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:36 cuandeoro python[1335549]: 2026-05-09 06:50:36,229 [INFO] Processing BCH-USDT (new candle)...
+May 09 06:50:38 cuandeoro python[1335549]:   [PB] rsi=31.9 adx=0.0 vol=0.55 btc=+0.17% fund=+0.0100% | match=R004
+May 09 06:50:38 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:38 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.90
+May 09 06:50:38 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:38 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:38 cuandeoro python[1335549]: 2026-05-09 06:50:38,462 [INFO] 🔪 KILLSWITCH [BCH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:38 cuandeoro python[1335549]: 2026-05-09 06:50:38,465 [INFO] Processing ADA-USDT (new candle)...
+May 09 06:50:40 cuandeoro python[1335549]:   [PB] rsi=31.0 adx=0.0 vol=0.56 btc=+0.17% fund=+0.0020% | match=R007
+May 09 06:50:40 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:40 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.18
+May 09 06:50:40 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:40 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:40 cuandeoro python[1335549]: 2026-05-09 06:50:40,703 [INFO] 🔪 KILLSWITCH [ADA-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:40 cuandeoro python[1335549]: 2026-05-09 06:50:40,705 [INFO] Processing NEAR-USDT (new candle)...
+May 09 06:50:43 cuandeoro python[1335549]:   [PB] rsi=49.6 adx=0.0 vol=1.54 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:50:43 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.97
+May 09 06:50:43 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:43 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:43 cuandeoro python[1335549]: 2026-05-09 06:50:43,123 [INFO] 🔪 KILLSWITCH [NEAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:43 cuandeoro python[1335549]: 2026-05-09 06:50:43,124 [INFO] Processing TRX-USDT (new candle)...
+May 09 06:50:45 cuandeoro python[1335549]:   [PB] rsi=47.4 adx=0.0 vol=0.54 btc=+0.17% fund=+0.0050% | match=None
+May 09 06:50:45 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 06:50:45 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:45 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:45 cuandeoro python[1335549]: 2026-05-09 06:50:45,639 [INFO] 🔪 KILLSWITCH [TRX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:45 cuandeoro python[1335549]: 2026-05-09 06:50:45,640 [INFO] Processing ETH-USDT (new candle)...
+May 09 06:50:48 cuandeoro python[1335549]:   [PB] rsi=42.8 adx=0.0 vol=1.13 btc=+0.17% fund=+0.0030% | match=None
+May 09 06:50:48 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.37
+May 09 06:50:48 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:48 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:48 cuandeoro python[1335549]: 2026-05-09 06:50:48,062 [INFO] 🔪 KILLSWITCH [ETH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:48 cuandeoro python[1335549]: 2026-05-09 06:50:48,063 [INFO] Processing SUI-USDT (new candle)...
+May 09 06:50:51 cuandeoro python[1335549]:   [PB] rsi=43.1 adx=0.0 vol=1.31 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:50:51 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.09
+May 09 06:50:51 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:51 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:51 cuandeoro python[1335549]: 2026-05-09 06:50:51,289 [INFO] 🔪 KILLSWITCH [SUI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:51 cuandeoro python[1335549]: 2026-05-09 06:50:51,290 [INFO] Processing UNI-USDT (new candle)...
+May 09 06:50:53 cuandeoro python[1335549]:   [PB] rsi=29.9 adx=0.0 vol=1.10 btc=+0.17% fund=+0.0100% | match=R007
+May 09 06:50:53 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:53 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.50
+May 09 06:50:53 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:53 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:53 cuandeoro python[1335549]: 2026-05-09 06:50:53,531 [INFO] 🔪 KILLSWITCH [UNI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:53 cuandeoro python[1335549]: 2026-05-09 06:50:53,534 [INFO] Processing HBAR-USDT (new candle)...
+May 09 06:50:53 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:53 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 06:50:55 cuandeoro python[1335549]:   [PB] rsi=34.1 adx=0.0 vol=1.47 btc=+0.17% fund=+0.0100% | match=R001
+May 09 06:50:55 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:55 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 45.98
+May 09 06:50:55 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:55 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:55 cuandeoro python[1335549]: 2026-05-09 06:50:55,554 [INFO] 🔪 KILLSWITCH [HBAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:55 cuandeoro python[1335549]: 2026-05-09 06:50:55,556 [INFO] Processing AVAX-USDT (new candle)...
+May 09 06:50:58 cuandeoro python[1335549]:   [PB] rsi=37.0 adx=0.0 vol=1.12 btc=+0.17% fund=+0.0100% | match=R004
+May 09 06:50:58 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:50:58 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.25
+May 09 06:50:58 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:50:58 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:50:58 cuandeoro python[1335549]: 2026-05-09 06:50:58,717 [INFO] 🔪 KILLSWITCH [AVAX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:50:58 cuandeoro python[1335549]: 2026-05-09 06:50:58,721 [WARNING] WS connect/read failed (wss://open-api-swap.bingx.com/swap-market): Cannot write to closing transport
+May 09 06:51:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:51:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 06:55:35 cuandeoro python[1335549]: 2026-05-09 06:55:35,061 [INFO] Processing ETH-USDT (new candle)...
+May 09 06:55:37 cuandeoro python[1335549]:   [PB] rsi=42.7 adx=0.0 vol=1.34 btc=+0.17% fund=+0.0029% | match=None
+May 09 06:55:37 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.37
+May 09 06:55:37 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:37 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,903 [INFO] SYMBOL HEALTH: BTC-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,903 [INFO] SYMBOL HEALTH: ETH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: BCH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: XRP-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: AVAX-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: XLM-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: HBAR-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: LINK-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: SUI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,904 [INFO] SYMBOL HEALTH: NEAR-USDT → TIER 3 (MINIMAL) — size 25% — Rolling WR 22%
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,905 [INFO] SYMBOL HEALTH: UNI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,905 [INFO] SymbolHealth: demoted → BTC-USDT=T2(REDUCED), ETH-USDT=T2(REDUCED), BCH-USDT=T2(REDUCED), XRP-USDT=T2(REDUCED), AVAX-USDT=T2(REDUCED), XLM-USDT=T2(REDUCED), HBAR-USDT=T2(REDUCED), LINK-USDT=T2(REDUCED), LTC-USDT=T4(PAUSED), SUI-USDT=T2(REDUCED), NEAR-USDT=T3(MINIMAL), UNI-USDT=T2(REDUCED)
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,906 [INFO] 🔪 KILLSWITCH [ETH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:37 cuandeoro python[1335549]: 2026-05-09 06:55:37,907 [INFO] Processing BNB-USDT (new candle)...
+May 09 06:55:40 cuandeoro python[1335549]:   [PB] rsi=42.9 adx=0.0 vol=0.51 btc=+0.17% fund=+0.0050% | match=None
+May 09 06:55:40 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.69
+May 09 06:55:40 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:40 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:40 cuandeoro python[1335549]: 2026-05-09 06:55:40,255 [INFO] 🔪 KILLSWITCH [BNB-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:40 cuandeoro python[1335549]: 2026-05-09 06:55:40,255 [INFO] Processing DOGE-USDT (new candle)...
+May 09 06:55:42 cuandeoro python[1335549]:   [PB] rsi=57.0 adx=0.0 vol=1.03 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:55:42 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 55.60
+May 09 06:55:42 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:42 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:42 cuandeoro python[1335549]: 2026-05-09 06:55:42,751 [INFO] 🔪 KILLSWITCH [DOGE-USDT] (tier=major): killswitch_cumulative_loss_$-27.94 -- skipping trade
+May 09 06:55:42 cuandeoro python[1335549]: 2026-05-09 06:55:42,752 [INFO] Processing BTC-USDT (new candle)...
+May 09 06:55:45 cuandeoro python[1335549]:   [PB] rsi=25.9 adx=0.0 vol=1.17 btc=+0.17% fund=-0.0043% | match=R007
+May 09 06:55:45 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:55:45 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.46
+May 09 06:55:45 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:45 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:45 cuandeoro python[1335549]: 2026-05-09 06:55:45,312 [INFO] 🔪 KILLSWITCH [BTC-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:45 cuandeoro python[1335549]: 2026-05-09 06:55:45,313 [INFO] Processing SUI-USDT (new candle)...
+May 09 06:55:47 cuandeoro python[1335549]:   [PB] rsi=36.2 adx=0.0 vol=1.65 btc=+0.17% fund=+0.0100% | match=R001
+May 09 06:55:47 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:55:47 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.09
+May 09 06:55:47 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:47 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:47 cuandeoro python[1335549]: 2026-05-09 06:55:47,661 [INFO] 🔪 KILLSWITCH [SUI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:47 cuandeoro python[1335549]: 2026-05-09 06:55:47,661 [INFO] Processing HBAR-USDT (new candle)...
+May 09 06:55:50 cuandeoro python[1335549]:   [PB] rsi=28.1 adx=0.0 vol=0.95 btc=+0.17% fund=+0.0100% | match=R007
+May 09 06:55:50 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:55:50 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 45.98
+May 09 06:55:50 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:50 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:50 cuandeoro python[1335549]: 2026-05-09 06:55:50,205 [INFO] 🔪 KILLSWITCH [HBAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:50 cuandeoro python[1335549]: 2026-05-09 06:55:50,206 [INFO] Processing NEAR-USDT (new candle)...
+May 09 06:55:52 cuandeoro python[1335549]:   [PB] rsi=48.6 adx=0.0 vol=0.52 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:55:52 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.97
+May 09 06:55:52 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:52 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:52 cuandeoro python[1335549]: 2026-05-09 06:55:52,597 [INFO] 🔪 KILLSWITCH [NEAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:52 cuandeoro python[1335549]: 2026-05-09 06:55:52,598 [INFO] Processing SOL-USDT (new candle)...
+May 09 06:55:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 06:55:55 cuandeoro python[1335549]:   [PB] rsi=45.9 adx=0.0 vol=0.74 btc=+0.17% fund=-0.0102% | match=None
+May 09 06:55:55 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.16
+May 09 06:55:55 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:55 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:55 cuandeoro python[1335549]: 2026-05-09 06:55:55,364 [INFO] 🔪 KILLSWITCH [SOL-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:55 cuandeoro python[1335549]: 2026-05-09 06:55:55,365 [INFO] Processing TRX-USDT (new candle)...
+May 09 06:55:58 cuandeoro python[1335549]:   [PB] rsi=61.0 adx=0.0 vol=1.35 btc=+0.17% fund=+0.0050% | match=None
+May 09 06:55:58 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 06:55:58 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:55:58 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:55:58 cuandeoro python[1335549]: 2026-05-09 06:55:58,203 [INFO] 🔪 KILLSWITCH [TRX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:55:58 cuandeoro python[1335549]: 2026-05-09 06:55:58,205 [INFO] Processing UNI-USDT (new candle)...
+May 09 06:56:01 cuandeoro python[1335549]:   [PB] rsi=18.3 adx=0.0 vol=1.39 btc=+0.17% fund=+0.0100% | match=R001
+May 09 06:56:01 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:56:01 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.50
+May 09 06:56:01 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:01 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:01 cuandeoro python[1335549]: 2026-05-09 06:56:01,016 [INFO] 🔪 KILLSWITCH [UNI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:56:01 cuandeoro python[1335549]: 2026-05-09 06:56:01,017 [INFO] Processing XLM-USDT (new candle)...
+May 09 06:56:04 cuandeoro python[1335549]:   [PB] rsi=37.7 adx=0.0 vol=0.96 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:56:04 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.30
+May 09 06:56:04 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:04 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:04 cuandeoro python[1335549]: 2026-05-09 06:56:04,224 [INFO] 🔪 KILLSWITCH [XLM-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:56:04 cuandeoro python[1335549]: 2026-05-09 06:56:04,225 [INFO] Processing ADA-USDT (new candle)...
+May 09 06:56:07 cuandeoro python[1335549]:   [PB] rsi=20.0 adx=0.0 vol=2.08 btc=+0.17% fund=+0.0022% | match=R001
+May 09 06:56:07 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:56:07 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.18
+May 09 06:56:07 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:07 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:07 cuandeoro python[1335549]: 2026-05-09 06:56:07,139 [INFO] 🔪 KILLSWITCH [ADA-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:56:07 cuandeoro python[1335549]: 2026-05-09 06:56:07,140 [INFO] Processing AVAX-USDT (new candle)...
+May 09 06:56:10 cuandeoro python[1335549]:   [PB] rsi=32.5 adx=0.0 vol=0.62 btc=+0.17% fund=+0.0100% | match=R007
+May 09 06:56:10 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:56:10 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.25
+May 09 06:56:10 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:10 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:10 cuandeoro python[1335549]: 2026-05-09 06:56:10,157 [INFO] 🔪 KILLSWITCH [AVAX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:56:10 cuandeoro python[1335549]: 2026-05-09 06:56:10,158 [INFO] Processing BCH-USDT (new candle)...
+May 09 06:56:13 cuandeoro python[1335549]:   [PB] rsi=37.1 adx=0.0 vol=0.81 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:56:13 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.90
+May 09 06:56:13 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:13 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:13 cuandeoro python[1335549]: 2026-05-09 06:56:13,143 [INFO] 🔪 KILLSWITCH [BCH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:56:13 cuandeoro python[1335549]: 2026-05-09 06:56:13,144 [INFO] Processing DOT-USDT (new candle)...
+May 09 06:56:16 cuandeoro python[1335549]:   [PB] rsi=35.7 adx=0.0 vol=0.44 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:56:16 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.96
+May 09 06:56:16 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:16 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:16 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:924: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:16 cuandeoro python[1335549]:   state.last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+May 09 06:56:16 cuandeoro python[1335549]: 2026-05-09 06:56:16,102 [INFO] Processing LINK-USDT (new candle)...
+May 09 06:56:19 cuandeoro python[1335549]:   [PB] rsi=20.7 adx=0.0 vol=3.64 btc=+0.17% fund=+0.0100% | match=R001
+May 09 06:56:19 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:56:19 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.89
+May 09 06:56:19 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:19 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:19 cuandeoro python[1335549]: 2026-05-09 06:56:19,085 [INFO] 🔪 KILLSWITCH [LINK-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:56:19 cuandeoro python[1335549]: 2026-05-09 06:56:19,086 [INFO] Processing LTC-USDT (new candle)...
+May 09 06:56:21 cuandeoro python[1335549]:   [PB] rsi=47.5 adx=0.0 vol=0.69 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:56:21 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 06:56:21 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:21 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:22 cuandeoro python[1335549]: 2026-05-09 06:56:21,999 [INFO] HEALTH-PAUSED [LTC-USDT]: Rolling WR 12% (unpauses in 87m) -- skipping trade
+May 09 06:56:22 cuandeoro python[1335549]: 2026-05-09 06:56:22,000 [INFO] Processing SHIB-USDT (new candle)...
+May 09 06:56:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 06:56:24 cuandeoro python[1335549]:   [PB] rsi=38.3 adx=0.0 vol=0.19 btc=+0.17% fund=+0.0100% | match=None
+May 09 06:56:24 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 81.64
+May 09 06:56:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:24 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:24 cuandeoro python[1335549]: 2026-05-09 06:56:24,757 [INFO] 🌙 SESSION-PAUSED [SHIB-USDT] (🐸 Memecoins): tier=meme — no trading at night
+May 09 06:56:24 cuandeoro python[1335549]: 2026-05-09 06:56:24,758 [INFO] Processing XRP-USDT (new candle)...
+May 09 06:56:27 cuandeoro python[1335549]:   [PB] rsi=38.9 adx=0.0 vol=1.59 btc=+0.17% fund=+0.0100% | match=R001
+May 09 06:56:27 cuandeoro python[1335549]:   🌙 SESSION FILTER: PAUSED — no trades 0-6 UTC
+May 09 06:56:27 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 49.37
+May 09 06:56:27 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:27 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 06:56:27 cuandeoro python[1335549]: 2026-05-09 06:56:27,301 [INFO] 🔪 KILLSWITCH [XRP-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 06:56:27 cuandeoro python[1335549]: 2026-05-09 06:56:27,308 [WARNING] WS connect/read failed (wss://open-api-swap.bingx.com/swap-market): Cannot write to closing transport
+May 09 06:56:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 06:56:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:00:12 cuandeoro python[1335549]: 2026-05-09 07:00:12,345 [INFO] Processing TRX-USDT (new candle)...
+May 09 07:00:15 cuandeoro python[1335549]:   [PB] rsi=52.6 adx=0.0 vol=0.23 btc=-0.01% fund=+0.0050% | match=None
+May 09 07:00:15 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 07:00:15 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:15 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,854 [INFO] SYMBOL HEALTH: BTC-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,855 [INFO] SYMBOL HEALTH: ETH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,855 [INFO] SYMBOL HEALTH: BCH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,855 [INFO] SYMBOL HEALTH: XRP-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,855 [INFO] SYMBOL HEALTH: AVAX-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,856 [INFO] SYMBOL HEALTH: XLM-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,856 [INFO] SYMBOL HEALTH: HBAR-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,856 [INFO] SYMBOL HEALTH: LINK-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,856 [INFO] SYMBOL HEALTH: SUI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,856 [INFO] SYMBOL HEALTH: NEAR-USDT → TIER 3 (MINIMAL) — size 25% — Rolling WR 22%
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,857 [INFO] SYMBOL HEALTH: UNI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,857 [INFO] SymbolHealth: demoted → BTC-USDT=T2(REDUCED), ETH-USDT=T2(REDUCED), BCH-USDT=T2(REDUCED), XRP-USDT=T2(REDUCED), AVAX-USDT=T2(REDUCED), XLM-USDT=T2(REDUCED), HBAR-USDT=T2(REDUCED), LINK-USDT=T2(REDUCED), LTC-USDT=T4(PAUSED), SUI-USDT=T2(REDUCED), NEAR-USDT=T3(MINIMAL), UNI-USDT=T2(REDUCED)
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,860 [INFO] 🔪 KILLSWITCH [TRX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:00:15 cuandeoro python[1335549]: 2026-05-09 07:00:15,861 [INFO] Processing BCH-USDT (new candle)...
+May 09 07:00:18 cuandeoro python[1335549]:   [PB] rsi=29.1 adx=0.0 vol=0.52 btc=-0.01% fund=+0.0100% | match=R007
+May 09 07:00:18 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.52<1.5
+May 09 07:00:18 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.90
+May 09 07:00:18 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:18 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:18 cuandeoro python[1335549]: 2026-05-09 07:00:18,019 [INFO] 🔪 KILLSWITCH [BCH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:00:18 cuandeoro python[1335549]: 2026-05-09 07:00:18,020 [INFO] Processing XLM-USDT (new candle)...
+May 09 07:00:20 cuandeoro python[1335549]:   [PB] rsi=31.9 adx=0.0 vol=1.26 btc=-0.01% fund=+0.0100% | match=R007
+May 09 07:00:20 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.26<1.5
+May 09 07:00:20 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.30
+May 09 07:00:20 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:20 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:20 cuandeoro python[1335549]: 2026-05-09 07:00:20,466 [INFO] 🔪 KILLSWITCH [XLM-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:00:20 cuandeoro python[1335549]: 2026-05-09 07:00:20,467 [INFO] Processing XRP-USDT (new candle)...
+May 09 07:00:22 cuandeoro python[1335549]:   [PB] rsi=36.7 adx=0.0 vol=0.70 btc=-0.01% fund=+0.0100% | match=None
+May 09 07:00:22 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 49.37
+May 09 07:00:22 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:22 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:22 cuandeoro python[1335549]: 2026-05-09 07:00:22,952 [INFO] 🔪 KILLSWITCH [XRP-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:00:22 cuandeoro python[1335549]: 2026-05-09 07:00:22,953 [INFO] Processing LTC-USDT (new candle)...
+May 09 07:00:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:00:25 cuandeoro python[1335549]:   [PB] rsi=36.4 adx=0.0 vol=0.92 btc=-0.01% fund=+0.0100% | match=None
+May 09 07:00:25 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 07:00:25 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:25 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:25 cuandeoro python[1335549]: 2026-05-09 07:00:25,365 [INFO] HEALTH-PAUSED [LTC-USDT]: Rolling WR 12% (unpauses in 83m) -- skipping trade
+May 09 07:00:25 cuandeoro python[1335549]: 2026-05-09 07:00:25,366 [INFO] Processing DOGE-USDT (new candle)...
+May 09 07:00:28 cuandeoro python[1335549]:   [PB] rsi=48.6 adx=0.0 vol=0.66 btc=-0.01% fund=+0.0100% | match=None
+May 09 07:00:28 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 55.60
+May 09 07:00:28 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:28 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:28 cuandeoro python[1335549]: 2026-05-09 07:00:28,258 [INFO] 🔪 KILLSWITCH [DOGE-USDT] (tier=major): killswitch_cumulative_loss_$-27.94 -- skipping trade
+May 09 07:00:28 cuandeoro python[1335549]: 2026-05-09 07:00:28,259 [INFO] Processing ADA-USDT (new candle)...
+May 09 07:00:30 cuandeoro python[1335549]:   [PB] rsi=12.0 adx=0.0 vol=0.45 btc=-0.01% fund=+0.0022% | match=R004
+May 09 07:00:30 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_dead_ratio=0.45
+May 09 07:00:30 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.18
+May 09 07:00:30 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:30 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:30 cuandeoro python[1335549]: 2026-05-09 07:00:30,654 [INFO] 🔪 KILLSWITCH [ADA-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:00:30 cuandeoro python[1335549]: 2026-05-09 07:00:30,655 [INFO] Processing DOT-USDT (new candle)...
+May 09 07:00:33 cuandeoro python[1335549]:   [PB] rsi=33.3 adx=0.0 vol=1.36 btc=-0.01% fund=+0.0100% | match=R001
+May 09 07:00:33 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.36<1.5
+May 09 07:00:33 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.96
+May 09 07:00:33 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:33 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:33 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:924: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:33 cuandeoro python[1335549]:   state.last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+May 09 07:00:33 cuandeoro python[1335549]: 2026-05-09 07:00:33,096 [INFO] Processing BTC-USDT (new candle)...
+May 09 07:00:35 cuandeoro python[1335549]:   [PB] rsi=24.4 adx=0.0 vol=2.47 btc=-0.01% fund=-0.0043% | match=R001
+May 09 07:00:35 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:00:35 cuandeoro python[1335549]: Action: 1, Margin: 33.65, Lev: 5.00x, Notional: 168.27, Portfolio: 48.46
+May 09 07:00:35 cuandeoro python[1335549]:   ATR SL/TP: SL=0.09% TP R:R=2.5:1 ATR=58.057143
+May 09 07:00:35 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($117.79)
+May 09 07:00:35 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:35 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:35 cuandeoro python[1335549]: 2026-05-09 07:00:35,855 [INFO] 🔪 KILLSWITCH [BTC-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:00:35 cuandeoro python[1335549]: 2026-05-09 07:00:35,856 [INFO] Processing SOL-USDT (new candle)...
+May 09 07:00:38 cuandeoro python[1335549]:   [PB] rsi=41.9 adx=0.0 vol=0.78 btc=-0.01% fund=-0.0102% | match=None
+May 09 07:00:38 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.16
+May 09 07:00:38 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:38 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:38 cuandeoro python[1335549]: 2026-05-09 07:00:38,521 [INFO] 🔪 KILLSWITCH [SOL-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:00:38 cuandeoro python[1335549]: 2026-05-09 07:00:38,522 [INFO] Processing SHIB-USDT (new candle)...
+May 09 07:00:41 cuandeoro python[1335549]:   [PB] rsi=36.2 adx=0.0 vol=3.18 btc=-0.01% fund=+0.0100% | match=R001
+May 09 07:00:41 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:00:41 cuandeoro python[1335549]: Action: 1, Margin: 81.64, Lev: 5.00x, Notional: 408.19, Portfolio: 81.64
+May 09 07:00:41 cuandeoro python[1335549]:   ATR SL/TP: SL=0.19% TP R:R=2.5:1 ATR=0.000000
+May 09 07:00:41 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($285.73)
+May 09 07:00:41 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:41 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:00:41 cuandeoro python[1335549]: 2026-05-09 07:00:41,211 [INFO] 🧠 GEMMA4-NIGHT-OFF [SHIB-USDT]: night_mode=off, session=REDUCED
+May 09 07:00:41 cuandeoro python[1335549]: 2026-05-09 07:00:41,212 [WARNING] WS connect/read failed (wss://open-api-swap.bingx.com/swap-market): Cannot write to closing transport
+May 09 07:00:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:00:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:01:12 cuandeoro python[1335549]: 2026-05-09 07:01:12,218 [INFO] Processing BNB-USDT (new candle)...
+May 09 07:01:14 cuandeoro python[1335549]:   [PB] rsi=42.9 adx=0.0 vol=0.79 btc=-0.01% fund=+0.0050% | match=None
+May 09 07:01:14 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.69
+May 09 07:01:14 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:14 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:14 cuandeoro python[1335549]: 2026-05-09 07:01:14,766 [INFO] 🔪 KILLSWITCH [BNB-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:14 cuandeoro python[1335549]: 2026-05-09 07:01:14,767 [INFO] Processing SUI-USDT (new candle)...
+May 09 07:01:17 cuandeoro python[1335549]:   [PB] rsi=33.0 adx=0.0 vol=1.35 btc=+0.01% fund=+0.0100% | match=R001
+May 09 07:01:17 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.35<1.5
+May 09 07:01:17 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.09
+May 09 07:01:17 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:17 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:17 cuandeoro python[1335549]: 2026-05-09 07:01:17,644 [INFO] 🔪 KILLSWITCH [SUI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:17 cuandeoro python[1335549]: 2026-05-09 07:01:17,645 [INFO] Processing ETH-USDT (new candle)...
+May 09 07:01:19 cuandeoro python[1335549]:   [PB] rsi=40.0 adx=0.0 vol=2.21 btc=+0.01% fund=+0.0028% | match=R001
+May 09 07:01:19 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:01:19 cuandeoro python[1335549]: Action: 1, Margin: 28.44, Lev: 5.00x, Notional: 142.18, Portfolio: 46.37
+May 09 07:01:19 cuandeoro python[1335549]:   ATR SL/TP: SL=0.11% TP R:R=2.5:1 ATR=2.170714
+May 09 07:01:19 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($99.52)
+May 09 07:01:19 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:19 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:20 cuandeoro python[1335549]: 2026-05-09 07:01:20,006 [INFO] 🔪 KILLSWITCH [ETH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:20 cuandeoro python[1335549]: 2026-05-09 07:01:20,007 [INFO] Processing HBAR-USDT (new candle)...
+May 09 07:01:22 cuandeoro python[1335549]:   [PB] rsi=30.9 adx=0.0 vol=1.66 btc=+0.01% fund=+0.0100% | match=R001
+May 09 07:01:22 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:01:22 cuandeoro python[1335549]: Action: 1, Margin: 27.46, Lev: 5.00x, Notional: 137.28, Portfolio: 45.98
+May 09 07:01:22 cuandeoro python[1335549]:   ATR SL/TP: SL=0.22% TP R:R=2.5:1 ATR=0.000169
+May 09 07:01:22 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($96.10)
+May 09 07:01:22 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:22 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:22 cuandeoro python[1335549]: 2026-05-09 07:01:22,348 [INFO] 🔪 KILLSWITCH [HBAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:22 cuandeoro python[1335549]: 2026-05-09 07:01:22,349 [INFO] Processing NEAR-USDT (new candle)...
+May 09 07:01:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:01:25 cuandeoro python[1335549]:   [PB] rsi=48.0 adx=0.0 vol=0.50 btc=+0.01% fund=+0.0100% | match=None
+May 09 07:01:25 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.97
+May 09 07:01:25 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:25 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:25 cuandeoro python[1335549]: 2026-05-09 07:01:25,504 [INFO] 🔪 KILLSWITCH [NEAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:25 cuandeoro python[1335549]: 2026-05-09 07:01:25,505 [INFO] Processing UNI-USDT (new candle)...
+May 09 07:01:27 cuandeoro python[1335549]:   [PB] rsi=19.1 adx=0.0 vol=0.41 btc=+0.01% fund=+0.0100% | match=R007
+May 09 07:01:27 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_dead_ratio=0.41
+May 09 07:01:27 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.50
+May 09 07:01:27 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:27 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:27 cuandeoro python[1335549]: 2026-05-09 07:01:27,936 [INFO] 🔪 KILLSWITCH [UNI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:27 cuandeoro python[1335549]: 2026-05-09 07:01:27,938 [INFO] Processing AVAX-USDT (new candle)...
+May 09 07:01:30 cuandeoro python[1335549]:   [PB] rsi=30.2 adx=0.0 vol=0.64 btc=+0.01% fund=+0.0100% | match=R007
+May 09 07:01:30 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.64<1.5
+May 09 07:01:30 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.25
+May 09 07:01:30 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:30 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:30 cuandeoro python[1335549]: 2026-05-09 07:01:30,513 [INFO] 🔪 KILLSWITCH [AVAX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:30 cuandeoro python[1335549]: 2026-05-09 07:01:30,514 [INFO] Processing LINK-USDT (new candle)...
+May 09 07:01:33 cuandeoro python[1335549]:   [PB] rsi=18.2 adx=0.0 vol=0.26 btc=+0.01% fund=+0.0100% | match=R004
+May 09 07:01:33 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_dead_ratio=0.26
+May 09 07:01:33 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.89
+May 09 07:01:33 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:33 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:01:33 cuandeoro python[1335549]: 2026-05-09 07:01:33,057 [INFO] 🔪 KILLSWITCH [LINK-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:01:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:01:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:05:17 cuandeoro python[1335549]: 2026-05-09 07:05:17,366 [INFO] Processing TRX-USDT (new candle)...
+May 09 07:05:20 cuandeoro python[1335549]:   [PB] rsi=44.9 adx=0.0 vol=1.49 btc=+0.07% fund=+0.0050% | match=None
+May 09 07:05:20 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 07:05:20 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:20 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,324 [INFO] SYMBOL HEALTH: BTC-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,325 [INFO] SYMBOL HEALTH: ETH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,325 [INFO] SYMBOL HEALTH: BCH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,325 [INFO] SYMBOL HEALTH: XRP-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,325 [INFO] SYMBOL HEALTH: AVAX-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,326 [INFO] SYMBOL HEALTH: XLM-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,326 [INFO] SYMBOL HEALTH: HBAR-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,326 [INFO] SYMBOL HEALTH: LINK-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,326 [INFO] SYMBOL HEALTH: SUI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,326 [INFO] SYMBOL HEALTH: NEAR-USDT → TIER 3 (MINIMAL) — size 25% — Rolling WR 22%
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,326 [INFO] SYMBOL HEALTH: UNI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,327 [INFO] SymbolHealth: demoted → BTC-USDT=T2(REDUCED), ETH-USDT=T2(REDUCED), BCH-USDT=T2(REDUCED), XRP-USDT=T2(REDUCED), AVAX-USDT=T2(REDUCED), XLM-USDT=T2(REDUCED), HBAR-USDT=T2(REDUCED), LINK-USDT=T2(REDUCED), LTC-USDT=T4(PAUSED), SUI-USDT=T2(REDUCED), NEAR-USDT=T3(MINIMAL), UNI-USDT=T2(REDUCED)
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,329 [INFO] 🔪 KILLSWITCH [TRX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:20 cuandeoro python[1335549]: 2026-05-09 07:05:20,330 [INFO] Processing BTC-USDT (new candle)...
+May 09 07:05:22 cuandeoro python[1335549]:   [PB] rsi=35.1 adx=0.0 vol=0.63 btc=+0.07% fund=-0.0045% | match=None
+May 09 07:05:22 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.46
+May 09 07:05:22 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:22 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:22 cuandeoro python[1335549]: 2026-05-09 07:05:22,908 [INFO] 🔪 KILLSWITCH [BTC-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:22 cuandeoro python[1335549]: 2026-05-09 07:05:22,909 [INFO] Processing ETH-USDT (new candle)...
+May 09 07:05:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:05:24 cuandeoro python[1335549]:   [PB] rsi=47.9 adx=0.0 vol=0.83 btc=+0.07% fund=+0.0028% | match=None
+May 09 07:05:24 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.37
+May 09 07:05:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:24 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:24 cuandeoro python[1335549]: 2026-05-09 07:05:24,987 [INFO] 🔪 KILLSWITCH [ETH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:24 cuandeoro python[1335549]: 2026-05-09 07:05:24,988 [INFO] Processing ADA-USDT (new candle)...
+May 09 07:05:27 cuandeoro python[1335549]:   [PB] rsi=16.7 adx=0.0 vol=0.43 btc=+0.07% fund=+0.0019% | match=R007
+May 09 07:05:27 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_dead_ratio=0.43
+May 09 07:05:27 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.18
+May 09 07:05:27 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:27 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:27 cuandeoro python[1335549]: 2026-05-09 07:05:27,578 [INFO] 🔪 KILLSWITCH [ADA-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:27 cuandeoro python[1335549]: 2026-05-09 07:05:27,579 [INFO] Processing DOT-USDT (new candle)...
+May 09 07:05:30 cuandeoro python[1335549]:   [PB] rsi=44.8 adx=0.0 vol=0.36 btc=+0.07% fund=+0.0100% | match=None
+May 09 07:05:30 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.96
+May 09 07:05:30 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:30 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:30 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:924: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:30 cuandeoro python[1335549]:   state.last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+May 09 07:05:30 cuandeoro python[1335549]: 2026-05-09 07:05:30,174 [INFO] Processing SHIB-USDT (new candle)...
+May 09 07:05:32 cuandeoro python[1335549]:   [PB] rsi=41.7 adx=0.0 vol=3.13 btc=+0.07% fund=+0.0100% | match=R001
+May 09 07:05:32 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:05:32 cuandeoro python[1335549]: Action: 1, Margin: 81.64, Lev: 5.00x, Notional: 408.19, Portfolio: 81.64
+May 09 07:05:32 cuandeoro python[1335549]:   ATR SL/TP: SL=0.19% TP R:R=2.5:1 ATR=0.000000
+May 09 07:05:32 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($285.73)
+May 09 07:05:32 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:32 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:32 cuandeoro python[1335549]: 2026-05-09 07:05:32,802 [INFO] 🧠 GEMMA4-NIGHT-OFF [SHIB-USDT]: night_mode=off, session=REDUCED
+May 09 07:05:32 cuandeoro python[1335549]: 2026-05-09 07:05:32,803 [INFO] Processing DOGE-USDT (new candle)...
+May 09 07:05:35 cuandeoro python[1335549]:   [PB] rsi=48.6 adx=0.0 vol=0.47 btc=+0.07% fund=+0.0100% | match=None
+May 09 07:05:35 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 55.60
+May 09 07:05:35 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:35 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:35 cuandeoro python[1335549]: 2026-05-09 07:05:35,357 [INFO] 🔪 KILLSWITCH [DOGE-USDT] (tier=major): killswitch_cumulative_loss_$-27.94 -- skipping trade
+May 09 07:05:35 cuandeoro python[1335549]: 2026-05-09 07:05:35,358 [INFO] Processing SUI-USDT (new candle)...
+May 09 07:05:37 cuandeoro python[1335549]:   [PB] rsi=34.1 adx=0.0 vol=0.41 btc=+0.07% fund=+0.0100% | match=R007
+May 09 07:05:37 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_dead_ratio=0.41
+May 09 07:05:37 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.09
+May 09 07:05:37 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:37 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:37 cuandeoro python[1335549]: 2026-05-09 07:05:37,623 [INFO] 🔪 KILLSWITCH [SUI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:37 cuandeoro python[1335549]: 2026-05-09 07:05:37,624 [INFO] Processing NEAR-USDT (new candle)...
+May 09 07:05:39 cuandeoro python[1335549]:   [PB] rsi=42.2 adx=0.0 vol=0.86 btc=+0.07% fund=+0.0100% | match=None
+May 09 07:05:39 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.97
+May 09 07:05:39 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:39 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:39 cuandeoro python[1335549]: 2026-05-09 07:05:39,875 [INFO] 🔪 KILLSWITCH [NEAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:39 cuandeoro python[1335549]: 2026-05-09 07:05:39,875 [INFO] Processing UNI-USDT (new candle)...
+May 09 07:05:41 cuandeoro python[1335549]:   [PB] rsi=23.5 adx=0.0 vol=0.40 btc=+0.07% fund=+0.0100% | match=R007
+May 09 07:05:41 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_dead_ratio=0.40
+May 09 07:05:41 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.50
+May 09 07:05:41 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:41 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:41 cuandeoro python[1335549]: 2026-05-09 07:05:41,892 [INFO] 🔪 KILLSWITCH [UNI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:41 cuandeoro python[1335549]: 2026-05-09 07:05:41,894 [INFO] Processing BCH-USDT (new candle)...
+May 09 07:05:44 cuandeoro python[1335549]:   [PB] rsi=37.3 adx=0.0 vol=0.59 btc=+0.07% fund=+0.0100% | match=None
+May 09 07:05:44 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.90
+May 09 07:05:44 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:44 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:44 cuandeoro python[1335549]: 2026-05-09 07:05:44,453 [INFO] 🔪 KILLSWITCH [BCH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:44 cuandeoro python[1335549]: 2026-05-09 07:05:44,454 [INFO] Processing LINK-USDT (new candle)...
+May 09 07:05:46 cuandeoro python[1335549]:   [PB] rsi=22.6 adx=0.0 vol=0.56 btc=+0.07% fund=+0.0100% | match=R007
+May 09 07:05:46 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.56<1.5
+May 09 07:05:46 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.89
+May 09 07:05:46 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:46 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:46 cuandeoro python[1335549]: 2026-05-09 07:05:46,703 [INFO] 🔪 KILLSWITCH [LINK-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:46 cuandeoro python[1335549]: 2026-05-09 07:05:46,704 [INFO] Processing LTC-USDT (new candle)...
+May 09 07:05:49 cuandeoro python[1335549]:   [PB] rsi=35.0 adx=0.0 vol=1.95 btc=+0.07% fund=+0.0100% | match=R001
+May 09 07:05:49 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:05:49 cuandeoro python[1335549]: Action: 1, Margin: 33.05, Lev: 5.00x, Notional: 165.23, Portfolio: 48.22
+May 09 07:05:49 cuandeoro python[1335549]:   ATR SL/TP: SL=0.22% TP R:R=2.5:1 ATR=0.107143
+May 09 07:05:49 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($115.66)
+May 09 07:05:49 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:49 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:49 cuandeoro python[1335549]: 2026-05-09 07:05:49,193 [INFO] HEALTH-PAUSED [LTC-USDT]: Rolling WR 12% (unpauses in 78m) -- skipping trade
+May 09 07:05:49 cuandeoro python[1335549]: 2026-05-09 07:05:49,194 [INFO] Processing XRP-USDT (new candle)...
+May 09 07:05:51 cuandeoro python[1335549]:   [PB] rsi=45.7 adx=0.0 vol=0.60 btc=+0.07% fund=+0.0100% | match=None
+May 09 07:05:51 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 49.37
+May 09 07:05:51 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:51 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:51 cuandeoro python[1335549]: 2026-05-09 07:05:51,820 [INFO] 🔪 KILLSWITCH [XRP-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:51 cuandeoro python[1335549]: 2026-05-09 07:05:51,821 [INFO] Processing SOL-USDT (new candle)...
+May 09 07:05:54 cuandeoro python[1335549]:   [PB] rsi=45.6 adx=0.0 vol=0.66 btc=+0.07% fund=-0.0095% | match=None
+May 09 07:05:54 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.16
+May 09 07:05:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:54 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:54 cuandeoro python[1335549]: 2026-05-09 07:05:54,161 [INFO] 🔪 KILLSWITCH [SOL-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:54 cuandeoro python[1335549]: 2026-05-09 07:05:54,162 [INFO] Processing XLM-USDT (new candle)...
+May 09 07:05:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:05:56 cuandeoro python[1335549]:   [PB] rsi=32.6 adx=0.0 vol=0.98 btc=+0.07% fund=+0.0100% | match=R007
+May 09 07:05:56 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.98<1.5
+May 09 07:05:56 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.30
+May 09 07:05:56 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:56 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:56 cuandeoro python[1335549]: 2026-05-09 07:05:56,519 [INFO] 🔪 KILLSWITCH [XLM-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:56 cuandeoro python[1335549]: 2026-05-09 07:05:56,520 [INFO] Processing AVAX-USDT (new candle)...
+May 09 07:05:58 cuandeoro python[1335549]:   [PB] rsi=31.7 adx=0.0 vol=0.57 btc=+0.07% fund=+0.0100% | match=R007
+May 09 07:05:58 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.57<1.5
+May 09 07:05:58 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.25
+May 09 07:05:58 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:05:58 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:05:58 cuandeoro python[1335549]: 2026-05-09 07:05:58,786 [INFO] 🔪 KILLSWITCH [AVAX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:05:58 cuandeoro python[1335549]: 2026-05-09 07:05:58,788 [INFO] Processing BNB-USDT (new candle)...
+May 09 07:06:00 cuandeoro python[1335549]:   [PB] rsi=51.0 adx=0.0 vol=0.55 btc=+0.07% fund=+0.0050% | match=None
+May 09 07:06:00 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.69
+May 09 07:06:00 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:06:00 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:06:00 cuandeoro python[1335549]: 2026-05-09 07:06:00,859 [INFO] 🔪 KILLSWITCH [BNB-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:06:00 cuandeoro python[1335549]: 2026-05-09 07:06:00,864 [WARNING] WS connect/read failed (wss://open-api-swap.bingx.com/swap-market): Cannot write to closing transport
+May 09 07:06:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:06:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:06:33 cuandeoro python[1335549]: 2026-05-09 07:06:33,274 [INFO] Processing HBAR-USDT (new candle)...
+May 09 07:06:36 cuandeoro python[1335549]:   [PB] rsi=37.1 adx=0.0 vol=1.44 btc=+0.08% fund=+0.0100% | match=R001
+May 09 07:06:36 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.44<1.5
+May 09 07:06:36 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 45.98
+May 09 07:06:36 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:06:36 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:06:36 cuandeoro python[1335549]: 2026-05-09 07:06:36,157 [INFO] 🔪 KILLSWITCH [HBAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:06:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:06:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:10:38 cuandeoro python[1335549]: 2026-05-09 07:10:38,068 [INFO] Processing BTC-USDT (new candle)...
+May 09 07:10:40 cuandeoro python[1335549]:   [PB] rsi=32.6 adx=0.0 vol=0.86 btc=+0.13% fund=-0.0047% | match=R007
+May 09 07:10:40 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.86<1.5
+May 09 07:10:40 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.46
+May 09 07:10:40 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:40 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,973 [INFO] SYMBOL HEALTH: BTC-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,973 [INFO] SYMBOL HEALTH: ETH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,974 [INFO] SYMBOL HEALTH: BCH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,974 [INFO] SYMBOL HEALTH: XRP-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,974 [INFO] SYMBOL HEALTH: AVAX-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,974 [INFO] SYMBOL HEALTH: XLM-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,974 [INFO] SYMBOL HEALTH: HBAR-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,974 [INFO] SYMBOL HEALTH: LINK-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,975 [INFO] SYMBOL HEALTH: SUI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,975 [INFO] SYMBOL HEALTH: NEAR-USDT → TIER 3 (MINIMAL) — size 25% — Rolling WR 22%
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,975 [INFO] SYMBOL HEALTH: UNI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,975 [INFO] SymbolHealth: demoted → BTC-USDT=T2(REDUCED), ETH-USDT=T2(REDUCED), BCH-USDT=T2(REDUCED), XRP-USDT=T2(REDUCED), AVAX-USDT=T2(REDUCED), XLM-USDT=T2(REDUCED), HBAR-USDT=T2(REDUCED), LINK-USDT=T2(REDUCED), LTC-USDT=T4(PAUSED), SUI-USDT=T2(REDUCED), NEAR-USDT=T3(MINIMAL), UNI-USDT=T2(REDUCED)
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,977 [INFO] 🔪 KILLSWITCH [BTC-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:10:40 cuandeoro python[1335549]: 2026-05-09 07:10:40,978 [INFO] Processing SUI-USDT (new candle)...
+May 09 07:10:43 cuandeoro python[1335549]:   [PB] rsi=32.8 adx=0.0 vol=1.47 btc=+0.13% fund=+0.0100% | match=R001
+May 09 07:10:43 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.47<1.5
+May 09 07:10:43 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.09
+May 09 07:10:43 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:43 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:43 cuandeoro python[1335549]: 2026-05-09 07:10:43,546 [INFO] 🔪 KILLSWITCH [SUI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:10:43 cuandeoro python[1335549]: 2026-05-09 07:10:43,547 [INFO] Processing ETH-USDT (new candle)...
+May 09 07:10:46 cuandeoro python[1335549]:   [PB] rsi=47.0 adx=0.0 vol=1.14 btc=+0.13% fund=+0.0027% | match=None
+May 09 07:10:46 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.37
+May 09 07:10:46 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:46 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:46 cuandeoro python[1335549]: 2026-05-09 07:10:46,123 [INFO] 🔪 KILLSWITCH [ETH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:10:46 cuandeoro python[1335549]: 2026-05-09 07:10:46,124 [INFO] Processing BNB-USDT (new candle)...
+May 09 07:10:48 cuandeoro python[1335549]:   [PB] rsi=45.3 adx=0.0 vol=0.87 btc=+0.13% fund=+0.0050% | match=None
+May 09 07:10:48 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.69
+May 09 07:10:48 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:48 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:48 cuandeoro python[1335549]: 2026-05-09 07:10:48,675 [INFO] 🔪 KILLSWITCH [BNB-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:10:48 cuandeoro python[1335549]: 2026-05-09 07:10:48,676 [INFO] Processing AVAX-USDT (new candle)...
+May 09 07:10:51 cuandeoro python[1335549]:   [PB] rsi=39.6 adx=0.0 vol=0.69 btc=+0.13% fund=+0.0100% | match=None
+May 09 07:10:51 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.25
+May 09 07:10:51 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:51 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:51 cuandeoro python[1335549]: 2026-05-09 07:10:51,305 [INFO] 🔪 KILLSWITCH [AVAX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:10:51 cuandeoro python[1335549]: 2026-05-09 07:10:51,306 [INFO] Processing DOGE-USDT (new candle)...
+May 09 07:10:53 cuandeoro python[1335549]:   [PB] rsi=46.0 adx=0.0 vol=0.41 btc=+0.13% fund=+0.0100% | match=None
+May 09 07:10:53 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 55.60
+May 09 07:10:53 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:53 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:53 cuandeoro python[1335549]: 2026-05-09 07:10:53,841 [INFO] 🔪 KILLSWITCH [DOGE-USDT] (tier=major): killswitch_cumulative_loss_$-27.94 -- skipping trade
+May 09 07:10:53 cuandeoro python[1335549]: 2026-05-09 07:10:53,841 [INFO] Processing HBAR-USDT (new candle)...
+May 09 07:10:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:10:56 cuandeoro python[1335549]:   [PB] rsi=34.2 adx=0.0 vol=0.69 btc=+0.13% fund=+0.0100% | match=R011
+May 09 07:10:56 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.69<1.5
+May 09 07:10:56 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 45.98
+May 09 07:10:56 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:56 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:56 cuandeoro python[1335549]: 2026-05-09 07:10:56,125 [INFO] 🔪 KILLSWITCH [HBAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:10:56 cuandeoro python[1335549]: 2026-05-09 07:10:56,126 [INFO] Processing NEAR-USDT (new candle)...
+May 09 07:10:58 cuandeoro python[1335549]:   [PB] rsi=34.6 adx=0.0 vol=0.69 btc=+0.13% fund=+0.0100% | match=R007
+May 09 07:10:58 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.69<1.5
+May 09 07:10:58 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.97
+May 09 07:10:58 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:10:58 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:10:58 cuandeoro python[1335549]: 2026-05-09 07:10:58,697 [INFO] 🔪 KILLSWITCH [NEAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:10:58 cuandeoro python[1335549]: 2026-05-09 07:10:58,698 [INFO] Processing SOL-USDT (new candle)...
+May 09 07:11:01 cuandeoro python[1335549]:   [PB] rsi=46.2 adx=0.0 vol=0.92 btc=+0.13% fund=-0.0091% | match=None
+May 09 07:11:01 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.16
+May 09 07:11:01 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:01 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:01 cuandeoro python[1335549]: 2026-05-09 07:11:01,283 [INFO] 🔪 KILLSWITCH [SOL-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:11:01 cuandeoro python[1335549]: 2026-05-09 07:11:01,284 [INFO] Processing UNI-USDT (new candle)...
+May 09 07:11:03 cuandeoro python[1335549]:   [PB] rsi=26.5 adx=0.0 vol=0.71 btc=+0.13% fund=+0.0095% | match=R007
+May 09 07:11:03 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.71<1.5
+May 09 07:11:03 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.50
+May 09 07:11:03 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:03 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:03 cuandeoro python[1335549]: 2026-05-09 07:11:03,960 [INFO] 🔪 KILLSWITCH [UNI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:11:03 cuandeoro python[1335549]: 2026-05-09 07:11:03,961 [INFO] Processing XLM-USDT (new candle)...
+May 09 07:11:06 cuandeoro python[1335549]:   [PB] rsi=33.0 adx=0.0 vol=1.22 btc=+0.13% fund=+0.0100% | match=R007
+May 09 07:11:06 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.22<1.5
+May 09 07:11:06 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.30
+May 09 07:11:06 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:06 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:06 cuandeoro python[1335549]: 2026-05-09 07:11:06,496 [INFO] 🔪 KILLSWITCH [XLM-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:11:06 cuandeoro python[1335549]: 2026-05-09 07:11:06,497 [INFO] Processing ADA-USDT (new candle)...
+May 09 07:11:09 cuandeoro python[1335549]:   [PB] rsi=23.1 adx=0.0 vol=1.02 btc=+0.13% fund=+0.0016% | match=R007
+May 09 07:11:09 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.02<1.5
+May 09 07:11:09 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.18
+May 09 07:11:09 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:09 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:09 cuandeoro python[1335549]: 2026-05-09 07:11:09,029 [INFO] 🔪 KILLSWITCH [ADA-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:11:09 cuandeoro python[1335549]: 2026-05-09 07:11:09,030 [INFO] Processing BCH-USDT (new candle)...
+May 09 07:11:12 cuandeoro python[1335549]:   [PB] rsi=36.6 adx=0.0 vol=1.35 btc=+0.13% fund=+0.0100% | match=R001
+May 09 07:11:12 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.35<1.5
+May 09 07:11:12 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.90
+May 09 07:11:12 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:12 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:12 cuandeoro python[1335549]: 2026-05-09 07:11:12,229 [INFO] 🔪 KILLSWITCH [BCH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:11:12 cuandeoro python[1335549]: 2026-05-09 07:11:12,233 [INFO] Processing DOT-USDT (new candle)...
+May 09 07:11:14 cuandeoro python[1335549]:   [PB] rsi=44.8 adx=0.0 vol=0.78 btc=+0.13% fund=+0.0100% | match=None
+May 09 07:11:14 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.96
+May 09 07:11:14 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:14 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:14 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:924: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:14 cuandeoro python[1335549]:   state.last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+May 09 07:11:14 cuandeoro python[1335549]: 2026-05-09 07:11:14,808 [INFO] Processing LINK-USDT (new candle)...
+May 09 07:11:17 cuandeoro python[1335549]:   [PB] rsi=23.9 adx=0.0 vol=0.64 btc=+0.13% fund=+0.0100% | match=R007
+May 09 07:11:17 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.64<1.5
+May 09 07:11:17 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.89
+May 09 07:11:17 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:17 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:17 cuandeoro python[1335549]: 2026-05-09 07:11:17,338 [INFO] 🔪 KILLSWITCH [LINK-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:11:17 cuandeoro python[1335549]: 2026-05-09 07:11:17,339 [INFO] Processing LTC-USDT (new candle)...
+May 09 07:11:20 cuandeoro python[1335549]:   [PB] rsi=38.6 adx=0.0 vol=0.79 btc=+0.13% fund=+0.0100% | match=None
+May 09 07:11:20 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 07:11:20 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:20 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:20 cuandeoro python[1335549]: 2026-05-09 07:11:20,086 [INFO] HEALTH-PAUSED [LTC-USDT]: Rolling WR 12% (unpauses in 72m) -- skipping trade
+May 09 07:11:20 cuandeoro python[1335549]: 2026-05-09 07:11:20,087 [INFO] Processing SHIB-USDT (new candle)...
+May 09 07:11:22 cuandeoro python[1335549]:   [PB] rsi=43.2 adx=0.0 vol=0.58 btc=+0.13% fund=+0.0100% | match=None
+May 09 07:11:22 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 81.64
+May 09 07:11:22 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:22 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:22 cuandeoro python[1335549]: 2026-05-09 07:11:22,595 [INFO] 🧠 GEMMA4-NIGHT-OFF [SHIB-USDT]: night_mode=off, session=REDUCED
+May 09 07:11:22 cuandeoro python[1335549]: 2026-05-09 07:11:22,596 [INFO] Processing XRP-USDT (new candle)...
+May 09 07:11:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:11:25 cuandeoro python[1335549]:   [PB] rsi=51.3 adx=0.0 vol=1.35 btc=+0.13% fund=+0.0100% | match=None
+May 09 07:11:25 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 49.37
+May 09 07:11:25 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:25 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:11:25 cuandeoro python[1335549]: 2026-05-09 07:11:25,240 [INFO] 🔪 KILLSWITCH [XRP-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:11:25 cuandeoro python[1335549]: 2026-05-09 07:11:25,246 [WARNING] WS connect/read failed (wss://open-api-swap.bingx.com/swap-market): Cannot write to closing transport
+May 09 07:11:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:11:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:11:57 cuandeoro python[1335549]: 2026-05-09 07:11:57,340 [INFO] Processing TRX-USDT (new candle)...
+May 09 07:12:00 cuandeoro python[1335549]:   [PB] rsi=39.6 adx=0.0 vol=0.52 btc=+0.14% fund=+0.0050% | match=None
+May 09 07:12:00 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 07:12:00 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:12:00 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:12:00 cuandeoro python[1335549]: 2026-05-09 07:12:00,231 [INFO] 🔪 KILLSWITCH [TRX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:12:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:12:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:15:12 cuandeoro python[1335549]: 2026-05-09 07:15:12,669 [INFO] Processing DOGE-USDT (new candle)...
+May 09 07:15:15 cuandeoro python[1335549]:   [PB] rsi=36.0 adx=0.0 vol=2.86 btc=+0.08% fund=+0.0100% | match=R001
+May 09 07:15:15 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:15:15 cuandeoro python[1335549]: Action: 1, Margin: 51.51, Lev: 5.00x, Notional: 257.53, Portfolio: 55.60
+May 09 07:15:15 cuandeoro python[1335549]:   ATR SL/TP: SL=0.34% TP R:R=2.5:1 ATR=0.000310
+May 09 07:15:15 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($180.27)
+May 09 07:15:15 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:15 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,468 [INFO] SYMBOL HEALTH: BTC-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,468 [INFO] SYMBOL HEALTH: ETH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,469 [INFO] SYMBOL HEALTH: BCH-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,469 [INFO] SYMBOL HEALTH: XRP-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,469 [INFO] SYMBOL HEALTH: AVAX-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,469 [INFO] SYMBOL HEALTH: XLM-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,469 [INFO] SYMBOL HEALTH: HBAR-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,469 [INFO] SYMBOL HEALTH: LINK-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,470 [INFO] SYMBOL HEALTH: SUI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,470 [INFO] SYMBOL HEALTH: NEAR-USDT → TIER 3 (MINIMAL) — size 25% — Rolling WR 22%
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,470 [INFO] SYMBOL HEALTH: UNI-USDT → TIER 2 (REDUCED) — size 50% — 5 consecutive losses
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,470 [INFO] SymbolHealth: demoted → BTC-USDT=T2(REDUCED), ETH-USDT=T2(REDUCED), BCH-USDT=T2(REDUCED), XRP-USDT=T2(REDUCED), AVAX-USDT=T2(REDUCED), XLM-USDT=T2(REDUCED), HBAR-USDT=T2(REDUCED), LINK-USDT=T2(REDUCED), LTC-USDT=T4(PAUSED), SUI-USDT=T2(REDUCED), NEAR-USDT=T3(MINIMAL), UNI-USDT=T2(REDUCED)
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,472 [INFO] 🔪 KILLSWITCH [DOGE-USDT] (tier=major): killswitch_cumulative_loss_$-27.94 -- skipping trade
+May 09 07:15:15 cuandeoro python[1335549]: 2026-05-09 07:15:15,473 [INFO] Processing NEAR-USDT (new candle)...
+May 09 07:15:18 cuandeoro python[1335549]:   [PB] rsi=31.6 adx=0.0 vol=1.53 btc=+0.08% fund=+0.0100% | match=R001
+May 09 07:15:18 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:15:18 cuandeoro python[1335549]: Action: 1, Margin: 32.43, Lev: 5.00x, Notional: 162.16, Portfolio: 47.97
+May 09 07:15:18 cuandeoro python[1335549]:   ATR SL/TP: SL=0.51% TP R:R=2.5:1 ATR=0.006714
+May 09 07:15:18 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($113.51)
+May 09 07:15:18 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:18 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:18 cuandeoro python[1335549]: 2026-05-09 07:15:18,276 [INFO] 🔪 KILLSWITCH [NEAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:18 cuandeoro python[1335549]: 2026-05-09 07:15:18,277 [INFO] Processing SHIB-USDT (new candle)...
+May 09 07:15:20 cuandeoro python[1335549]:   [PB] rsi=35.7 adx=0.0 vol=0.49 btc=+0.08% fund=+0.0100% | match=None
+May 09 07:15:20 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 81.64
+May 09 07:15:20 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:20 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:20 cuandeoro python[1335549]: 2026-05-09 07:15:20,618 [INFO] 🧠 GEMMA4-NIGHT-OFF [SHIB-USDT]: night_mode=off, session=REDUCED
+May 09 07:15:20 cuandeoro python[1335549]: 2026-05-09 07:15:20,619 [INFO] Processing TRX-USDT (new candle)...
+May 09 07:15:22 cuandeoro python[1335549]:   [PB] rsi=41.7 adx=0.0 vol=0.71 btc=+0.08% fund=+0.0050% | match=R004
+May 09 07:15:22 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.71<1.5
+May 09 07:15:22 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 07:15:22 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:22 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:22 cuandeoro python[1335549]: 2026-05-09 07:15:22,888 [INFO] 🔪 KILLSWITCH [TRX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:22 cuandeoro python[1335549]: 2026-05-09 07:15:22,889 [INFO] Processing AVAX-USDT (new candle)...
+May 09 07:15:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:15:25 cuandeoro python[1335549]:   [PB] rsi=33.7 adx=0.0 vol=0.94 btc=+0.08% fund=+0.0100% | match=R004
+May 09 07:15:25 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.94<1.5
+May 09 07:15:25 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.25
+May 09 07:15:25 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:25 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:25 cuandeoro python[1335549]: 2026-05-09 07:15:25,200 [INFO] 🔪 KILLSWITCH [AVAX-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:25 cuandeoro python[1335549]: 2026-05-09 07:15:25,202 [INFO] Processing XLM-USDT (new candle)...
+May 09 07:15:27 cuandeoro python[1335549]:   [PB] rsi=26.2 adx=0.0 vol=0.93 btc=+0.08% fund=+0.0100% | match=R004
+May 09 07:15:27 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.93<1.5
+May 09 07:15:27 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.30
+May 09 07:15:27 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:27 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:27 cuandeoro python[1335549]: 2026-05-09 07:15:27,723 [INFO] 🔪 KILLSWITCH [XLM-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:27 cuandeoro python[1335549]: 2026-05-09 07:15:27,724 [INFO] Processing LINK-USDT (new candle)...
+May 09 07:15:30 cuandeoro python[1335549]:   [PB] rsi=24.3 adx=0.0 vol=0.83 btc=+0.08% fund=+0.0100% | match=R007
+May 09 07:15:30 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.83<1.5
+May 09 07:15:30 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.89
+May 09 07:15:30 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:30 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:30 cuandeoro python[1335549]: 2026-05-09 07:15:30,603 [INFO] 🔪 KILLSWITCH [LINK-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:30 cuandeoro python[1335549]: 2026-05-09 07:15:30,604 [INFO] Processing XRP-USDT (new candle)...
+May 09 07:15:32 cuandeoro python[1335549]:   [PB] rsi=49.5 adx=0.0 vol=1.09 btc=+0.08% fund=+0.0100% | match=None
+May 09 07:15:32 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 49.37
+May 09 07:15:32 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:32 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:32 cuandeoro python[1335549]: 2026-05-09 07:15:32,886 [INFO] 🔪 KILLSWITCH [XRP-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:32 cuandeoro python[1335549]: 2026-05-09 07:15:32,886 [INFO] Processing ETH-USDT (new candle)...
+May 09 07:15:35 cuandeoro python[1335549]:   [PB] rsi=43.5 adx=0.0 vol=2.34 btc=+0.08% fund=+0.0027% | match=None
+May 09 07:15:35 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 46.37
+May 09 07:15:35 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:35 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:35 cuandeoro python[1335549]: 2026-05-09 07:15:35,178 [INFO] 🔪 KILLSWITCH [ETH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:35 cuandeoro python[1335549]: 2026-05-09 07:15:35,179 [INFO] Processing UNI-USDT (new candle)...
+May 09 07:15:37 cuandeoro python[1335549]:   [PB] rsi=18.7 adx=0.0 vol=0.73 btc=+0.08% fund=+0.0095% | match=R007
+May 09 07:15:37 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.73<1.5
+May 09 07:15:37 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 47.50
+May 09 07:15:37 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:37 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:37 cuandeoro python[1335549]: 2026-05-09 07:15:37,520 [INFO] 🔪 KILLSWITCH [UNI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:37 cuandeoro python[1335549]: 2026-05-09 07:15:37,521 [INFO] Processing DOT-USDT (new candle)...
+May 09 07:15:39 cuandeoro python[1335549]:   [PB] rsi=34.4 adx=0.0 vol=0.44 btc=+0.08% fund=+0.0100% | match=R007
+May 09 07:15:39 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_dead_ratio=0.44
+May 09 07:15:39 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.96
+May 09 07:15:39 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:39 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:39 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:924: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:39 cuandeoro python[1335549]:   state.last_processed_at_utc[token] = pd.Timestamp.utcnow().isoformat()
+May 09 07:15:39 cuandeoro python[1335549]: 2026-05-09 07:15:39,748 [INFO] Processing SUI-USDT (new candle)...
+May 09 07:15:42 cuandeoro python[1335549]:   [PB] rsi=30.1 adx=0.0 vol=1.54 btc=+0.08% fund=+0.0100% | match=R001
+May 09 07:15:42 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:15:42 cuandeoro python[1335549]: Action: 1, Margin: 32.72, Lev: 5.00x, Notional: 163.60, Portfolio: 48.09
+May 09 07:15:42 cuandeoro python[1335549]:   ATR SL/TP: SL=0.41% TP R:R=2.5:1 ATR=0.003657
+May 09 07:15:42 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($114.52)
+May 09 07:15:42 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:42 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:42 cuandeoro python[1335549]: 2026-05-09 07:15:42,015 [INFO] 🔪 KILLSWITCH [SUI-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:42 cuandeoro python[1335549]: 2026-05-09 07:15:42,018 [INFO] Processing ADA-USDT (new candle)...
+May 09 07:15:44 cuandeoro python[1335549]:   [PB] rsi=19.4 adx=0.0 vol=3.77 btc=+0.08% fund=+0.0016% | match=R001
+May 09 07:15:44 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:15:44 cuandeoro python[1335549]: Action: 1, Margin: 32.95, Lev: 5.00x, Notional: 164.76, Portfolio: 48.18
+May 09 07:15:44 cuandeoro python[1335549]:   ATR SL/TP: SL=0.27% TP R:R=2.5:1 ATR=0.000607
+May 09 07:15:44 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($115.33)
+May 09 07:15:44 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:44 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:44 cuandeoro python[1335549]: 2026-05-09 07:15:44,057 [INFO] 🔪 KILLSWITCH [ADA-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:15:44 cuandeoro python[1335549]: 2026-05-09 07:15:44,058 [INFO] Processing LTC-USDT (new candle)...
+May 09 07:15:46 cuandeoro python[1335549]:   [PB] rsi=38.1 adx=0.0 vol=1.09 btc=+0.08% fund=+0.0100% | match=R004
+May 09 07:15:46 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.09<1.5
+May 09 07:15:46 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.22
+May 09 07:15:46 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:46 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:15:46 cuandeoro python[1335549]: 2026-05-09 07:15:46,326 [INFO] HEALTH-PAUSED [LTC-USDT]: Rolling WR 12% (unpauses in 68m) -- skipping trade
+May 09 07:15:46 cuandeoro python[1335549]: 2026-05-09 07:15:46,329 [WARNING] WS connect/read failed (wss://open-api-swap.bingx.com/swap-market): Cannot write to closing transport
+May 09 07:15:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:15:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:16:17 cuandeoro python[1335549]: 2026-05-09 07:16:17,862 [INFO] Processing BTC-USDT (new candle)...
+May 09 07:16:21 cuandeoro python[1335549]:   [PB] rsi=29.7 adx=0.0 vol=1.39 btc=+0.07% fund=-0.0046% | match=R001
+May 09 07:16:21 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.39<1.5
+May 09 07:16:21 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.46
+May 09 07:16:21 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:16:21 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:16:21 cuandeoro python[1335549]: 2026-05-09 07:16:21,189 [INFO] 🔪 KILLSWITCH [BTC-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:16:21 cuandeoro python[1335549]: 2026-05-09 07:16:21,190 [INFO] Processing BNB-USDT (new candle)...
+May 09 07:16:24 cuandeoro python[1335549]:   [PB] rsi=35.1 adx=0.0 vol=1.75 btc=+0.07% fund=+0.0049% | match=R001
+May 09 07:16:24 cuandeoro python[1335549]:   ✅ PLAYBOOK LONG triggered: Rule R001 | rsi_oversold + vol_spike | WR=60.0% Sharpe=10.0
+May 09 07:16:24 cuandeoro python[1335549]: Action: 1, Margin: 34.22, Lev: 5.00x, Notional: 171.09, Portfolio: 48.69
+May 09 07:16:24 cuandeoro python[1335549]:   ATR SL/TP: SL=0.13% TP R:R=2.5:1 ATR=0.727857
+May 09 07:16:24 cuandeoro python[1335549]:   Session sizing: REDUCED → 70% size ($119.76)
+May 09 07:16:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:16:24 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:16:24 cuandeoro python[1335549]: 2026-05-09 07:16:24,666 [INFO] 🔪 KILLSWITCH [BNB-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:16:24 cuandeoro python[1335549]: 2026-05-09 07:16:24,667 [INFO] Processing HBAR-USDT (new candle)...
+May 09 07:16:24 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:16:24 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),
+May 09 07:16:27 cuandeoro python[1335549]:   [PB] rsi=28.7 adx=0.0 vol=1.05 btc=+0.07% fund=+0.0100% | match=R007
+May 09 07:16:27 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=1.05<1.5
+May 09 07:16:27 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 45.98
+May 09 07:16:27 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:16:27 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:16:27 cuandeoro python[1335549]: 2026-05-09 07:16:27,253 [INFO] 🔪 KILLSWITCH [HBAR-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:16:27 cuandeoro python[1335549]: 2026-05-09 07:16:27,253 [INFO] Processing SOL-USDT (new candle)...
+May 09 07:16:29 cuandeoro python[1335549]:   [PB] rsi=38.8 adx=0.0 vol=0.78 btc=+0.07% fund=-0.0086% | match=None
+May 09 07:16:29 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.16
+May 09 07:16:29 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:16:29 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:16:29 cuandeoro python[1335549]: 2026-05-09 07:16:29,932 [INFO] 🔪 KILLSWITCH [SOL-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:16:29 cuandeoro python[1335549]: 2026-05-09 07:16:29,934 [INFO] Processing BCH-USDT (new candle)...
+May 09 07:16:32 cuandeoro python[1335549]:   [PB] rsi=32.3 adx=0.0 vol=0.65 btc=+0.07% fund=+0.0100% | match=R007
+May 09 07:16:32 cuandeoro python[1335549]:   📊 VOLUME GATE: blocked — volume_low_ratio=0.65<1.5
+May 09 07:16:32 cuandeoro python[1335549]: Action: 0, Margin: 0.00, Lev: 1.00x, Notional: 0.00, Portfolio: 48.90
+May 09 07:16:32 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:818: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:16:32 cuandeoro python[1335549]:   {"timestamp": pd.Timestamp.utcnow(), "symbol": token,
+May 09 07:16:32 cuandeoro python[1335549]: 2026-05-09 07:16:32,506 [INFO] 🔪 KILLSWITCH [BCH-USDT] (tier=major): killswitch_5_consecutive_losses -- skipping trade
+May 09 07:16:54 cuandeoro python[1335549]: /nvme0n1-disk/srv/profitlab_quantum/main.py:726: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+May 09 07:16:54 cuandeoro python[1335549]:   "pid": os.getpid(), "ts_utc": pd.Timestamp.utcnow().isoformat(),

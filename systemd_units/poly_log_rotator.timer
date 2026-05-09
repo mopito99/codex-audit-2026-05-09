@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily log rotation for poly_sidecar (P5.0 firmado Gemma r150-novum)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 UTC
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

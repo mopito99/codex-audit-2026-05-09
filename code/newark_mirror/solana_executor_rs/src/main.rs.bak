@@ -1,0 +1,295 @@
+mod config;
+mod jupiter;
+mod logger;
+mod jito;
+mod tip_stream;
+mod fat_finger;
+mod jup_rate;
+mod toxicity;
+mod blockhash_worker;
+mod dex;
+mod stable_micro;
+mod state_engine;
+mod opportunity_engine;
+mod toxicity_worker;
+mod sandwich_executor;
+mod chaos_detector;
+mod pair_list;
+
+use anyhow::Result;
+use config::{EnvCfg, MIN_PROFIT_BPS, MIN_PROFIT_USDC, POLL_INTERVAL_MS,
+             scan_pairs, tier_slippage_bps};
+use jito::{build_bundle, poll_bundle_status, send_bundle, simulate_bundle_pre, VoteAccountBlacklist};
+use jupiter::{find_cyclic_arb, get_swap_transaction, ArbResult};
+use logger::Logger;
+use sandwich_executor::{SandwichExecutor, SandwichGap};
+use chaos_detector::ChaosDetector;
+use pair_list::SharedPairList;
+use solana_client::rpc_client::RpcClient;
+use solana_sdk::signature::{Keypair, Signer};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
+use std::time::Duration;
+use tokio::sync::mpsc;
+
+const JUPITER_RATE_PER_SEC: f64 = 2.0;
+
+fn load_keypair(b58_secret: &Option<String>) -> Option<Keypair> {
+    let s = b58_secret.as_ref()?;
+    let bytes = bs58::decode(s).into_vec().ok()?;
+    Keypair::from_bytes(&bytes).ok()
+}
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    let cfg = EnvCfg::load();
+    let keypair = load_keypair(&cfg.wallet_private_key);
+    let has_key = !cfg.helius_api_key.is_empty();
+
+    let rpc_url = if has_key {
+        if keypair.is_some() { cfg.helius_gatekeeper.clone() } else { cfg.helius_rpc.clone() }
+    } else {
+        "https://api.mainnet-beta.solana.com".to_string()
+    };
+
+    let rpc = Arc::new(RpcClient::new(rpc_url));
+    let mut default_headers = reqwest::header::HeaderMap::new();
+    if let Some(key) = &cfg.jupiter_api_key {
+        // Header CORRECTO segun docs Jupiter: x-api-key (no Authorization Bearer)
+        let name = reqwest::header::HeaderName::from_static("x-api-key");
+        let val = reqwest::header::HeaderValue::from_str(key)
+            .expect("invalid jupiter api key");
+        default_headers.insert(name, val);
+        println!(" jupiter api: api.jup.ag con x-api-key header (10 req/s, 25M creditos/mes)");
+    }
+    let http = reqwest::Client::builder()
+        .timeout(Duration::from_secs(8))
+        .default_headers(default_headers)
+        .tcp_keepalive(Duration::from_secs(60))
+        .pool_idle_timeout(Duration::from_secs(90))
+        .pool_max_idle_per_host(8)
+        .tcp_nodelay(true)
+        .build()?;
+
+    let logger = Logger::new(cfg.paper_mode);
+
+    // Tip dinamico via Jito tip stream — fallback al valor del .env mientras conecta
+    let dynamic_tip = Arc::new(AtomicU64::new(cfg.jito_tip_lamports));
+    tip_stream::spawn(dynamic_tip.clone(), cfg.helius_rpc.clone());
+
+    // Worker prefetch blockhash (Gemma 2026-04-28: elimina ~100ms del hot path)
+    let blockhash_cache = blockhash_worker::new_cache();
+    blockhash_worker::spawn(rpc.clone(), blockhash_cache.clone());
+
+    // Worker toxicity: actualiza market snapshots cada 2s para filtrar fat fingers tóxicos
+    let toxicity_snapshots = toxicity::new_snapshot_map();
+    toxicity_worker::spawn(toxicity_snapshots.clone(), cfg.helius_rpc.clone());
+
+    let base_fees_usdc = (5_000.0 * 2.0 / 1e9) * cfg.sol_price_usd;
+
+    println!("{}", "=".repeat(64));
+    println!(" SOLANA EXECUTOR · RUST · {}",
+        if cfg.paper_mode { "PAPER MODE" } else { "LIVE MODE — DINERO REAL" });
+    println!(" pares: {} | sol_price: ${} | tip: dinamico p75+15% | base_fees: ${:.4}",
+        scan_pairs().len(), cfg.sol_price_usd, base_fees_usdc);
+    if let Some(kp) = keypair.as_ref() { println!(" wallet: {}", kp.pubkey()); }
+    else { println!(" sin keypair — solo deteccion"); }
+    println!("{}", "=".repeat(64));
+
+    let blacklist = VoteAccountBlacklist::new();
+
+    // heartbeat: stats cada 30s
+    {
+        let logger = logger.clone();
+        let tip_h = dynamic_tip.clone();
+        let sol_price = cfg.sol_price_usd;
+        tokio::spawn(async move {
+            loop {
+                tokio::time::sleep(Duration::from_secs(30)).await;
+                let t = tip_h.load(Ordering::Relaxed);
+                let tip_usd = (t as f64 / 1e9) * sol_price;
+                println!("[stats] {} | tip_actual={} lam (${:.4})", logger.summary_line(), t, tip_usd);
+                logger.flush();
+            }
+        });
+    }
+
+    // fat_finger DISABLED — Pyth polling redundante con state_engine WebSocket
+    // fat_finger::spawn(
+    //     http.clone(), rpc.clone(), cfg.wallet_private_key.clone(),
+    //     blacklist.clone(), logger.clone(), cfg.sol_price_usd, toxicity_snapshots.clone(),
+    // );
+
+    // STATE ENGINE: actualiza precios de pools clave via Helius accountSubscribe
+    let price_cache = state_engine::new_cache();
+    state_engine::spawn(
+        price_cache.clone(),
+        cfg.helius_wss.clone(),
+        vec![
+            state_engine::PoolWatch {
+                pubkey: "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE",
+                dex: dex::DexType::OrcaWhirlpool,
+                dec0: 9, dec1: 6,
+                label: "Orca SOL/USDC",
+            },
+            state_engine::PoolWatch {
+                pubkey: "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj",
+                dex: dex::DexType::RaydiumClmm,
+                dec0: 9, dec1: 6,
+                label: "Raydium SOL/USDC",
+            },
+        ],
+    );
+
+    // CHANNEL OPPORTUNITY -> SANDWICH EXECUTOR (event-driven, bounded)
+    let (sg_tx, sg_rx) = mpsc::channel::<SandwichGap>(1024);
+
+    // OPPORTUNITY ENGINE: detecta gaps Orca<->Raydium, emite SandwichGap por canal
+    opportunity_engine::spawn(
+        price_cache.clone(),
+        cfg.paper_mode,
+        sg_tx,
+        dynamic_tip.clone(),
+    );
+
+    // SANDWICH EXECUTOR: paper-only, evalua y logea cada SandwichGap
+    // DYNAMIC PAIR LIST: fetches active_pairs.json from Dallas scanner every 10min
+    let active_pairs: SharedPairList = pair_list::new_list();
+    pair_list::spawn(active_pairs.clone(), "https://hftbots.quantummbo.io/data/active_pairs.json".to_string(), http.clone());
+
+    let chaos_detector = Arc::new(ChaosDetector::new());
+    let executor = Arc::new(SandwichExecutor::new(cfg.sol_price_usd, chaos_detector.clone()));
+    {
+        let executor = executor.clone();
+        let logger_s = logger.clone();
+        tokio::spawn(async move {
+            executor.run(sg_rx, logger_s).await;
+        });
+    }
+
+    // stable_micro DISABLED — era invento mío, no del advisor
+    // stable_micro::spawn(...);
+
+    loop {
+        let mkt_cfg = chaos_detector.current_config();
+        // Merge static pairs + dynamic long-tail pairs from scanner
+        let mut pairs: Vec<(String, Vec<f64>)> = scan_pairs()
+            .into_iter().map(|(m, a)| (m.to_string(), a)).collect();
+        pairs.extend(pair_list::get(&active_pairs).await);
+        for (mint, amounts) in &pairs {
+            for &amount in amounts {
+                // tip dinamico — recalcular por probe para que use el valor actual
+                let tip_lamports = dynamic_tip.load(Ordering::Relaxed);
+                let tip_usdc = (tip_lamports as f64 / 1e9) * cfg.sol_price_usd;
+                let total_cost_usdc = tip_usdc + base_fees_usdc;
+
+                let slippage = tier_slippage_bps(mint);
+                let result = find_cyclic_arb(&http, mint, amount, total_cost_usdc, slippage).await;
+
+                match result {
+                    ArbResult::Ok(arb) | ArbResult::NoProfit(arb) => {
+                        let profitable = arb.net_profit >= mkt_cfg.min_profit_usdc
+                            && arb.profit_bps >= mkt_cfg.min_profit_bps;
+                        let status_str = if profitable { "ok" } else { "no_profit" };
+                        logger.record_probe(mint, amount, status_str);
+                        logger.record_opportunity(&arb, profitable);
+
+                        if !profitable { continue; }
+
+                        // FILTRO HOPS: rutas con muchos hops fallan simulacion
+                        if arb.leg1_dexes.len() > config::MAX_HOPS_PER_LEG ||
+                           arb.leg2_dexes.len() > config::MAX_HOPS_PER_LEG {
+                            println!("    [skip] ruta compleja: {}+{} hops (max {})",
+                                arb.leg1_dexes.len(), arb.leg2_dexes.len(), config::MAX_HOPS_PER_LEG);
+                            continue;
+                        }
+
+                        // TIP AGRESIVO (validacion): 90% del profit, cap 100M lam
+                        let target_tip_usdc = (arb.gross_profit - base_fees_usdc) * 0.90;
+                        let target_tip_lam = ((target_tip_usdc / cfg.sol_price_usd) * 1e9) as u64;
+                        let dyn_tip_lam = target_tip_lam.clamp(500_000u64, mkt_cfg.max_tip_lamports);
+                        let actual_tip_usdc = (dyn_tip_lam as f64 / 1e9) * cfg.sol_price_usd;
+                        let actual_net = arb.gross_profit - actual_tip_usdc - base_fees_usdc;
+
+                        // Filtro: si tras tip optimo no quedan al menos $0.05 de margen, skip
+                        if actual_net < 0.05 {
+                            println!("    [skip] arb tight: gross=${:.4} tip_opt={} lam net_real=${:.4}",
+                                arb.gross_profit, dyn_tip_lam, actual_net);
+                            continue;
+                        }
+
+                        let name = config::name_for(mint);
+                        println!(
+                            "[+] ARB {} USDC -> {} -> USDC | gross=${:.4} | net_dyn=${:.4} ({:.2} bps) | tip_dyn={} lam (${:.4}) | {:?} -> {:?}",
+                            arb.input_usdc, name, arb.gross_profit, actual_net, arb.profit_bps,
+                            dyn_tip_lam, actual_tip_usdc, arb.leg1_dexes, arb.leg2_dexes
+                        );
+
+                        if cfg.paper_mode {
+                            println!("    [paper] quote OK — net=${:.4} tip={} lam", actual_net, dyn_tip_lam);
+                            continue;
+                        }
+
+                        let kp = match keypair.as_ref() { Some(k) => k, None => continue };
+
+                        let user = kp.pubkey().to_string();
+                        let (tx1_res, tx2_res) = tokio::join!(
+                            get_swap_transaction(&http, &arb.leg1_quote, &user),
+                            get_swap_transaction(&http, &arb.leg2_quote, &user)
+                        );
+                        let (tx1, tx2) = match (tx1_res, tx2_res) {
+                            (Ok(a), Ok(b)) => (a, b),
+                            _ => { println!("    [live] no se pudo obtener swap tx"); continue; }
+                        };
+
+                        let cached_bh = blockhash_worker::get(&blockhash_cache);
+                        let built = build_bundle(
+                            &rpc, &tx1, &tx2, kp, dyn_tip_lam, &blacklist, cached_bh
+                        ).await;
+                        let built = match built {
+                            Ok(Some(b)) => b,
+                            Ok(None)    => { println!("    [live] bundle: descartado (blacklist)"); continue; }
+                            Err(e)      => { println!("    [live] buildBundle error — {e}"); continue; }
+                        };
+
+                        // simulate REMOVIDO del hot path: ahorra 200-400ms
+                        // perdemos tip en bundles que fallan pero ganamos velocidad
+
+                        let sent = send_bundle(
+                            &http, &built.bundle, &built.swap_txs, &blacklist
+                        ).await;
+                        let (bundle_id, endpoint) = match sent {
+                            Some(x) => x,
+                            None    => { println!("    [live] bundle: todos los endpoints fallaron"); continue; }
+                        };
+                        let host = url::Url::parse(&endpoint).ok()
+                            .and_then(|u| u.host_str()
+                                .map(|s| s.split('.').next().unwrap_or("?").to_string()))
+                            .unwrap_or_default();
+                        println!("    [live] bundle enviado: {bundle_id} ({host}) tip={dyn_tip_lam} lam (${:.4})", actual_tip_usdc);
+                        logger.record_bundle_sent(
+                            &bundle_id, &endpoint, actual_net,
+                            &arb.intermediate, arb.input_usdc
+                        );
+
+                        // poll asincrono
+                        let logger_p = logger.clone();
+                        let http_p = http.clone();
+                        tokio::spawn(async move {
+                            let status = poll_bundle_status(
+                                &http_p, &bundle_id, &endpoint, 5_000
+                            ).await;
+                            let sym = match status { "landed" => "OK", "failed" => "FAIL", _ => "TIM" };
+                            println!("    [jito] {sym} bundle {}... -> {status}",
+                                &bundle_id[..8.min(bundle_id.len())]);
+                            logger_p.record_bundle_status(&bundle_id, status);
+                        });
+                    }
+                    ArbResult::NoRoute  => logger.record_probe(mint, amount, "no_route"),
+                    ArbResult::ApiError => logger.record_probe(mint, amount, "api_error"),
+                }
+            }
+        }
+        tokio::time::sleep(Duration::from_millis(POLL_INTERVAL_MS)).await;
+    }
+}

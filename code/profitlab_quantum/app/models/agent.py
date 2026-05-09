@@ -1,0 +1,399 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torch.nn.functional as F
+import numpy as np
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+class PositionalEncoding(nn.Module):
+    def __init__(self, d_model: int, max_len: int = 512):
+        super().__init__()
+        if d_model <= 0:
+            raise ValueError("d_model must be > 0")
+        if max_len <= 0:
+            raise ValueError("max_len must be > 0")
+
+        position = torch.arange(max_len, dtype=torch.float32).unsqueeze(1)  # [T,1]
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2, dtype=torch.float32) * (-np.log(10000.0) / d_model)
+        )
+        pe = torch.zeros(max_len, d_model, dtype=torch.float32)
+        pe[:, 0::2] = torch.sin(position * div_term)
+        if d_model % 2 == 1:
+            pe[:, 1::2] = torch.cos(position * div_term[:-1])
+        else:
+            pe[:, 1::2] = torch.cos(position * div_term)
+        self.register_buffer("pe", pe.unsqueeze(0), persistent=False)  # [1,T,D]
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # x: [B,T,D]
+        t = x.size(1)
+        return x + self.pe[:, :t, :]
+
+class ActorCritic(nn.Module):
+    def __init__(
+        self,
+        input_dim: int,
+        action_dim: int,
+        hidden_dim: int = 256,
+        *,
+        use_transformer: bool = True,
+        seq_len: int = 32,
+        d_model: int = 128,
+        nhead: int = 4,
+        num_layers: int = 2,
+        dropout: float = 0.1,
+    ):
+        super(ActorCritic, self).__init__()
+
+        self.use_transformer = bool(use_transformer)
+
+        if self.use_transformer:
+            if seq_len <= 0:
+                raise ValueError("seq_len must be > 0")
+            if d_model <= 0:
+                raise ValueError("d_model must be > 0")
+            if nhead <= 0:
+                raise ValueError("nhead must be > 0")
+            if d_model % nhead != 0:
+                raise ValueError("d_model must be divisible by nhead")
+
+            self.seq_len = int(seq_len)
+            self.input_proj = nn.Linear(input_dim, d_model)
+            self.positional = PositionalEncoding(d_model=d_model, max_len=self.seq_len)
+
+            encoder_layer = nn.TransformerEncoderLayer(
+                d_model=d_model,
+                nhead=nhead,
+                dim_feedforward=4 * d_model,
+                dropout=float(dropout),
+                activation="gelu",
+                batch_first=True,
+                norm_first=True,
+            )
+            self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=int(num_layers))
+
+            self.shared = nn.Sequential(
+                nn.LayerNorm(d_model),
+                nn.Linear(d_model, hidden_dim),
+                nn.ReLU(),
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.ReLU(),
+            )
+        else:
+            # MLP fallback (legacy)
+            self.shared = nn.Sequential(
+                nn.Linear(input_dim, hidden_dim),
+                nn.ReLU(),
+                nn.Linear(hidden_dim, hidden_dim),
+                nn.ReLU(),
+            )
+        
+        # Actor (Policy)
+        self.actor = nn.Sequential(
+            nn.Linear(hidden_dim, action_dim),
+            nn.Softmax(dim=-1)
+        )
+        
+        # Critic (Value)
+        self.critic = nn.Sequential(
+            nn.Linear(hidden_dim, 1)
+        )
+        
+    def forward(self, x):
+        # x:
+        # - transformer mode: [B,T,input_dim] (preferred) or [B,input_dim]
+        # - mlp mode: [B,input_dim] (preferred) or [B,T,input_dim]
+
+        if self.use_transformer:
+            if x.dim() == 2:
+                x = x.unsqueeze(1)
+            x = self.input_proj(x)
+            x = self.positional(x)
+            x = self.transformer(x)
+            x = x[:, -1, :]
+            x = self.shared(x)
+        else:
+            if x.dim() == 3:
+                x = x[:, -1, :]
+            x = self.shared(x)
+
+        policy = self.actor(x)
+        value = self.critic(x)
+        return policy, value
+
+class QuantumAgent:
+    _VALUE_COEF: float = 0.5
+    _MAX_GRAD_NORM: float = 1.0
+
+    def __init__(
+        self,
+        input_dim,
+        action_dim,
+        lr=1e-4,
+        gamma=0.99,
+        ppo_clip=0.2,
+        ppo_epochs=10,
+        entropy_coef=0.40,  # FIXED 2026-05-08: was 0.15, agente colapsado en HOLD 100% post-monitor 15min · forced exploration tras audit Gemma 4 31B v3
+        *,
+        use_transformer: bool = True,
+        seq_len: int = 32,
+        autosave_path: str | None = None,
+        autosave_every_updates: int | None = None,
+        db_url: str | None = None,
+        symbol: str | None = None,
+    ):
+        self.gamma = gamma
+        self.ppo_clip = float(ppo_clip)
+        self.ppo_epochs = int(ppo_epochs)
+        self.entropy_coef = float(entropy_coef)
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.seq_len = int(seq_len)
+        self._state_window = []
+
+        self.model = ActorCritic(
+            input_dim,
+            action_dim,
+            use_transformer=bool(use_transformer),
+            seq_len=self.seq_len,
+        ).to(self.device)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr, weight_decay=0.0)
+        
+        # On-policy trajectory buffer:
+        # - legacy: (state, action, reward, done, old_log_prob, old_value)
+        # - timestamped: (ts_ms, state, action, reward, done, old_log_prob, old_value)
+        self.memory = []
+
+        # Optional autosave (for auditability / long runs)
+        if autosave_path is None:
+            autosave_path = os.getenv(
+                "PPO_AUTOSAVE_PATH",
+                "/srv/profitlab_quantum/artifacts/ppo/ppo.pt",
+            ).strip()
+        if autosave_every_updates is None:
+            autosave_every_updates = int(os.getenv("PPO_AUTOSAVE_EVERY_UPDATES", "25").strip())
+        self._autosave_path = str(autosave_path)
+        self._autosave_every_updates = int(autosave_every_updates)
+        self._update_count = 0
+
+        # Database persistence for PPO memory (survives restarts)
+        self._persistence = None
+        self._symbol = symbol
+        if db_url and symbol:
+            try:
+                from app.models.ppo_persistence import PPOMemoryPersistence
+                self._persistence = PPOMemoryPersistence(db_url, symbol)
+                # Load existing memory from DB on startup
+                loaded = self._persistence.load_memory(window_hours=72.0, max_samples=4096)
+                if loaded:
+                    self.memory = loaded
+                    logger.info("[%s] Loaded %d PPO experiences from DB", symbol, len(loaded))
+                # Restore last update count
+                self._update_count = self._persistence.get_last_update_count()
+                if self._update_count > 0:
+                    logger.info("[%s] Restored update_count=%d from DB", symbol, self._update_count)
+            except Exception as e:
+                logger.warning("[%s] Failed to init PPO persistence: %s", symbol, e)
+                self._persistence = None
+
+    def _build_sequence(self, state: np.ndarray) -> np.ndarray:
+        state_np = np.asarray(state, dtype=np.float32).reshape(-1)
+        if state_np.shape[0] == 0:
+            raise ValueError("state must be non-empty")
+
+        self._state_window.append(state_np)
+        if len(self._state_window) > self.seq_len:
+            self._state_window = self._state_window[-self.seq_len :]
+
+        if len(self._state_window) < self.seq_len:
+            pad = [np.zeros_like(state_np) for _ in range(self.seq_len - len(self._state_window))]
+            seq = pad + list(self._state_window)
+        else:
+            seq = list(self._state_window)
+
+        return np.stack(seq, axis=0).astype(np.float32)  # [T,input_dim]
+        
+    @torch.no_grad()
+    def get_action(self, state):
+        seq_state = self._build_sequence(state)
+        state_t = torch.as_tensor(seq_state, dtype=torch.float32, device=self.device).unsqueeze(0)  # [1,T,D]
+        policy, value = self.model(state_t)
+
+        dist = torch.distributions.Categorical(policy)
+        action_t = dist.sample()
+        log_prob_t = dist.log_prob(action_t)
+
+        return (
+            int(action_t.item()),
+            log_prob_t.squeeze(0),
+            value.squeeze(0).squeeze(-1),
+            policy.squeeze(0),
+            seq_state,
+        )
+    
+    def prune_memory(self, *, min_ts_ms: int) -> None:
+        if not self.memory:
+            return
+
+        try:
+            first = self.memory[0]
+            if isinstance(first, (tuple, list)) and len(first) == 7:
+                self.memory = [m for m in self.memory if int(m[0]) >= int(min_ts_ms)]
+        except Exception:
+            return
+
+    def _unpack_memory(self):
+        """Unpack memory buffer, handling both legacy and timestamped formats."""
+        first = self.memory[0]
+        if isinstance(first, (tuple, list)) and len(first) == 7:
+            _ts_ms, states, actions, rewards, dones, old_log_probs, old_values = zip(*self.memory)
+        else:
+            states, actions, rewards, dones, old_log_probs, old_values = zip(*self.memory)
+        return states, actions, rewards, dones, old_log_probs, old_values
+
+    def _compute_returns(self, rewards_t: torch.Tensor, dones_t: torch.Tensor, last_val: float = 0.0) -> torch.Tensor:
+        """Compute discounted returns with optional V(s_T) bootstrapping.
+
+        FIX Bug#3: previously called with last_val=0 (implicit), which underestimates
+        future returns for samples near the end of a rolling buffer that is NOT an
+        episode boundary.  Passing the critic's estimate of the last state corrects this.
+        """
+        returns = []
+        running = last_val  # bootstrap from critic value of terminal state
+        for r, d in zip(reversed(rewards_t.tolist()), reversed(dones_t.tolist())):
+            running = r + self.gamma * running * (1.0 - float(d))
+            returns.append(running)
+        return torch.as_tensor(list(reversed(returns)), dtype=torch.float32, device=self.device)
+
+    def _log_and_autosave(self, loss, samples_used):
+        """Log training to DB and autosave weights (best-effort)."""
+        if self._persistence is not None:
+            try:
+                self._persistence.log_training(
+                    update_count=self._update_count,
+                    samples_used=samples_used,
+                    loss=float(loss.item()),
+                )
+                logger.info("[%s] PPO update #%d: %d samples, loss=%.4f", self._symbol, self._update_count, samples_used, loss.item())
+            except Exception as e:
+                logger.debug("Failed to log training: %s", e)
+
+        if self._autosave_every_updates > 0 and (self._update_count % self._autosave_every_updates == 0):
+            try:
+                from pathlib import Path
+                p = Path(self._autosave_path)
+                p.parent.mkdir(parents=True, exist_ok=True)
+                torch.save(self.model.state_dict(), str(p))
+            except Exception:
+                pass
+
+    def update(self, *, clear_memory: bool = True) -> None:
+        if len(self.memory) < 128:  # Batch size
+            return
+
+        states, actions, rewards, dones, old_log_probs, old_values = self._unpack_memory()
+
+        states_t = torch.tensor(np.array(states), dtype=torch.float32, device=self.device)
+        actions_t = torch.tensor(actions, dtype=torch.long, device=self.device)
+        rewards_t = torch.tensor(rewards, dtype=torch.float32, device=self.device)
+        dones_t = torch.tensor(dones, dtype=torch.float32, device=self.device)
+        # Move each tensor to device before stacking to avoid CPU/CUDA mismatch
+        # (memory loaded from DB is on CPU, new experiences from get_action() are on CUDA)
+        old_log_probs_t = torch.stack([lp.to(self.device) for lp in old_log_probs]).detach()
+        old_values_t = torch.stack([v.to(self.device) for v in old_values]).detach()
+
+        # FIX Bug#3: bootstrap V(s_T) for the terminal state in the buffer.
+        # Without this, the last ~gamma^k samples underestimate future returns,
+        # creating a systematic negative bias in advantages near the buffer boundary.
+        with torch.no_grad():
+            _, last_val_t = self.model(states_t[-1:])
+            last_val = float(last_val_t.squeeze().item())
+
+        returns_t = self._compute_returns(rewards_t, dones_t, last_val=last_val)
+        advantages_t = returns_t - old_values_t
+        advantages_t = (advantages_t - advantages_t.mean()) / (advantages_t.std(unbiased=False) + 1e-8)
+
+        n_samples = len(states)
+        batch_size = 128  # FIX Bug#2: mini-batches for stable PPO gradient estimates
+        loss = torch.tensor(0.0, device=self.device)  # for logging
+
+        for _ in range(self.ppo_epochs):
+            # Shuffle indices each epoch so every mini-batch has an iid mix of samples.
+            # Without shuffling, consecutive samples are temporally correlated and the
+            # PPO ratio can drift far from 1.0 after epoch 3, breaking the clip.
+            perm = torch.randperm(n_samples, device=self.device)
+
+            for start in range(0, n_samples, batch_size):
+                idx = perm[start : start + batch_size]
+
+                mb_states      = states_t[idx]
+                mb_actions     = actions_t[idx]
+                mb_advantages  = advantages_t[idx]
+                mb_returns     = returns_t[idx]
+                mb_old_lp      = old_log_probs_t[idx]
+
+                policies_mb, values_mb = self.model(mb_states)
+                values_mb = values_mb.squeeze(-1)
+
+                dist = torch.distributions.Categorical(policies_mb)
+                new_log_probs_mb = dist.log_prob(mb_actions)
+                entropy_mb = dist.entropy().mean()
+
+                ratio = (new_log_probs_mb - mb_old_lp).exp()
+                surr1 = ratio * mb_advantages
+                surr2 = torch.clamp(ratio, 1.0 - self.ppo_clip, 1.0 + self.ppo_clip) * mb_advantages
+                actor_loss = -torch.min(surr1, surr2).mean()
+
+                value_loss = F.mse_loss(values_mb, mb_returns)
+
+                loss = actor_loss + (self._VALUE_COEF * value_loss) - (self.entropy_coef * entropy_mb)
+
+                self.optimizer.zero_grad(set_to_none=True)
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(self.model.parameters(), self._MAX_GRAD_NORM)
+                self.optimizer.step()
+
+        self._update_count += 1
+        self._log_and_autosave(loss, len(states))
+
+        if clear_memory:
+            self.memory = []
+            if self._persistence is not None:
+                try:
+                    self._persistence.prune_old(window_hours=72.0)
+                except Exception:
+                    pass
+        
+    def remember(self, state, action, reward, done, log_prob, value, ts_ms: int | None = None):
+        if ts_ms is None:
+            self.memory.append((state, int(action), float(reward), float(done), log_prob.detach(), value.detach()))
+        else:
+            self.memory.append((int(ts_ms), state, int(action), float(reward), float(done), log_prob.detach(), value.detach()))
+        
+        # Persist to database if enabled
+        if self._persistence is not None and ts_ms is not None:
+            try:
+                lp = float(log_prob.item()) if hasattr(log_prob, 'item') else float(log_prob)
+                v = float(value.item()) if hasattr(value, 'item') else float(value)
+                self._persistence.save_experience(
+                    ts_ms=int(ts_ms),
+                    state=state,
+                    action=int(action),
+                    reward=float(reward),
+                    done=float(done),
+                    log_prob=lp,
+                    value=v
+                )
+            except Exception as e:
+                logger.debug("Failed to persist experience: %s", e)
+        
+    def save(self, path):
+        torch.save(self.model.state_dict(), path)
+        
+    def load(self, path):
+        self.model.load_state_dict(torch.load(path, map_location=self.device))

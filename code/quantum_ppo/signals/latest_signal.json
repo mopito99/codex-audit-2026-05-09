@@ -1,0 +1,11 @@
+{
+    "timestamp_utc": "2026-04-24T09:55:09.099108",
+    "symbol": "SOLUSDT",
+    "action": "HOLD/CLOSE",
+    "price": 85.38,
+    "indicator_atr": 0.15794629641381877,
+    "suggested_sl": null,
+    "suggested_tp": null,
+    "model_loaded": "agent_ppo_vfinal.zip",
+    "bot_id": "ppo_a100_autonomous"
+}

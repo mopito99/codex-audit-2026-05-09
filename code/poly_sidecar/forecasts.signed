@@ -1,0 +1,23 @@
+{
+  "hash": "96571929e5d3f9dd9ac8d5a32c33bd1d125c4e21576302b2448432d06ea8d2c1",
+  "hash_algorithm": "sha256",
+  "signed_at_utc": "2026-05-09T03:39:10.852249+00:00",
+  "signed_by": "marco",
+  "forecasts_path": "forecasts.json",
+  "events_count": 2,
+  "events_summary": [
+    {
+      "category": "CPI",
+      "release_date": "2026-05-12",
+      "primary_metric_for_sf": "cpi_yoy_pct",
+      "primary_value": 3.3
+    },
+    {
+      "category": "NFP",
+      "release_date": "2026-05-08",
+      "primary_metric_for_sf": "nfp_change_thousands",
+      "primary_value": 62
+    }
+  ],
+  "validator_warnings": []
+}

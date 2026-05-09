@@ -1,0 +1,61 @@
+[package]
+name = "solana-executor-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Solana core
+solana-sdk = "2.0"
+solana-client = "2.0"
+
+# Async runtime
+tokio = { version = "1.36", features = ["full"] }
+
+# HTTP / serialización
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Decimal arithmetic
+rust_decimal = "1.34"
+
+# Encoding
+bs58 = "0.5"
+base64 = "0.21"
+
+# Env y logging
+dotenvy = "0.15"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Utilidades
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+bincode = "1.3.3"
+rand = "0.8"
+url = "2.5"
+
+# Latencia determinista (G53/G54/G57)
+crossbeam-queue = "0.3"        # lock-free ArrayQueue listener→executor
+crossbeam-channel = "0.5"      # G75: bounded channel para SandwichOpportunity
+core_affinity = "0.8"           # pinear hilos a CCX del EPYC 7543P
+mimalloc = { version = "0.1", default-features = false }  # elimina p99 tail latency
+dashmap = "6.1"                 # G65/G68: AltCache + BotDetector (lock-free reads)
+bytes = "1.7"                   # G75: Arc<Bytes> para victim_tx_bytes (1.2KB sin clonar)
+arc-swap = "1.7"                # G74: pool_state lock-free reads
+
+# Métricas Prometheus (G49)
+prometheus = { version = "0.13", default-features = false }
+
+# gRPC Yellowstone (sandwich listener)
+yellowstone-grpc-proto = "12.3"
+# tonic 0.14 = misma versión que usa yellowstone-grpc-proto → cargo unifica en un solo crate
+# features aquí añaden TLS al tonic compartido (features son aditivas en cargo)
+tonic = { version = "0.14", features = ["tls-ring", "tls-native-roots"] }
+tokio-stream = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+

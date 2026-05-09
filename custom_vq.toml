@@ -1,0 +1,87 @@
+# custom_vq.toml — VelocityQuant gitleaks paranoid config
+# Firmado: Gemma 4 31B r152 · Sensitivity HIGH/PARANOID
+# Fecha: 2026-05-09 09:35 UTC
+# Uso: gitleaks detect --config custom_vq.toml --no-git OR --all-commits
+
+title = "VelocityQuant Paranoid Secret Scan"
+
+[extend]
+# Heredar todas las default rules de gitleaks (AWS/GCP/GitHub/Slack/etc)
+useDefault = true
+
+# ─────────────────────────────────────────────────────────────────────────
+# CUSTOM RULES VelocityQuant (firmado Gemma r152 · 3 vectores)
+# ─────────────────────────────────────────────────────────────────────────
+
+[[rules]]
+id = "vq-fred-api-key"
+description = "FRED API key (32 hex chars in api_key= param)"
+regex = '''api_key=[a-f0-9]{32}'''
+keywords = ["api_key", "stlouisfed"]
+
+[[rules]]
+id = "vq-bls-api-key"
+description = "BLS registration key (32 hex chars in registrationkey= param)"
+regex = '''registrationkey=[a-f0-9]{32}'''
+keywords = ["registrationkey", "bls.gov"]
+
+[[rules]]
+id = "vq-internal-path-administrator"
+description = "Hardcoded /home/administrator/poly_sidecar path (PATH_BASE pendiente)"
+regex = '''/home/administrator/poly_sidecar'''
+keywords = ["/home/administrator"]
+
+[[rules]]
+id = "vq-internal-port-8090"
+description = "Hardcoded internal port 127.0.0.1:8090 (vq-poly-api)"
+regex = '''127\.0\.0\.1:8090'''
+keywords = ["127.0.0.1:8090"]
+
+[[rules]]
+id = "vq-internal-port-8091"
+description = "Hardcoded internal CB endpoint 127.0.0.1:9091"
+regex = '''127\.0\.0\.1:9091'''
+keywords = ["127.0.0.1:9091"]
+
+[[rules]]
+id = "vq-auth-basic-header"
+description = "Authorization Basic header con base64 credentials"
+regex = '''(?i)Authorization:\s*Basic\s+[A-Za-z0-9+/]{8,}={0,2}'''
+keywords = ["Authorization", "Basic"]
+
+[[rules]]
+id = "vq-anthropic-key"
+description = "Anthropic API key (sk-ant-api*)"
+regex = '''sk-ant-api[0-9]+-[A-Za-z0-9_-]{30,}'''
+keywords = ["sk-ant"]
+
+[[rules]]
+id = "vq-solana-base58-privkey"
+description = "Solana base58 private key (87-88 chars, no 0OIl)"
+regex = '''[1-9A-HJ-NP-Za-km-z]{87,88}'''
+keywords = []
+
+[[rules]]
+id = "vq-telegram-bot-token"
+description = "Telegram bot token (botid:token)"
+regex = '''[0-9]{8,12}:[A-Za-z0-9_-]{30,}'''
+keywords = ["telegram", "bot"]
+
+[[rules]]
+id = "vq-chainstack-token"
+description = "Chainstack hex token (32 chars · ej en URL endpoint)"
+regex = '''chainstack\.com/[a-f0-9]{32}'''
+keywords = ["chainstack"]
+
+[[rules]]
+id = "vq-gitea-token-url"
+description = "Gitea token embedded in URL (user:token@host)"
+regex = '''https?://[a-zA-Z0-9_-]+:[a-f0-9]{40}@'''
+keywords = ["@git.mbottoken.com", "gitea"]
+
+# ─────────────────────────────────────────────────────────────────────────
+# ALLOWLIST: NONE (paranoid mode · no exclusions)
+# ─────────────────────────────────────────────────────────────────────────
+# Por orden Gemma: NO usar .gitignore, NO ignorar venv/, NO ignorar nada.
+# Sin embargo, para evitar matches obvios en deps externas, scope explícito
+# del scan será el filesystem real (no venv).

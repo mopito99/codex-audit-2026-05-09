@@ -1,0 +1,33 @@
+{
+  "artifacts": {
+    "dt_meta_exists": true,
+    "dt_meta_path": "/srv/profitlab_quantum/artifacts/dt/dt_meta.json",
+    "dt_weights_exists": true,
+    "dt_weights_path": "/srv/profitlab_quantum/artifacts/dt/dt.pt",
+    "ppo_weights_exists": false,
+    "ppo_weights_path": "/srv/profitlab_quantum/artifacts/ppo/ppo.pt"
+  },
+  "bingx_depth": {
+    "microstructure": {
+      "ask_depth_usd": 120479.32318,
+      "bid_depth_usd": 828920.5992899999,
+      "imbalance": 0.7461990035420358,
+      "mid": 68216.35,
+      "spread_bps": 0.7769398392031983,
+      "top_n": 10,
+      "ts": 1771668381638
+    },
+    "ok": true
+  },
+  "env": {
+    "AGENT_TYPE": "ppo_transformer",
+    "BINGX_FEE_TAKER": "0.001",
+    "BINGX_SLIPPAGE_BPS": "2.5",
+    "USE_ORDERBOOK": "1",
+    "USE_WS_FEED": "1"
+  },
+  "tools_present": {
+    "train_decision_transformer": true,
+    "train_timegan": true
+  }
+}

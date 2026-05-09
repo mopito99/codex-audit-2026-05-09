@@ -1,0 +1,11 @@
+[Unit]
+Description=Run VelocityQuant shadow collector every 15s
+
+[Timer]
+OnBootSec=20s
+OnUnitActiveSec=15s
+AccuracySec=1s
+Unit=velocityquant-shadow-collector.service
+
+[Install]
+WantedBy=timers.target

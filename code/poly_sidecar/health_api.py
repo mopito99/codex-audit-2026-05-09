@@ -1,0 +1,1117 @@
+"""Polymarket Sentiment Sidecar — dashboard + /health + /api/report.
+
+Endpoints:
+  GET /            HTML dashboard con τ + ayuda inline (auto-refresh 30s)
+  GET /health      JSON estado completo (consumido por bot Rust o monitoring)
+  GET /api/state   alias /health
+  POST /api/report/generate   Lanza generación de informe (subprocess background)
+  GET  /api/report/status/<id>  Estado de la generación (running/done/error)
+  GET  /api/report/list       Lista informes históricos
+  GET  /api/report/file/<id>/<name>  Sirve report.html|.md|.json
+"""
+from __future__ import annotations
+import json
+import os
+import subprocess
+import threading
+import time
+import uuid
+from pathlib import Path
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse, FileResponse
+
+import store
+import pnl
+import synthetic_override  # r125 firma Gemma — synthetic injection layer
+
+app = FastAPI(title="VelocityQuant — Polymarket Sentiment Sidecar")
+
+REPORTS_DIR = Path("/home/administrator/poly_sidecar/reports")
+REPORT_GENERATOR = "/home/administrator/poly_sidecar/report_generator.py"
+PYTHON_BIN = "/home/administrator/poly_sidecar/venv/bin/python3"
+
+# NFP Audit Dashboard — firma Gemma r110 §4 + r111 §5
+AUDIT_QUERIES_DIR = Path("/home/administrator/poly_sidecar/audit_queries")
+RISK_AUDIT_JSONL = Path("/home/administrator/poly_sidecar/data/risk_audit.jsonl")
+
+_jobs: dict[str, dict] = {}
+_jobs_lock = threading.Lock()
+
+
+def _run_generator_job(job_id: str, date_arg: str | None):
+    cmd = [PYTHON_BIN, REPORT_GENERATOR]
+    if date_arg:
+        cmd += ["--date", date_arg]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+        if proc.returncode == 0:
+            try:
+                payload = json.loads(proc.stdout.strip().splitlines()[-1])
+            except Exception:
+                payload = {"status": "ok", "raw": proc.stdout[:1000]}
+            with _jobs_lock:
+                _jobs[job_id].update({
+                    "status": "done",
+                    "finished_at": time.time(),
+                    "result": payload,
+                })
+        else:
+            with _jobs_lock:
+                _jobs[job_id].update({
+                    "status": "error",
+                    "finished_at": time.time(),
+                    "error": proc.stderr[:1000] or proc.stdout[:1000],
+                })
+    except subprocess.TimeoutExpired:
+        with _jobs_lock:
+            _jobs[job_id].update({
+                "status": "error",
+                "finished_at": time.time(),
+                "error": "timeout 180s",
+            })
+    except Exception as e:
+        with _jobs_lock:
+            _jobs[job_id].update({
+                "status": "error",
+                "finished_at": time.time(),
+                "error": str(e),
+            })
+
+
+@app.post("/api/report/generate")
+def report_generate(date: str | None = None):
+    job_id = uuid.uuid4().hex[:12]
+    with _jobs_lock:
+        _jobs[job_id] = {
+            "job_id": job_id,
+            "status": "running",
+            "started_at": time.time(),
+            "date_arg": date,
+        }
+    t = threading.Thread(target=_run_generator_job, args=(job_id, date), daemon=True)
+    t.start()
+    return {"job_id": job_id, "status": "running"}
+
+
+@app.get("/api/report/status/{job_id}")
+def report_status(job_id: str):
+    with _jobs_lock:
+        job = _jobs.get(job_id)
+    if not job:
+        raise HTTPException(404, "job not found")
+    return job
+
+
+@app.get("/api/report/list")
+def report_list():
+    if not REPORTS_DIR.exists():
+        return {"reports": []}
+    items = []
+    for d in sorted(REPORTS_DIR.iterdir(), reverse=True):
+        if not d.is_dir():
+            continue
+        rid = d.name
+        json_path = d / "report.json"
+        meta = {"report_id": rid}
+        if json_path.exists():
+            try:
+                data = json.loads(json_path.read_text())
+                meta["date_utc"] = data.get("date_utc")
+                meta["generated_at_utc"] = data.get("generated_at_utc")
+                sc = data.get("sidecar_now") or {}
+                meta["mode"] = sc.get("mode")
+                meta["tau_final"] = sc.get("tau_final")
+                meta["btc_price_usd"] = sc.get("btc_price_usd")
+            except Exception:
+                pass
+        meta["files"] = [f.name for f in d.iterdir() if f.is_file()]
+        items.append(meta)
+    return {"reports": items, "count": len(items)}
+
+
+@app.get("/api/report/file/{report_id}/{filename}")
+def report_file(report_id: str, filename: str):
+    # Hard-coded whitelist: solo servir los 3 archivos esperados
+    if filename not in ("report.html", "report.md", "report.json"):
+        raise HTTPException(404, "filename not allowed")
+    # Validar report_id: sin slashes, longitud razonable
+    if "/" in report_id or ".." in report_id or len(report_id) > 64:
+        raise HTTPException(400, "invalid report_id")
+    path = REPORTS_DIR / report_id / filename
+    if not path.exists():
+        raise HTTPException(404, "not found")
+    if filename.endswith(".html"):
+        return HTMLResponse(path.read_text())
+    if filename.endswith(".md"):
+        return PlainTextResponse(path.read_text(), media_type="text/markdown; charset=utf-8")
+    return FileResponse(str(path), media_type="application/json")
+
+
+@app.get("/health")
+def health():
+    return JSONResponse(_state_payload())
+
+
+@app.get("/api/state")
+def api_state():
+    return JSONResponse(_state_payload())
+
+
+def _state_payload() -> dict:
+    s = store.read()
+    age = store.heartbeat_age_seconds()
+    stale = store.is_stale(max_age_seconds=600)
+    if not s:
+        return {
+            "status": "uninitialized",
+            "tau_final": 0.0,
+            "tau_macro": 0.0,
+            "tau_crypto": 0.0,
+            "heartbeat_age_seconds": None,
+            "is_stale": True,
+            "endpoints_errors": {},
+            "per_contract": [],
+            "served_at": time.time(),
+        }
+    payload = {
+        "status": "stale" if stale else "ok",
+        "tau_final": s.get("tau_final"),
+        "tau_macro": s.get("tau_macro"),
+        "tau_crypto": s.get("tau_crypto"),
+        "rho": s.get("rho"),
+        "rho_threshold": s.get("rho_threshold"),
+        "rho_divergence_active": s.get("rho_divergence_active"),
+        "rho_per_contract": s.get("rho_per_contract", []),
+        "btc_price_usd": s.get("btc_price_usd"),
+        "btc_pub_time": s.get("btc_pub_time"),
+        "btc_samples_in_cache": s.get("btc_samples_in_cache"),
+        "btc_status": s.get("btc_status"),
+        "btc_errors": s.get("btc_errors"),
+        "btc_last_sync_ts": s.get("btc_last_sync_ts"),
+        "polymarket_last_sync_ts": s.get("polymarket_last_sync_ts"),
+        "fmp": s.get("fmp", {}),
+        "investing": s.get("investing", {}),
+        "mode": s.get("mode", "UNKNOWN"),
+        "mode_reason": s.get("mode_reason", ""),
+        "heartbeat_ts": s.get("heartbeat_ts"),
+        "heartbeat_age_seconds": age,
+        "is_stale": stale,
+        "endpoints_errors": s.get("endpoints_errors", {}),
+        "per_contract": s.get("per_contract", []),
+        "calendar_version": s.get("calendar_version"),
+        "polling_interval_s": s.get("polling_interval_s"),
+        "last_error": s.get("last_error"),
+        "served_at": time.time(),
+        "is_synthetic": False,
+    }
+    # r125 §3 firma Gemma — apply synthetic override if active (lock-free read)
+    return synthetic_override.maybe_apply(payload)
+
+
+@app.get("/", response_class=HTMLResponse)
+def dashboard():
+    return HTMLResponse(_HTML)
+
+
+_HTML = r"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<title>VelocityQuant — Polymarket τ Sentiment</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg:#0d1117; --panel:#161b22; --border:#30363d;
+    --text:#c9d1d9; --muted:#8b949e; --accent:#58a6ff;
+    --green:#3fb950; --red:#f85149; --yellow:#d29922;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:20px; font-family: -apple-system, system-ui, sans-serif;
+         background:var(--bg); color:var(--text); line-height:1.5; }
+  h1 { margin:0 0 5px 0; font-size:1.4rem; }
+  .sub { color:var(--muted); font-size:.85rem; margin-bottom:20px; }
+  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+          gap:14px; margin-bottom:20px; }
+  .card { background:var(--panel); border:1px solid var(--border);
+          border-radius:8px; padding:16px; position:relative; }
+  .card h3 { margin:0 0 8px 0; font-size:.85rem; color:var(--muted);
+             font-weight:500; text-transform:uppercase; letter-spacing:.5px; }
+  .big { font-size:1.9rem; font-weight:600; font-variant-numeric: tabular-nums; }
+  .help-icon { position:absolute; top:8px; right:10px; cursor:help;
+               color:var(--muted); font-size:.85rem; border:1px solid var(--border);
+               border-radius:50%; width:20px; height:20px; display:inline-flex;
+               align-items:center; justify-content:center; }
+  .help-icon:hover { color:var(--accent); border-color:var(--accent); }
+  .tooltip { display:none; position:absolute; top:30px; right:5px; width:280px;
+             background:#1f2630; border:1px solid var(--border); padding:10px;
+             border-radius:6px; font-size:.8rem; color:var(--text);
+             box-shadow:0 4px 12px rgba(0,0,0,0.4); z-index:10; }
+  .help-icon:hover + .tooltip, .tooltip:hover { display:block; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:4px;
+           font-size:.75rem; font-weight:500; }
+  .badge.ok { background:rgba(63,185,80,0.15); color:var(--green); }
+  .badge.stale { background:rgba(248,81,73,0.15); color:var(--red); }
+  .badge.warn { background:rgba(210,153,34,0.15); color:var(--yellow); }
+  table { width:100%; border-collapse:collapse; background:var(--panel);
+          border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  th, td { padding:8px 10px; text-align:left; border-bottom:1px solid var(--border);
+           font-size:.85rem; font-variant-numeric:tabular-nums; }
+  th { background:#1f2630; color:var(--muted); font-weight:500;
+       text-transform:uppercase; font-size:.7rem; letter-spacing:.5px;
+       position:relative; cursor:help; }
+  th[title] { border-bottom-style:dashed; }
+  tr:last-child td { border-bottom:none; }
+  .num.pos { color:var(--green); }
+  .num.neg { color:var(--red); }
+  .cat { font-size:.7rem; padding:2px 6px; background:#1f2630;
+         border-radius:3px; color:var(--muted); }
+  .footer { margin-top:20px; color:var(--muted); font-size:.75rem; }
+  .formula { background:#0d1117; border:1px solid var(--border); border-radius:6px;
+             padding:12px; margin-top:14px; font-family: monospace; font-size:.8rem;
+             color:var(--text); white-space:pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>Polymarket τ Sentiment <span id="status-badge" class="badge ok">ok</span></h1>
+<div class="sub">VelocityQuant V4.1 sidecar — heartbeat: <span id="hb-age">—</span> ago · poll: <span id="poll">300</span>s · calendar v<span id="cv">—</span></div>
+
+<div class="grid">
+  <div class="card">
+    <h3>τ_final
+      <span class="help-icon">?</span>
+      <div class="tooltip">
+        <strong>τ_final</strong> = 0.7 · τ_crypto + 0.3 · τ_macro<br><br>
+        Tensión de mercado total ponderada. Modula CB y bundle size en V4-Alpha:<br>
+        Th_adj = max(2, Th_base − floor(τ × 6))<br>
+        Size_adj = Size × (1 − τ)
+      </div>
+    </h3>
+    <div class="big" id="tau-final">—</div>
+  </div>
+
+  <div class="card">
+    <h3>τ_crypto
+      <span class="help-icon">?</span>
+      <div class="tooltip">
+        <strong>τ_crypto = max(τ_per_contract)</strong> entre los contratos cripto monitoreados (BTC, SOL, ETH).<br><br>
+        Take-Max captura el evento de mayor impacto sin diluir con mercados muertos.
+      </div>
+    </h3>
+    <div class="big" id="tau-crypto">—</div>
+  </div>
+
+  <div class="card">
+    <h3>τ_macro
+      <span class="help-icon">?</span>
+      <div class="tooltip">
+        <strong>τ_macro = max(τ_per_contract)</strong> entre contratos macro (FOMC, CPI, NFP, etc).<br><br>
+        Define el régimen de volatilidad de fondo, mientras crypto define el momentum inmediato.
+      </div>
+    </h3>
+    <div class="big" id="tau-macro">—</div>
+  </div>
+
+  <div class="card">
+    <h3>ρ (rho) Pearson
+      <span class="help-icon">?</span>
+      <div class="tooltip">
+        <strong>ρ rolling 6h</strong> entre ΔBTC y ΔP_evento_bajista.<br><br>
+        Si ρ &lt; −0.7 → divergencia narrativa → fuerza Modo Defensivo (Th −2, Size −30%) independiente de τ.
+      </div>
+    </h3>
+    <div class="big" id="rho">—</div>
+  </div>
+</div>
+
+<table id="tbl">
+  <thead>
+    <tr>
+      <th title="Categoría: macro (FOMC/CPI/etc) o crypto (BTC/SOL)">Cat</th>
+      <th title="Tipo de evento del contrato (FOMC, CPI, BTC_DAILY, etc)">Tipo</th>
+      <th>Mercado</th>
+      <th title="τ del contrato individual = 0.5·sig(ΔP) + 0.3·sig(VZ) + 0.2·sig(IV)">τ</th>
+      <th title="ΔProb = (P_now − P_avg_4h) / P_avg_4h · cambio relativo de probabilidad vs media 4h">ΔProb</th>
+      <th title="VolZScore = (V_24h − μ_rolling288) / σ_rolling288 · Z-score del volumen actual sobre baseline rolling 24h con muestreo cada 5min (288 puntos)">VolZ</th>
+      <th title="ImpliedVol proxy = spread / midpoint · ancho relativo del orderbook como proxy de volatilidad implícita">IV</th>
+      <th title="Sigmoide aplicada a ΔProb (k=10, x0=0.10)">σ(ΔP)</th>
+      <th title="Sigmoide aplicada a VolZScore (k=2, x0=1.0)">σ(VZ)</th>
+      <th title="Sigmoide aplicada a IV (k=50, x0=0.02)">σ(IV)</th>
+      <th title="Validez del cálculo (false si endpoints no respondieron)">OK</th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+
+<div class="formula" id="formula-box">
+τ_per_contract = 0.5·sig(ΔProb) + 0.3·sig(VolZ) + 0.2·sig(IV)
+ΔProb = (P_now − P_avg_4h_history) / P_avg_4h_history
+VolZScore = (V_24h_now − μ_24h) / σ_24h     [288 pts rolling fidelity 5min]
+ImpliedVol = spread / midpoint
+sigmoid(x) = 1 / (1 + exp(−k·(x − x0)))
+  ΔProb        : k=10  x0=0.10
+  VolZScore    : k=2   x0=1.0
+  ImpliedVol   : k=50  x0=0.02
+τ_macro  = max(τ_per_contract for c in macro)
+τ_crypto = max(τ_per_contract for c in crypto)
+τ_final  = 0.7·τ_crypto + 0.3·τ_macro
+ρ rolling 6h fidelity 5 (Pearson) entre ΔBTC y ΔP_evento_bajista
+</div>
+
+<div class="footer" id="footer">—</div>
+
+<script>
+function fmtAge(s) {
+  if (s == null) return "—";
+  s = Math.floor(s);
+  if (s < 60) return s + "s";
+  if (s < 3600) return Math.floor(s/60) + "m" + (s%60) + "s";
+  return Math.floor(s/3600) + "h" + Math.floor((s%3600)/60) + "m";
+}
+function fmtNum(x, d=4, signed=false) {
+  if (x == null || isNaN(x)) return "—";
+  let v = parseFloat(x).toFixed(d);
+  if (signed && parseFloat(x) >= 0) v = "+" + v;
+  return v;
+}
+function colorTau(t) {
+  if (t == null) return "";
+  if (t > 0.7) return "var(--red)";
+  if (t > 0.4) return "var(--yellow)";
+  return "var(--green)";
+}
+async function refresh() {
+  try {
+    const r = await fetch('/api/state', {cache:'no-cache'});
+    const d = await r.json();
+    document.getElementById('tau-final').textContent = fmtNum(d.tau_final);
+    document.getElementById('tau-final').style.color = colorTau(d.tau_final);
+    document.getElementById('tau-crypto').textContent = fmtNum(d.tau_crypto);
+    document.getElementById('tau-macro').textContent = fmtNum(d.tau_macro);
+    document.getElementById('rho').textContent = d.rho == null ? "n/a" : fmtNum(d.rho);
+    document.getElementById('hb-age').textContent = fmtAge(d.heartbeat_age_seconds);
+    document.getElementById('poll').textContent = d.polling_interval_s || 300;
+    document.getElementById('cv').textContent = d.calendar_version || "—";
+    const badge = document.getElementById('status-badge');
+    badge.className = "badge " + (d.is_stale ? "stale" : (d.status === "ok" ? "ok" : "warn"));
+    badge.textContent = d.is_stale ? "stale" : (d.status || "ok");
+
+    const tb = document.getElementById('tbody');
+    tb.innerHTML = '';
+    (d.per_contract || []).forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><span class="cat">${p.category_group||""}</span></td>
+        <td>${p.category||""}</td>
+        <td>${(p.title||"").substring(0,50)}</td>
+        <td class="num" style="color:${colorTau(p.tau)}">${fmtNum(p.tau)}</td>
+        <td class="num ${p.delta_prob>=0?'pos':'neg'}">${fmtNum(p.delta_prob, 4, true)}</td>
+        <td class="num ${p.vol_zscore>=0?'pos':'neg'}">${fmtNum(p.vol_zscore, 3, true)}</td>
+        <td class="num">${fmtNum(p.implied_vol, 4)}</td>
+        <td class="num">${fmtNum(p.norm_delta_prob)}</td>
+        <td class="num">${fmtNum(p.norm_vol_zscore)}</td>
+        <td class="num">${fmtNum(p.norm_implied_vol)}</td>
+        <td>${p.valid ? '✓' : '✗'}</td>
+      `;
+      tb.appendChild(tr);
+    });
+
+    const errs = d.endpoints_errors || {};
+    const errSum = Object.entries(errs).map(([k,v])=>`${k}=${v}`).join(', ') || 'none';
+    document.getElementById('footer').textContent =
+      `endpoint errors: ${errSum} · last_error: ${d.last_error||'none'} · refreshed ${new Date().toLocaleTimeString()}`;
+  } catch(e) {
+    document.getElementById('footer').textContent = 'fetch error: ' + e;
+  }
+}
+refresh();
+setInterval(refresh, 30000);
+</script>
+
+</body>
+</html>"""
+
+
+# ════════════════════════════════════════════════════════════════════
+# NFP AUDIT DASHBOARD ENDPOINTS (firma Gemma r110 §4 + r111 §5)
+# ════════════════════════════════════════════════════════════════════
+
+@app.get("/audit/run/{query_name}")
+def audit_run_query(query_name: str):
+    """Ejecuta un jq query pre-aprobado contra risk_audit.jsonl.
+
+    Whitelist explícita: solo queries en audit_queries/q_*.jq son ejecutables.
+    Firma r110 §4 + r111 §3 (incluye q_v4_decision_latency).
+    """
+    # Whitelist: solo nombres válidos sin path traversal
+    if not query_name.replace("_", "").isalnum():
+        raise HTTPException(400, "invalid query name")
+
+    query_file = AUDIT_QUERIES_DIR / f"q_{query_name}.jq"
+    if not query_file.exists():
+        raise HTTPException(404, f"query 'q_{query_name}.jq' not found")
+
+    if not RISK_AUDIT_JSONL.exists():
+        # Audit jsonl aún no existe — return vacío
+        return JSONResponse({"count": 0, "data": [], "note": "risk_audit.jsonl not yet created"})
+
+    try:
+        result = subprocess.run(
+            ["jq", "-n", "-c", "-f", str(query_file)],
+            stdin=open(RISK_AUDIT_JSONL, "rb"),
+            capture_output=True, text=True, timeout=10,
+        )
+        if result.returncode != 0:
+            raise HTTPException(500, f"jq error: {result.stderr[:500]}")
+        try:
+            return JSONResponse(json.loads(result.stdout))
+        except json.JSONDecodeError:
+            return JSONResponse({"raw_output": result.stdout, "parse_error": True})
+    except subprocess.TimeoutExpired:
+        raise HTTPException(504, "jq query timeout (>10s)")
+    except Exception as e:
+        raise HTTPException(500, f"jq exec failed: {type(e).__name__}: {e}")
+
+
+@app.get("/audit/queries")
+def audit_list_queries():
+    """Lista queries disponibles."""
+    if not AUDIT_QUERIES_DIR.exists():
+        return JSONResponse({"queries": []})
+    queries = sorted([
+        q.stem.replace("q_", "")
+        for q in AUDIT_QUERIES_DIR.glob("q_*.jq")
+    ])
+    return JSONResponse({"queries": queries, "count": len(queries)})
+
+
+@app.get("/audit/dashboard.html", response_class=HTMLResponse)
+def audit_dashboard():
+    """Dashboard HTML para NFP audit. Polling 30s (firma r111 §4c)."""
+    return HTMLResponse(_AUDIT_DASHBOARD_HTML)
+
+
+@app.post("/admin/test/inject_macro_state")
+async def admin_inject_macro_state(payload: dict):
+    """r125 firma Gemma — inyecta state sintético del macro layer.
+
+    4 condicionantes Gemma:
+    1. Atomicidad lock — write-only lock en synthetic_override.inject()
+    2. Trazabilidad — injection_id + injection_time_utc en response y state
+    3. Auto-cleanup — TTL en read + polling tick wins en sidecar main loop
+    4. Validación warmup — caller verifica via /admin/test/macro_status
+
+    127.0.0.1 only (nginx NO proxy /admin/*). Requires LIQ_SIDECAR_TEST_MODE=1.
+    """
+    try:
+        result = synthetic_override.inject(payload)
+    except RuntimeError as e:
+        raise HTTPException(status_code=403, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"injection failed: {e}")
+
+    # Log forensic audit
+    try:
+        with open("/home/administrator/poly_sidecar/data/risk_audit.jsonl", "a") as f:
+            f.write(json.dumps({
+                "ts_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                "audit_type": "synthetic_test_inject_macro_state",
+                "spec_signed_by": "Gemma r125",
+                "injection_id": result.get("injection_id"),
+                "payload": {
+                    "btc_price_usd": payload.get("btc_price_usd"),
+                    "mode": payload.get("mode"),
+                    "ttl_seconds": payload.get("ttl_seconds"),
+                },
+            }) + "\n")
+    except Exception:
+        pass  # audit log best-effort, no romper inject
+
+    return JSONResponse(result)
+
+
+@app.get("/admin/test/macro_status")
+def admin_macro_status():
+    """Estado del override + warmup validation (condición #4 Gemma r125)."""
+    s = _state_payload()
+    so = synthetic_override.status()
+    return JSONResponse({
+        "warmup_complete": s.get("btc_price_usd") is not None,
+        "btc_price_usd": s.get("btc_price_usd"),
+        "is_synthetic_active": s.get("is_synthetic", False),
+        "override": so,
+    })
+
+
+@app.get("/audit/bundle.md", response_class=PlainTextResponse)
+def audit_bundle():
+    """Bundle estructurado de auditoría para Gemma 4 — código + configs + estado runtime."""
+    bundle_path = Path("/home/administrator/audit_bundle_v4_for_gemma.md")
+    if not bundle_path.exists():
+        raise HTTPException(status_code=404, detail="bundle no generado todavía. Run build_audit_bundle.sh")
+    return PlainTextResponse(bundle_path.read_text(), media_type="text/markdown; charset=utf-8")
+
+
+@app.get("/audit/jsonl_size")
+def audit_jsonl_size():
+    """Health check del risk_audit.jsonl."""
+    if not RISK_AUDIT_JSONL.exists():
+        return JSONResponse({"exists": False, "size_bytes": 0, "lines": 0})
+    size = RISK_AUDIT_JSONL.stat().st_size
+    try:
+        with open(RISK_AUDIT_JSONL) as f:
+            lines = sum(1 for _ in f)
+    except Exception:
+        lines = -1
+    return JSONResponse({
+        "exists": True,
+        "size_bytes": size,
+        "size_mb": round(size / 1e6, 2),
+        "lines": lines,
+        "path": str(RISK_AUDIT_JSONL),
+    })
+
+
+# ── PNL endpoints (wallet balance + SHADOW summary) ────────────────────────
+
+@app.get("/pnl/balance")
+def pnl_balance():
+    """Solana RPC live read del balance de master + hot200."""
+    try:
+        return JSONResponse(pnl.all_balances())
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"RPC error: {e}")
+
+
+@app.get("/pnl/snapshots")
+def pnl_snapshots(h: int = 24):
+    """Series de snapshots últimas h horas (cada 5min vía systemd timer)."""
+    return JSONResponse({
+        "period_hours": h,
+        "snapshots": pnl.read_snapshots(hours=h),
+    })
+
+
+@app.get("/pnl/shadow_summary")
+def pnl_shadow_summary():
+    """Lee cache pre-calculado por systemd timer (full scan tarda ~45s, no on-demand)."""
+    return JSONResponse(pnl.shadow_cache_read())
+
+
+@app.get("/pnl/bot_status")
+def pnl_bot_status():
+    """Lee flags del .env Newark vía SSH (cached 60s)."""
+    return JSONResponse(pnl.bot_status_cached())
+
+
+@app.get("/pnl/dashboard.html", response_class=HTMLResponse)
+def pnl_dashboard():
+    """Dashboard PNL — balances live + delta snapshots + SHADOW would-profit."""
+    return HTMLResponse(_PNL_DASHBOARD_HTML)
+
+
+_PNL_DASHBOARD_HTML = r"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VelocityQuant · PNL dashboard</title>
+<style>
+  body{margin:0;background:#0c1117;color:#d8e0ec;font:14px/1.5 -apple-system,Segoe UI,Roboto,monospace;padding:18px}
+  .card.highlight{background:linear-gradient(135deg,#0f2418,#143a23);border:2px solid #5fd28a;box-shadow:0 0 20px rgba(95,210,138,.25)}
+  .card.highlight .label{color:#5fd28a;font-weight:600}
+  .card.highlight .value.big{font-size:2.1rem}
+  /* r137b — Real LIVE estimation cards (3 escenarios) */
+  .card.estimate{background:linear-gradient(135deg,#1a1410,#2a1f15);border:2px solid #b8862f}
+  .card.estimate .label{color:#e8b765;font-weight:600;font-size:.78rem}
+  .card.estimate .value{font-size:1.55rem;font-weight:600}
+  .card.estimate.bad{border-color:#ec6d6d;background:linear-gradient(135deg,#251515,#3a1f1f)}
+  .card.estimate.bad .label{color:#ec6d6d}
+  .card.estimate.bad .value{color:#ec6d6d}
+  .card.estimate.avg{border-color:#e8b765}
+  .card.estimate.avg .value{color:#e8b765}
+  .card.estimate.good{border-color:#5fd28a;background:linear-gradient(135deg,#0f2418,#143a23)}
+  .card.estimate.good .label{color:#5fd28a}
+  .card.estimate.good .value{color:#5fd28a}
+  .haircut-pct{font-size:.7rem;color:#76828e;margin-top:4px}
+  /* tooltip CSS */
+  .help{display:inline-block;margin-left:6px;width:14px;height:14px;line-height:14px;text-align:center;border-radius:50%;background:#2a3441;color:#9bb0c4;font-size:.7rem;font-weight:600;cursor:help;position:relative}
+  .help:hover{background:#5fd28a;color:#0c1117}
+  .help[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:#161d28;color:#d8e0ec;border:1px solid #2a3441;padding:8px 12px;border-radius:6px;font-size:.78rem;font-weight:400;white-space:normal;width:280px;line-height:1.45;text-align:left;z-index:100;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+  .help[data-tip]:hover::before{content:'';position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#2a3441;z-index:101}
+  h1{font-size:1.1rem;margin:0 0 4px}
+  .sub{color:#76828e;font-size:.78rem;margin-bottom:18px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:14px}
+  .card{background:#161d28;border:1px solid #232c3a;border-radius:8px;padding:11px}
+  .label{color:#76828e;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px}
+  .value{color:#d8e0ec;font-size:1.35rem;font-weight:600;margin-top:3px;font-variant-numeric:tabular-nums}
+  .value.big{font-size:1.7rem}
+  .value.green{color:#5fd28a}
+  .value.red{color:#ec6d6d}
+  .value.muted{color:#76828e}
+  .section-title{font-size:.92rem;color:#9bb0c4;margin:18px 0 8px;border-bottom:1px solid #232c3a;padding-bottom:5px}
+  table{width:100%;border-collapse:collapse;font-size:.83rem}
+  th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #1d2531}
+  th{color:#76828e;font-weight:500;background:#0f1520}
+  td.num{text-align:right;font-variant-numeric:tabular-nums}
+  .muted{color:#76828e}
+  .flag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:.72rem;font-weight:600;margin-left:6px}
+  .flag-shadow{background:#3a2c14;color:#e8b765}
+  .flag-live{background:#143a23;color:#5fd28a}
+  #last-refresh{color:#76828e;font-size:.7rem}
+</style>
+</head>
+<body>
+
+<h1>VelocityQuant · PNL dashboard <span id="last-refresh"></span></h1>
+<div class="sub">Balance on-chain Solana · SHADOW what-if profit · refresh 30s</div>
+
+<div class="section-title">Balance actual on-chain</div>
+<div id="totals" class="grid"></div>
+<div id="wallets-detail"></div>
+
+<div class="section-title">Delta últimas 24h (snapshots cada 5min)</div>
+<div id="delta-24h" class="grid"></div>
+
+<div class="section-title">SHADOW what-if (cyclic_shadow.jsonl últimas 24h)</div>
+<div id="shadow-summary" class="grid"></div>
+<div id="v4-observer"></div>
+
+<div class="section-title" style="margin-top:24px">Modo bots</div>
+<div id="bot-status"></div>
+
+<script>
+async function fetchJSON(url) {
+  const r = await fetch(url, {cache:'no-cache'});
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return await r.json();
+}
+
+function fmtUSD(v) {
+  if (v === null || v === undefined) return '—';
+  return '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+function fmtNum(v, dec=4) {
+  if (v === null || v === undefined) return '—';
+  return Number(v).toLocaleString('en-US', {minimumFractionDigits: dec, maximumFractionDigits: dec});
+}
+function fmtDelta(curr, base) {
+  if (base === undefined || base === null || curr === undefined || curr === null) return {text:'—', cls:'muted'};
+  const d = curr - base;
+  const sign = d >= 0 ? '+' : '';
+  const cls = d > 0 ? 'green' : (d < 0 ? 'red' : 'muted');
+  return {text: sign + fmtUSD(d), cls};
+}
+
+async function loadBalance() {
+  const d = await fetchJSON('/poly/pnl/balance');
+  // totals top
+  const t = d.totals;
+  document.getElementById('totals').innerHTML = `
+    <div class="card"><div class="label">Total USD</div><div class="value big">${fmtUSD(t.total_usd)}</div></div>
+    <div class="card"><div class="label">SOL price</div><div class="value">${fmtUSD(d.sol_usd_price)}</div></div>
+    <div class="card"><div class="label">SOL total</div><div class="value">${fmtNum(t.sol, 4)}</div></div>
+    <div class="card"><div class="label">USDC total</div><div class="value">${fmtNum(t.usdc, 2)}</div></div>
+    <div class="card"><div class="label">USDT total</div><div class="value">${fmtNum(t.usdt, 2)}</div></div>
+  `;
+  // per-wallet
+  let html = `<table><thead><tr>
+    <th>Wallet</th><th>Pubkey</th><th class="num">SOL</th><th class="num">SOL USD</th>
+    <th class="num">USDC</th><th class="num">USDT</th><th class="num">Total USD</th></tr></thead><tbody>`;
+  for (const w of d.wallets) {
+    if (w.error) {
+      html += `<tr><td>${w.label}</td><td colspan="6">ERROR: ${w.error}</td></tr>`;
+      continue;
+    }
+    html += `<tr>
+      <td><b>${w.label}</b></td>
+      <td class="muted">${w.pubkey.slice(0,4)}…${w.pubkey.slice(-4)}</td>
+      <td class="num">${fmtNum(w.sol, 6)}</td>
+      <td class="num">${fmtUSD(w.sol_usd)}</td>
+      <td class="num">${fmtNum(w.usdc, 2)}</td>
+      <td class="num">${fmtNum(w.usdt, 2)}</td>
+      <td class="num"><b>${fmtUSD(w.total_usd)}</b></td>
+    </tr>`;
+  }
+  html += '</tbody></table>';
+  document.getElementById('wallets-detail').innerHTML = html;
+  return d;
+}
+
+async function loadDelta(currentBalance) {
+  try {
+    const d = await fetchJSON('/poly/pnl/snapshots?h=24');
+    if (!d.snapshots || d.snapshots.length === 0) {
+      document.getElementById('delta-24h').innerHTML = '<div class="card muted">Sin snapshots todavía. Esperando primer ciclo del timer (5min).</div>';
+      return;
+    }
+    // Filter out snapshots where any wallet had an error (RPC 429 etc) — usar sólo los completos
+    const validSnaps = d.snapshots.filter(s =>
+      s.wallets && s.wallets.length > 0 && s.wallets.every(w => !w.error)
+    );
+    const total = d.snapshots.length;
+    const skipped = total - validSnaps.length;
+    if (validSnaps.length === 0) {
+      document.getElementById('delta-24h').innerHTML = `<div class="card muted">${total} snapshot(s) pero todos con errores RPC. Esperando uno limpio.</div>`;
+      return;
+    }
+    // Si current tiene errores en wallets (429 RPC), NO calcular delta — mostrar warning
+    const currentHasErrors = currentBalance?.wallets?.some(w => w.error);
+    const currentTotal = currentBalance?.totals?.total_usd;
+    const oldest = validSnaps[0];
+    const baseTotal = oldest.totals?.total_usd;
+    const span_h = ((Date.parse(currentBalance.ts_utc.replace('Z','+00:00')) - Date.parse(oldest.ts_utc.replace('Z','+00:00'))) / 3600000).toFixed(1);
+    const skippedTxt = skipped > 0 ? `<div class="muted" style="font-size:.72rem;margin-top:4px">+${skipped} skipped (RPC errors)</div>` : '';
+    let pnlCard;
+    if (currentHasErrors || !currentTotal) {
+      pnlCard = `<div class="card"><div class="label">Ganancia/pérdida vs baseline</div><div class="value muted">RPC error</div><div class="muted" style="font-size:.72rem;margin-top:4px">esperando read limpio</div></div>`;
+    } else {
+      const delta = fmtDelta(currentTotal, baseTotal);
+      pnlCard = `<div class="card"><div class="label">Ganancia/pérdida vs baseline</div><div class="value ${delta.cls}">${delta.text}</div><div class="muted" style="font-size:.72rem;margin-top:4px">${currentBalance ? new Date(currentBalance.ts_utc).toLocaleTimeString() : ''}</div></div>`;
+    }
+    document.getElementById('delta-24h').innerHTML = `
+      <div class="card"><div class="label">Snapshots válidos</div><div class="value">${validSnaps.length}</div>${skippedTxt}</div>
+      <div class="card"><div class="label">Span horas</div><div class="value">${span_h}h</div></div>
+      <div class="card"><div class="label">Baseline (saldo inicial)</div><div class="value">${fmtUSD(baseTotal)}</div></div>
+      ${pnlCard}
+    `;
+  } catch(e) {
+    document.getElementById('delta-24h').innerHTML = `<div class="card">Error: ${e}</div>`;
+  }
+}
+
+async function loadShadow() {
+  try {
+    const d = await fetchJSON('/poly/pnl/shadow_summary?h=24');
+    const v3 = d.v3_cyclic_shadow;
+    const v4 = d.v4_observer;
+    if (!v3.present) {
+      document.getElementById('shadow-summary').innerHTML = '<div class="card muted">cyclic_shadow.jsonl no presente en mirror Dallas. Espera al primer rsync.</div>';
+    } else {
+      const cls = v3.total_profit_usd > 0 ? 'green' : (v3.total_profit_usd < 0 ? 'red' : 'muted');
+      // Rates derived
+      const cyclesPerSec = (v3.n_cycles / 86400).toFixed(2);
+      const usdPerMin = (v3.total_profit_usd / 1440).toFixed(2);
+      const usdPerHour = (v3.total_profit_usd / 24).toFixed(2);
+      const cachedAtNice = d.cached_at ? new Date(d.cached_at).toLocaleTimeString() : '?';
+      const lastTsNice = v3.last_ts ? new Date(v3.last_ts).toLocaleTimeString() : '?';
+      // Track delta vs previous render
+      const prev = window._lastShadowProfit;
+      let deltaTxt = '';
+      if (prev !== undefined && prev !== null) {
+        const delta = v3.total_profit_usd - prev;
+        const sign = delta >= 0 ? '+' : '';
+        deltaTxt = `<div class="muted" style="font-size:.72rem;margin-top:4px">Δ desde último refresh: ${sign}${fmtUSD(delta)}</div>`;
+      }
+      window._lastShadowProfit = v3.total_profit_usd;
+      // ROI sobre hot200 capital ($200 USDC + ~$5 SOL gas reserve)
+      const hot200_capital = 205;
+      const profitDay = v3.total_profit_usd;
+      const profitHour = v3.total_profit_usd / 24;
+      const roiPctDay = (100 * profitDay / hot200_capital).toFixed(0);
+      const roiPctHour = (100 * profitHour / hot200_capital).toFixed(1);
+      const tipDia = "Suma teórica si el bot firmara cada cycle SHADOW de las últimas 24h. Calculado como Σ(net_profit_usd) sobre 415k+ cycles. NO es ganancia real: el bot está en SHADOW (LIQ_CYCLIC_EXECUTE_LIVE=false) y nunca firmó TX. En LIVE realista se reduce 5-20% por slippage real, competencia bot y failed TX.";
+      const tipHora = "Profit promedio por hora (= profit/día ÷ 24). Refleja cuánto el bot SHADOW dice que ganaría /h en steady-state. Mismo caveat que /día: NO real hasta activar LIVE.";
+      const tipROI = "ROI = profit / capital expuesto en hot200 ($205 ≈ $200 USDC + $5 SOL gas). En LIVE real espera 5-20% de este número.";
+      // r137 — datos del día actual (desde UTC midnight)
+      const today = v3.today || {};
+      const profitToday = today.total_profit_usd || 0;
+      const hoursToday = today.hours_elapsed || 0;
+      const cyclesToday = today.n_cycles || 0;
+      const rateToday = today.rate_usd_per_hour || 0;
+      const todayClsLocal = profitToday > 0 ? 'green' : (profitToday < 0 ? 'red' : 'muted');
+      const tipToday = `Profit acumulado SHADOW desde 00:00 UTC del día actual (${today.midnight_utc || '?'}). ${cyclesToday.toLocaleString()} cycles en ${hoursToday}h. Mismo caveat que las otras métricas SHADOW: NO real hasta activar LIQ_CYCLIC_EXECUTE_LIVE=true.`;
+
+      // r149-pent · 2026-05-07 — Cards LIVE conjeturales (5/12/25%) ELIMINADAS.
+      // Eran inventos de Claude pre-LIVE. Reemplazadas por card de realidad cruda:
+      // 0 trades ejecutados, $0 realized, empirical haircut pending Lun 12 13:30 UTC.
+      const tipEmpirical = `Bot V4-Alpha en SHADOW puro. LIQ_CYCLIC_EXECUTE_LIVE=false confirmado. Journal Newark verificado: 0 bundles, 0 tx_signatures, 0 liquidaciones en 7+ días. Empirical haircut será computado cuando arranque microcapital LIVE el Lun 12 12:30 UTC tras CPI gate verde, vía execution attribution engine (firma Gemma r144 Q3).`;
+      const liveCountdownMs = (Date.UTC(2026, 4, 12, 13, 30, 0) - Date.now());
+      const liveCountdownDays = Math.max(0, Math.floor(liveCountdownMs / 86400000));
+      const liveCountdownHours = Math.max(0, Math.floor((liveCountdownMs % 86400000) / 3600000));
+
+      document.getElementById('shadow-summary').innerHTML = `
+        <div class="card highlight">
+          <div class="label">📅 PNL DEL DÍA (desde 00:00 UTC)<span class="help" data-tip="${tipToday}">?</span> <span class="flag flag-shadow" style="margin-left:4px">SHADOW</span></div>
+          <div class="value big ${todayClsLocal}">${fmtUSD(profitToday)}</div>
+          <div style="margin-top:6px;font-size:.85rem;color:#9bb0c4">${hoursToday}h elapsed · ${cyclesToday.toLocaleString()} cycles · rate <b style="color:#5fd28a">${fmtUSD(rateToday)}/h</b></div>
+        </div>
+        <div class="card highlight" style="border:1px solid #ffae00;background:linear-gradient(180deg,#1a1410,#0c1a2c)">
+          <div class="label" style="color:#ffae00">⚠ LIVE TRADES EJECUTADOS<span class="help" data-tip="${tipEmpirical}">?</span></div>
+          <div class="value big" style="color:#ffae00">0</div>
+          <div style="margin-top:6px;font-size:.85rem;color:#9bb0c4">realized profit: <b style="color:#ffae00">$0.00</b> · journal Newark verificado 7+ días</div>
+          <div style="margin-top:4px;font-size:.72rem;color:#76828e">empirical haircut activates: ${liveCountdownDays}d ${liveCountdownHours}h (Lun 12 13:30 UTC tras CPI gate)</div>
+        </div>
+        <div class="card highlight">
+          <div class="label">💰 PROFIT / DÍA (24h sliding)<span class="help" data-tip="${tipDia}">?</span> <span class="flag flag-shadow" style="margin-left:4px">SHADOW</span></div>
+          <div class="value big ${cls}">${fmtUSD(profitDay)}</div>
+          <div style="margin-top:6px;font-size:.85rem;color:#9bb0c4">≈ <b style="color:#5fd28a">${roiPctDay}%</b> ROI/día<span class="help" data-tip="${tipROI}">?</span></div>
+          ${deltaTxt}
+        </div>
+        <div class="card highlight">
+          <div class="label">⏱️ PROFIT / HORA<span class="help" data-tip="${tipHora}">?</span> <span class="flag flag-shadow" style="margin-left:4px">SHADOW</span></div>
+          <div class="value big ${cls}">${fmtUSD(profitHour)}</div>
+          <div style="margin-top:6px;font-size:.85rem;color:#9bb0c4">≈ <b style="color:#5fd28a">${roiPctHour}%</b> ROI/h · $${(profitHour/60).toFixed(2)}/min</div>
+        </div>
+        <div class="card"><div class="label">Cycles SHADOW 24h<span class="help" data-tip="Total de oportunidades cyclic detectadas en 24h. El cyclic_dispatch escanea pools cada slot (~400ms) y registra cada gap detectado entre Raydium y Orca SOL/USDC.">?</span></div><div class="value">${v3.n_cycles.toLocaleString()}</div><div class="muted" style="font-size:.72rem;margin-top:4px">${cyclesPerSec} cycles/s</div></div>
+        <div class="card"><div class="label">Win rate<span class="help" data-tip="% de cycles con net_profit_usd > 0. En SHADOW casi 100% porque el bot solo registra cuando hay gap. En LIVE real esto baja a 60-80% (race conditions, failed TX, slippage adverso).">?</span></div><div class="value">${v3.win_rate_pct}%</div><div class="muted" style="font-size:.72rem;margin-top:4px">${v3.wins.toLocaleString()} / ${v3.losses}</div></div>
+        <div class="card"><div class="label">Avg per cycle<span class="help" data-tip="Profit promedio por cycle (= profit/día ÷ cycles). Cycles tienen amount_in=$100, gas + jito tip ~$0.005, profit median ~$0.014.">?</span></div><div class="value">${fmtUSD(v3.avg_profit_per_cycle_usd)}</div></div>
+        <div class="card"><div class="label">Cached at<span class="help" data-tip="Hora UTC del último recálculo del SHADOW. systemd timer vq-pnl-shadow-cache refresca cada 5min porque escanear el JSONL de 1.3GB toma ~45s.">?</span></div><div class="value" style="font-size:1rem">${cachedAtNice}</div><div class="muted" style="font-size:.72rem;margin-top:4px">last cycle: ${lastTsNice}</div></div>
+      `;
+    }
+    if (!v4.present) {
+      document.getElementById('v4-observer').innerHTML = '<div class="muted" style="margin-top:8px">cyclic_shadow_v4.jsonl no en mirror todavía.</div>';
+    } else {
+      const modesHtml = Object.entries(v4.modes_count).map(([m,c]) => `${m}: <b>${c}</b>`).join(' · ');
+      document.getElementById('v4-observer').innerHTML = `
+        <div class="card" style="margin-top:8px">
+          <div class="label">V4 observer ticks 24h</div>
+          <div class="value">${v4.n_ticks.toLocaleString()}</div>
+          <div style="margin-top:6px;font-size:.78rem;color:#9bb0c4">modes: ${modesHtml}</div>
+          <div style="margin-top:4px;font-size:.78rem;color:#9bb0c4">V3 vs V4 disagreements: <b>${v4.v3_v4_disagreement_count}</b> · V4 blocks: <b>${v4.v4_block_count}</b></div>
+        </div>`;
+    }
+  } catch(e) {
+    document.getElementById('shadow-summary').innerHTML = `<div class="card">Error: ${e}</div>`;
+  }
+}
+
+async function setBotStatus() {
+  let cyclicLabel, cyclicCls, cyclicVar;
+  let kaminoLabel, kaminoCls, kaminoVar;
+  let footerNote = '';
+  try {
+    const s = await fetchJSON('/poly/pnl/bot_status');
+    if (s.ok) {
+      cyclicLabel = s.cyclic_live ? 'cyclic LIVE' : 'cyclic SHADOW';
+      cyclicCls = s.cyclic_live ? 'flag-live' : 'flag-shadow';
+      cyclicVar = `LIQ_CYCLIC_EXECUTE_LIVE=${s.cyclic_live}`;
+      kaminoLabel = s.kamino_disabled ? 'Kamino OFF' : 'Kamino ON';
+      kaminoCls = s.kamino_disabled ? 'flag-shadow' : 'flag-live';
+      kaminoVar = `LIQ_KAMINO_DISABLE=${s.kamino_disabled}`;
+      footerNote = s.cyclic_live
+        ? `<div class="muted" style="margin-top:6px;font-size:.75rem">⚠️ Bot LIVE: hot200 ($200 USDC) firmando TX reales. Profit/loss será visible en delta del balance.</div>`
+        : `<div class="muted" style="margin-top:6px;font-size:.75rem">Activar LIVE: descomentar LIQ_CYCLIC_EXECUTE_LIVE=true en .env + restart.</div>`;
+    } else {
+      cyclicLabel = 'unknown'; cyclicCls = 'flag-shadow'; cyclicVar = `error: ${s.error||''}`;
+      kaminoLabel = 'unknown'; kaminoCls = 'flag-shadow'; kaminoVar = '';
+    }
+  } catch(e) {
+    cyclicLabel = 'unknown'; cyclicCls = 'flag-shadow'; cyclicVar = `fetch error: ${e}`;
+    kaminoLabel = 'unknown'; kaminoCls = 'flag-shadow'; kaminoVar = '';
+  }
+  document.getElementById('bot-status').innerHTML = `
+    <div class="card">
+      <div class="label">liquidator_rs (V4 binary)</div>
+      <div style="margin-top:4px"><span class="flag ${cyclicCls}">${cyclicLabel}</span> · ${cyclicVar}</div>
+      <div style="margin-top:4px"><span class="flag ${kaminoCls}">${kaminoLabel}</span> · ${kaminoVar}</div>
+      ${footerNote}
+    </div>
+    <div class="card" style="margin-top:8px">
+      <div class="label">solana-executor-rs</div>
+      <div style="margin-top:4px"><span class="flag flag-shadow">PAPER</span> · sandwich_listener activo, sin send_transaction (hardcoded)</div>
+    </div>
+  `;
+}
+
+async function refreshAll() {
+  try {
+    const bal = await loadBalance();
+    await setBotStatus();
+    await loadDelta(bal);
+    await loadShadow();
+    document.getElementById('last-refresh').textContent = `· last refresh ${new Date().toLocaleTimeString()}`;
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+refreshAll();
+setInterval(refreshAll, 30000);
+</script>
+</body>
+</html>"""
+
+
+_AUDIT_DASHBOARD_HTML = r"""<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>NFP Audit Dashboard — VelocityQuant</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; line-height: 1.5; }
+  h1 { font-size: 1.4rem; margin: 0 0 6px 0; color: #fff; }
+  .sub { color: #8b949e; font-size: .85rem; margin-bottom: 20px; }
+  .panel { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .panel h2 { margin: 0 0 10px 0; color: #58a6ff; font-size: 1rem; border-bottom: 1px solid #30363d; padding-bottom: 6px; }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid #30363d; font-variant-numeric: tabular-nums; }
+  th { background: #1f2630; color: #8b949e; font-weight: 500; text-transform: uppercase; font-size: .68rem; letter-spacing: .5px; }
+  tr:last-child td { border-bottom: none; }
+  .empty { color: #8b949e; font-style: italic; padding: 20px; text-align: center; }
+  pre { background: #0d1117; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: .8rem; color: #c9d1d9; max-height: 300px; }
+  .footer { margin-top: 30px; color: #8b949e; font-size: .75rem; border-top: 1px solid #30363d; padding-top: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 12px; }
+  .card { background: #1f2630; border: 1px solid #30363d; border-radius: 6px; padding: 10px; }
+  .card .label { color: #8b949e; font-size: .7rem; text-transform: uppercase; letter-spacing: .5px; }
+  .card .value { font-size: 1.2rem; font-weight: 600; color: #fff; }
+  .mode-CRITICAL { color: #f85149; font-weight: 600; }
+  .mode-CAUTELA { color: #d29922; }
+  .mode-NORMAL { color: #3fb950; }
+  .reload-btn { background: #58a6ff; color: #0d1117; border: none; padding: 6px 14px; font-size: .85rem; border-radius: 4px; cursor: pointer; margin-left: 10px; }
+</style>
+</head>
+<body>
+
+<h1>NFP Audit Dashboard — VelocityQuant V4-Alpha SHADOW</h1>
+<div class="sub">
+  Polling /poly/audit/run/&lt;query&gt; cada 30s · risk_audit.jsonl auditing
+  <button class="reload-btn" onclick="refreshAll()">Refresh now</button>
+  <span id="last-refresh"></span>
+</div>
+
+<div class="panel">
+  <h2>📊 Audit Log Health</h2>
+  <div id="jsonl-health" class="grid"></div>
+</div>
+
+<div class="panel">
+  <h2>⚡ Kill Switch BTC Triggers (last 24h)</h2>
+  <div id="kill-triggers"></div>
+</div>
+
+<div class="panel">
+  <h2>🔄 Mode Transitions during macro events</h2>
+  <div id="mode-transitions"></div>
+</div>
+
+<div class="panel">
+  <h2>⏱ V4 Decision Latency (T0→T1→T2 components, firma r111 §3)</h2>
+  <div id="v4-latency"></div>
+</div>
+
+<div class="panel">
+  <h2>🌐 BTC Consensus Fetch Latency (p99)</h2>
+  <div id="btc-latency"></div>
+</div>
+
+<div class="panel">
+  <h2>❌ Outliers Rejected per Source (BS-3 collusion forensics)</h2>
+  <div id="outliers"></div>
+</div>
+
+<div class="panel">
+  <h2>↔️ V3 vs V4 Disagreement</h2>
+  <div id="v3-v4-disagree"></div>
+</div>
+
+<div class="panel">
+  <h2>📐 SF Calculations Summary (last 50)</h2>
+  <div id="sf-summary"></div>
+</div>
+
+<div class="footer">
+  VelocityQuant Audit Dashboard · Firma Gemma r110 §4 + r111 §3/§5
+  · Basic Auth + rate limit 10/min · refresh 30s
+</div>
+
+<script>
+async function loadQuery(qname, targetId, renderer) {
+  try {
+    const r = await fetch(`/poly/audit/run/${qname}`, { cache: 'no-cache' });
+    if (!r.ok) {
+      document.getElementById(targetId).innerHTML = `<div class="empty">HTTP ${r.status}</div>`;
+      return;
+    }
+    const data = await r.json();
+    document.getElementById(targetId).innerHTML = renderer(data);
+  } catch (e) {
+    document.getElementById(targetId).innerHTML = `<div class="empty">Error: ${e}</div>`;
+  }
+}
+
+function renderTable(rows, columns) {
+  if (!rows || (Array.isArray(rows) && rows.length === 0)) return '<div class="empty">No data yet</div>';
+  if (!Array.isArray(rows)) rows = [rows];
+  const cols = columns || Object.keys(rows[0]);
+  return `<table><thead><tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr></thead>
+          <tbody>${rows.slice(0, 50).map(row =>
+            `<tr>${cols.map(c => `<td>${formatCell(row[c])}</td>`).join('')}</tr>`
+          ).join('')}</tbody></table>`;
+}
+
+function formatCell(v) {
+  if (v === null || v === undefined) return '—';
+  if (typeof v === 'object') return `<pre>${JSON.stringify(v, null, 2).substring(0, 200)}</pre>`;
+  if (typeof v === 'number') return Number.isInteger(v) ? v : v.toFixed(4);
+  const s = String(v);
+  if (s.startsWith('CRITICAL')) return `<span class="mode-CRITICAL">${s}</span>`;
+  if (s.startsWith('CAUTELA')) return `<span class="mode-CAUTELA">${s}</span>`;
+  if (s.startsWith('NORMAL')) return `<span class="mode-NORMAL">${s}</span>`;
+  return s.substring(0, 200);
+}
+
+function renderJsonlHealth(d) {
+  if (!d || !d.exists) return '<div class="empty">risk_audit.jsonl not yet created</div>';
+  return `
+    <div class="card"><div class="label">File size</div><div class="value">${d.size_mb} MB</div></div>
+    <div class="card"><div class="label">Lines</div><div class="value">${d.lines.toLocaleString()}</div></div>
+    <div class="card"><div class="label">Status</div><div class="value mode-NORMAL">healthy</div></div>
+  `;
+}
+
+function renderLatency(d) {
+  if (!d || d.count === 0) return '<div class="empty">No latency samples yet</div>';
+  return `
+    <div class="grid">
+      <div class="card"><div class="label">Samples</div><div class="value">${d.count.toLocaleString()}</div></div>
+      <div class="card"><div class="label">Fetch p50</div><div class="value">${d.fetch_ms_p50?.toFixed(0)} ms</div></div>
+      <div class="card"><div class="label">Fetch p99</div><div class="value">${d.fetch_ms_p99?.toFixed(0)} ms</div></div>
+      <div class="card"><div class="label">Compute p50</div><div class="value">${d.compute_ms_p50?.toFixed(0)} ms</div></div>
+      <div class="card"><div class="label">Compute p99</div><div class="value">${d.compute_ms_p99?.toFixed(0)} ms</div></div>
+      <div class="card"><div class="label">Total p99</div><div class="value">${d.total_ms_p99?.toFixed(0)} ms</div></div>
+    </div>
+    ${d.worst_decision ? `<h3 style="font-size:.85rem;margin-top:14px">Worst decision (firma r111 §3b CRITICAL)</h3>
+    <pre>${JSON.stringify(d.worst_decision, null, 2)}</pre>` : ''}
+  `;
+}
+
+function renderBTCLatency(d) {
+  if (!d || d.count === 0) return '<div class="empty">No fetch samples yet</div>';
+  return `
+    <div class="grid">
+      <div class="card"><div class="label">Samples</div><div class="value">${d.count.toLocaleString()}</div></div>
+      <div class="card"><div class="label">p50</div><div class="value">${d.p50?.toFixed(0)} ms</div></div>
+      <div class="card"><div class="label">p95</div><div class="value">${d.p95?.toFixed(0)} ms</div></div>
+      <div class="card"><div class="label">p99</div><div class="value">${d.p99?.toFixed(0)} ms</div></div>
+      <div class="card"><div class="label">max</div><div class="value">${d.max?.toFixed(0)} ms</div></div>
+    </div>
+  `;
+}
+
+async function refreshAll() {
+  await loadQuery('kill_switch_triggers_today', 'kill-triggers', d => renderTable(d, ['ts','btc_move_pct','threshold_pct','event','consensus_price']));
+  await loadQuery('mode_transitions_during_event', 'mode-transitions', d => renderTable(d, ['ts','mode_from','mode_to','reason','sf']));
+  await loadQuery('v4_decision_latency', 'v4-latency', renderLatency);
+  await loadQuery('btc_consensus_latency_p99', 'btc-latency', renderBTCLatency);
+  await loadQuery('outliers_rejected_per_source', 'outliers', d => renderTable(d, ['source','rejection_count']));
+  await loadQuery('v3_v4_disagreement_count', 'v3-v4-disagree', d => `<p>Total disagreements: <b>${d.total || 0}</b></p>${renderTable(d.by_block_reason || [], ['reason','count'])}`);
+  await loadQuery('sf_calculations_summary', 'sf-summary', d => renderTable(d, ['ts','event','sf_naive','sf_adjusted','threshold_crossed','mode_transition']));
+  try {
+    const r = await fetch('/poly/audit/jsonl_size');
+    const d = await r.json();
+    document.getElementById('jsonl-health').innerHTML = renderJsonlHealth(d);
+  } catch (e) { /* non-fatal */ }
+  document.getElementById('last-refresh').textContent = `· last refresh ${new Date().toLocaleTimeString()}`;
+}
+
+refreshAll();
+setInterval(refreshAll, 30000);
+</script>
+
+</body>
+</html>"""

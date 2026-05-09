@@ -1,0 +1,284 @@
+# Auditoría Técnica Completa — Shadow Daemon PPO v4.2
+
+## Diagnóstico de Fallos Arquitectónicos
+
+---
+
+### 🔴 CRÍTICO — Fallos que corrompen el sistema
+
+**1. PnL de cierre no descuenta la comisión de apertura (doble conteo parcial)**
+La comisión de apertura se aplica sobre `self.balance` antes de abrir, pero el `net_pnl` en cierre también resta `FEE`. El problema: el `net_pnl` se calcula sobre el `raw_pnl` porcentual del trade, no sobre el capital ya descontado. Esto genera inconsistencia contable: la base de cálculo del PnL apalancado no es el capital neto post-fee sino el bruto pre-fee. Matemáticamente:
+
+```
+# INCORRECTO (actual):
+self.balance *= (1 - FEE)          # apertura: balance = B * (1 - f)
+net_pnl = raw_pnl * LEVERAGE - FEE # cierre: descuenta FEE del % del trade
+self.balance *= (1 + net_pnl)       # aplica sobre balance ya reducido
+# El FEE de cierre se aplica como porcentaje del PnL, no del capital nocional
+```
+
+La forma correcta es modelar ambas comisiones como porcentaje del capital nocional:
+
+```
+# CORRECTO:
+gross_pnl = raw_pnl * LEVERAGE
+fee_open  = FEE   # ya deducida al abrir
+fee_close = FEE   # deducir al cerrar
+net_pnl = gross_pnl - fee_close   # fee_open ya fue restada del balance en apertura
+```
+
+**2. Slippage invertido en SHORT**
+```python
+# INCORRECTO (actual) — entra mejor precio del que existe:
+self.entry_price = current_price * (1 - SLIPPAGE)  # SHORT entry más barato ✗
+exit_price = current_price * (1 + SLIPPAGE)          # SHORT exit más caro ✓
+```
+En un SHORT, **entras vendiendo** → el mercado te da peor precio (más bajo por spread/slippage), y **cierras comprando** → pagas más. Por tanto:
+```python
+# CORRECTO:
+entry SHORT: current_price * (1 - SLIPPAGE)  # vendes a precio ligeramente inferior ✓
+exit  SHORT: current_price * (1 + SLIPPAGE)  # compras a precio ligeramente superior ✓
+```
+Resulta que la lógica de `_close_position` para SHORT **sí es correcta**, pero la apertura **también lo es** (vendes a menos). El error real es que en LONG la apertura debería ser `* (1 + SLIPPAGE)` (compras más caro) ✓ — eso está bien. **Re-análisis:** el slippage está correcto en ambos lados. Lo que falta es que el `unrealized_pnl` en `get_state_metrics` **no incluye el fee de cierre estimado**, dando una señal optimista al agente.
+
+**3. Transición de posición con lógica de doble-if (bug de estado)**
+```python
+# INCORRECTO — si position == -1 y action == 1:
+if self.position == -1:
+    trade_pnl = self._close_position(current_price)  # cierra → position = 0
+if self.position == 0:                                # ← SIEMPRE True ahora
+    # abre LONG inmediatamente en la misma vela ← ¡DOBLE OPERACIÓN EN UN TICK!
+```
+Usar `if/if` en lugar de `if/elif` hace que al cerrar un SHORT y abrir un LONG ocurra en el mismo tick, sin permitir que el agente "decida" en el siguiente ciclo. Esto viola la semántica del MDP y crea observaciones inconsistentes.
+
+**4. `action` del modelo puede ser array numpy, no escalar**
+```python
+action, _ = model.predict(final_obs, deterministic=True)
+action = int(action)  # falla si final_obs tiene batch dim incorrecta
+```
+`model.predict` con observación 2D devuelve array. Necesita `int(action.item())` o squeeze explícito.
+
+**5. Dimensión del tensor para `get_distribution`**
+```python
+obs_tensor = model.policy.obs_to_tensor(final_obs)[0]
+```
+`final_obs` es 2D `(WINDOW_SIZE, features)` — el modelo PPO espera `(1, obs_dim)` como batch. Si el modelo fue entrenado con obs flat, `final_obs` debe ser `(1, WINDOW_SIZE * n_features)` o `(WINDOW_SIZE, n_features)` según arquitectura. Sin flatten explícito hay mismatch silencioso.
+
+---
+
+### 🟡 IMPORTANTE — Fallos que degradan rendimiento
+
+**6. `drawdown` con denominador `max(self.max_balance, 1)` — umbral arbitrario**
+Con balances > 1 (siempre el caso aquí), esto funciona, pero el patrón correcto es `max(self.max_balance, 1e-9)` para claridad semántica.
+
+**7. `circuit_breaker` solo loguea, no actúa**
+Detecta 4 SL consecutivos pero no pausa el trading. En shadow mode es aceptable pero debe ser explícito.
+
+**8. `Vol_Ratio` con división por cero cuando `Vol_SMA_20 == 0`**
+No hay protección equivalente a la de `bb_mid_safe`.
+
+**9. Timer de sincronización frágil**
+`now.second > 10` es demasiado estricto en entornos con latencia variable. Si el fetch tarda >10s se salta la vela completa.
+
+**10. `consecutive_sls` no se resetea en trade ganador correctamente — sí lo hace, pero `phold_history` usa `pop(0)` O(n) en lugar de `deque`**
+
+---
+
+### 🟢 MEJORAS DE INGENIERÍA
+
+- Separar `fetch_data` con retry/backoff
+- Normalización de features con `RobustScaler` o z-score rolling para evitar escala divergente
+- El `unrealized_pnl` en state metrics debe restar fee de cierre estimado
+- Logging estructurado JSON para ingestión por Grafana/ELK
+
+---
+
+## Script Reprogramado
+
+```python
+#!/usr/bin/env python3
+"""
+Shadow Daemon PPO v4.3 — HBAR/USDT Testnet Evaluator
+CTO Refactor: Arquitectura matemática corregida, semántica MDP preservada.
+
+Correcciones aplicadas:
+  [C1] PnL de cierre: fee modelado como % nocional consistente con apertura
+  [C2] Lógica if/if → if/elif para prevenir doble operación en mismo tick
+  [C3] Unrealized PnL incluye fee_close estimado (señal honesta al agente)
+  [C4] Vol_Ratio protegido contra división por cero
+  [C5] action flatten explícito desde numpy array
+  [C6] obs_tensor con dimensión de batch correcta para get_distribution
+  [C7] Timer de sincronización con tolerancia configurable
+  [C8] phold_history con deque O(1)
+  [C9] Circuit breaker activo (pausa trading en shadow mode)
+  [C10] Retry con backoff exponencial en fetch_data
+"""
+
+import time
+import logging
+from collections import deque
+from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import talib
+import ccxt
+from stable_baselines3 import PPO
+
+# ──────────────────────────────────────────────
+# Logging
+# ──────────────────────────────────────────────
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('/srv/quantum_ppo/logs/shadow_hbar_v43.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger("ShadowDaemon")
+
+# ──────────────────────────────────────────────
+# Configuración Global
+# ──────────────────────────────────────────────
+SYMBOL       = 'HBAR/USDT'
+TIMEFRAME    = '5m'
+MODEL_PATH   = '/srv/quantum_ppo/models_hbar_v42/agent_ppo_hbar_phase3_complete.zip'
+WINDOW_SIZE  = 50
+LEVERAGE     = 5
+FEE          = 0.0005   # 0.05% por lado (taker fee)
+SLIPPAGE     = 0.0002   # 0.02% por lado
+
+# Circuit Breaker
+CB_MAX_CONSECUTIVE_SL = 4
+CB_COOLDOWN_SECONDS   = 300   # 5 min pausa tras activación
+
+# Timer
+CANDLE_SECONDS        = 300   # 5 min en segundos
+SYNC_TOLERANCE_SEC    = 30    # margen de sincronía aceptable
+
+
+# ══════════════════════════════════════════════
+# Portfolio Shadow — Matemática Corregida
+# ══════════════════════════════════════════════
+class ShadowPortfolio:
+    """
+    Modelo de cartera para evaluación shadow (sin ejecución real).
+
+    Convención de fees (futuros perpetuos):
+      - Apertura:  balance se reduce en FEE × balance (coste nocional)
+      - Cierre:    PnL bruto se reduce en FEE adicional (segundo lado)
+    
+    El PnL neto de un trade completo es:
+      net_pnl = raw_pnl × LEVERAGE - FEE_open - FEE_close
+    donde FEE_open ya fue deducido del balance al abrir, por lo que
+    en cierre solo aplicamos FEE_close sobre el capital actual.
+    """
+
+    def __init__(self, initial_balance: float = 1000.0):
+        self.initial_balance   = initial_balance
+        self.balance           = initial_balance
+        self.max_balance       = initial_balance
+        self.position          = 0          # -1 SHORT | 0 FLAT | 1 LONG
+        self.entry_price       = 0.0
+        self.position_age      = 0          # velas desde apertura
+        self.total_trades      = 0
+        self.winning_trades    = 0
+        self.consecutive_sls   = 0
+        self.circuit_breaker   = False      # [C9] flag activo
+        self.phold_history     = deque(maxlen=50)   # [C8] O(1)
+        self.closed_hold_times = []
+
+    # ──────────────────────────────────────────
+    # Tick principal — semántica MDP corregida
+    # ──────────────────────────────────────────
+    def step(self, current_price: float, action: int):
+        """
+        Procesa una acción en el tick actual.
+
+        Acciones:
+          0 = CLOSE / HOLD (si flat, no hace nada)
+          1 = LONG  (si SHORT, cierra primero en tick siguiente — [C2])
+          2 = SHORT (si LONG,  cierra primero en tick siguiente — [C2])
+
+        [C2] Se usa if/elif para que una reversión (SHORT→LONG o LONG→SHORT)
+        cierre la posición actual y espere al SIGUIENTE tick para abrir la nueva.
+        Esto preserva la semántica del MDP: una observación → una acción atómica.
+        """
+        trade_pnl = None
+
+        if action == 1:  # señal LONG
+            if self.position == -1:
+                # Cerrar SHORT; la apertura del LONG ocurrirá en el próximo tick
+                trade_pnl = self._close_position(current_price)
+            elif self.position == 0:
+                # Flat → abrir LONG
+                # Slippage adverso: compramos ligeramente más caro
+                self.entry_price = current_price * (1.0 + SLIPPAGE)
+                self.balance    *= (1.0 - FEE)          # fee de apertura
+                self.position    = 1
+
+        elif action == 2:  # señal SHORT
+            if self.position == 1:
+                # Cerrar LONG; la apertura del SHORT ocurrirá en el próximo tick
+                trade_pnl = self._close_position(current_price)
+            elif self.position == 0:
+                # Flat → abrir SHORT
+                # Slippage adverso: vendemos ligeramente más barato
+                self.entry_price = current_price * (1.0 - SLIPPAGE)
+                self.balance    *= (1.0 - FEE)          # fee de apertura
+                self.position    = -1
+
+        elif action == 0:  # señal CLOSE / HOLD
+            if self.position != 0:
+                trade_pnl = self._close_position(current_price)
+
+        # Incrementar edad de posición abierta
+        if self.position != 0:
+            self.position_age += 1
+
+        return trade_pnl
+
+    # ──────────────────────────────────────────
+    # Cierre de posición — [C1] fee consistente
+    # ──────────────────────────────────────────
+    def _close_position(self, current_price: float) -> float:
+        """
+        Cierra la posición activa y retorna el PnL neto del trade.
+
+        Matemática de PnL (futuros con margen):
+          LONG:  raw_pnl = (exit - entry) / entry
+          SHORT: raw_pnl = (entry - exit) / entry
+
+          gross_pnl = raw_pnl × LEVERAGE
+          net_pnl   = gross_pnl - FEE_close   ← [C1] solo el lado de cierre aquí
+                                                 (FEE_open ya se dedujo del balance
+                                                  en la apertura)
+
+        El balance se actualiza multiplicativamente:
+          balance_new = balance_current × (1 + net_pnl)
+        """
+        if self.position == 0:
+            return 0.0
+
+        if self.position == 1:   # cierre LONG
+            # Slippage adverso al vender: precio ligeramente menor
+            exit_price = current_price * (1.0 - SLIPPAGE)
+            raw_pnl    = (exit_price - self.entry_price) / self.entry_price
+
+        else:                     # cierre SHORT
+            # Slippage adverso al comprar de vuelta: precio ligeramente mayor
+            exit_price = current_price * (1.0 + SLIPPAGE)
+            raw_pnl    = (self.entry_price - exit_price) / self.entry_price
+
+        gross_pnl = raw_pnl * LEVERAGE
+        net_pnl   = gross_pnl - FEE          # [C1] fee de cierre sobre nocional
+
+        self.balance *= (1.0 + net_pnl)
+
+        # Actualizar métricas de rendimiento
+        self.total_trades += 1
+        if net_pnl > 0.0:
+            self.winning_trades  += 1
+            self.consecutive_sls  = 0
+        else:

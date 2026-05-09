@@ -1,0 +1,480 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-300 to-yellow-200">🧠 CuanDeOro Strategy</h1>
+        <a href="/" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-medium transition">← Dashboard</a>
+    </div>
+
+    <!-- Liga Banner (Dinámico) -->
+    <div id="league-banner" class="bg-gradient-to-r from-green-900/30 to-yellow-900/30 border border-yellow-600/50 rounded-lg p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <span id="league-emoji" class="text-3xl">⏳</span>
+                <div>
+                    <h3 id="league-name" class="font-bold text-yellow-400">Cargando...</h3>
+                    <p class="text-xs text-gray-300">
+                        <span id="league-metrics">Win Rate: --% | Sharpe: -- | DD: --%</span>
+                    </p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span id="league-tokens" class="bg-green-600 text-white text-xs px-3 py-1 rounded-full font-bold">-- TOKENS</span>
+                <p id="league-next" class="text-[10px] text-gray-400 mt-1">Siguiente: --</p>
+            </div>
+        </div>
+        <!-- Progress bar hacia siguiente liga -->
+        <div class="mt-3">
+            <div class="flex justify-between text-[10px] text-gray-400 mb-1">
+                <span id="league-current-label">Actual</span>
+                <span id="league-next-label">Siguiente</span>
+            </div>
+            <div class="w-full bg-gray-700 rounded-full h-2">
+                <div id="league-progress" class="bg-yellow-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Decision Context -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        
+        <!-- Agent Brain State (más compacto) -->
+        <div class="card bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <h2 class="text-lg font-semibold mb-1 text-purple-400">🤖 Cerebro</h2>
+            <p class="text-[10px] text-gray-500 mb-2">Probabilidades PPO</p>
+            <div class="text-[10px] text-gray-500 mb-2" id="agent-latest-meta">Waiting...</div>
+            <div id="agent-state-container" class="space-y-2">
+                <div class="animate-pulse text-gray-500 text-xs">Waiting for data...</div>
+            </div>
+        </div>
+
+        <!-- SMC Features (2 columnas, más grande) -->
+        <div class="card bg-gray-800 rounded-lg p-4 border border-gray-700 lg:col-span-2">
+            <h2 class="text-lg font-semibold mb-1 text-blue-400">👁️ Visión SMC</h2>
+            <p class="text-[10px] text-gray-500 mb-2">Smart Money Concepts detectados</p>
+            <div class="text-[10px] text-gray-500 mb-2" id="smc-latest-meta">Waiting...</div>
+            <div id="smc-features-container">
+                <div class="animate-pulse text-gray-500 text-xs">Waiting for data...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Engine -->
+    <div class="card bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+        <h2 class="text-xl font-semibold mb-2 text-red-400">🛡️ Motor de Riesgo (El Escudo)</h2>
+        <p class="text-xs text-gray-400 mb-4">Protege tu capital calculando el tamaño óptimo de cada trade</p>
+        <div class="bg-gray-900 p-4 rounded" id="risk-metrics-container">
+            <!-- Explicación visual del Risk Engine -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div class="bg-gray-800 rounded-lg p-3 border border-gray-700">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-lg">📊</span>
+                        <span class="text-sm font-bold text-gray-200">Volatilidad (Vol)</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">Mide cuánto se mueve el precio. Alta vol = más riesgo = posiciones más pequeñas.</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-3 border border-gray-700">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-lg">🏦</span>
+                        <span class="text-sm font-bold text-gray-200">Floor (CPPI)</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">Capital mínimo protegido. Nunca arriesga bajar de este nivel.</p>
+                </div>
+                <div class="bg-gray-800 rounded-lg p-3 border border-gray-700">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-lg">💰</span>
+                        <span class="text-sm font-bold text-gray-200">MSP (Max Safe Position)</span>
+                    </div>
+                    <p class="text-[10px] text-gray-400">Tamaño máximo seguro para el próximo trade basado en vol y equity.</p>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm text-gray-400">
+                    <thead class="text-gray-200 uppercase">
+                        <tr>
+                            <th class="py-2 pr-4">Token</th>
+                            <th class="py-2 pr-4">Vol 24h</th>
+                            <th class="py-2 pr-4">Floor</th>
+                            <th class="py-2 pr-4">MSP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="risk-table-body" class="divide-y divide-gray-700">
+                        <tr><td colspan="4" class="py-3 text-gray-500">Waiting for data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Decision Timeline (Visual) -->
+    <div class="card bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <h2 class="text-xl font-semibold mb-2 text-gray-200">📜 Timeline de Decisiones</h2>
+        <p class="text-xs text-gray-400 mb-4">Historial visual de las últimas evaluaciones del agente</p>
+        <div id="timeline-container" class="space-y-3">
+            <!-- Timeline items injected by JS -->
+        </div>
+        <div id="logs-table-container" class="hidden">
+            <table class="w-full text-left text-sm text-gray-400">
+                <thead class="bg-gray-900 text-gray-200 uppercase">
+                    <tr>
+                        <th class="px-4 py-3">Time</th>
+                        <th class="px-4 py-3">Symbol</th>
+                        <th class="px-4 py-3">Features Detected</th>
+                        <th class="px-4 py-3">Risk Vol</th>
+                    </tr>
+                </thead>
+                <tbody id="logs-table-body" class="divide-y divide-gray-700">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // League colors mapping
+    const leagueColors = {
+        descenso: { bg: 'from-red-900/30 to-red-800/30', border: 'border-red-600/50', text: 'text-red-400', badge: 'bg-red-600' },
+        ascenso: { bg: 'from-yellow-900/30 to-orange-900/30', border: 'border-yellow-600/50', text: 'text-yellow-400', badge: 'bg-yellow-600' },
+        silver: { bg: 'from-gray-700/30 to-gray-600/30', border: 'border-gray-400/50', text: 'text-gray-300', badge: 'bg-gray-500' },
+        gold: { bg: 'from-yellow-700/30 to-amber-600/30', border: 'border-yellow-500/50', text: 'text-yellow-300', badge: 'bg-yellow-500' },
+        diamond: { bg: 'from-cyan-900/30 to-blue-800/30', border: 'border-cyan-400/50', text: 'text-cyan-400', badge: 'bg-cyan-500' },
+    };
+
+    async function fetchLeagueData() {
+        try {
+            const response = await fetch('/api/league');
+            const data = await response.json();
+            
+            const banner = document.getElementById('league-banner');
+            const colors = leagueColors[data.league] || leagueColors.ascenso;
+            
+            // Update banner colors
+            banner.className = `bg-gradient-to-r ${colors.bg} border ${colors.border} rounded-lg p-4 mb-6`;
+            
+            // Update content
+            document.getElementById('league-emoji').textContent = data.league_emoji || '⚽';
+            document.getElementById('league-name').textContent = data.league_name || 'Liga de Ascenso';
+            document.getElementById('league-name').className = `font-bold ${colors.text}`;
+            
+            // Update metrics with leverage
+            const m = data.metrics || {};
+            const maxLev = data.max_leverage || 1;
+            const nextLev = data.next_leverage || maxLev;
+            document.getElementById('league-metrics').innerHTML = `
+                <span class="text-purple-400 font-bold">⚡ ${maxLev}x</span> | 
+                WR: <span class="${m.win_rate >= 50 ? 'text-green-400' : m.win_rate >= 40 ? 'text-yellow-400' : 'text-red-400'}">${m.win_rate || 0}%</span> | 
+                Sharpe: <span class="${m.sharpe >= 1 ? 'text-green-400' : m.sharpe >= 0.5 ? 'text-yellow-400' : 'text-gray-400'}">${m.sharpe || 0}</span> | 
+                DD: <span class="${m.drawdown < 5 ? 'text-green-400' : m.drawdown < 15 ? 'text-yellow-400' : 'text-red-400'}">${m.drawdown || 0}%</span>
+            `;
+            
+            // Update tokens badge to show leverage
+            const tokensBadge = document.getElementById('league-tokens');
+            tokensBadge.textContent = `MAX ${maxLev}x LEV`;
+            tokensBadge.className = `${colors.badge} text-white text-xs px-3 py-1 rounded-full font-bold`;
+            
+            // Update next league info
+            const nextLeagueNames = {
+                silver: '🥈 Plata',
+                gold: '🥇 Oro', 
+                diamond: '💎 Diamante',
+                ascenso: '⚽ Ascenso',
+                null: '🏆 ¡Máximo!'
+            };
+            document.getElementById('league-next').textContent = data.next_league 
+                ? `Siguiente: ${nextLeagueNames[data.next_league] || data.next_league}` 
+                : '🏆 ¡Máximo nivel!';
+            
+            // Update progress bar
+            const progress = document.getElementById('league-progress');
+            const progressBar = calculateProgress(data);
+            progress.style.width = `${progressBar}%`;
+            progress.className = `${colors.badge} h-2 rounded-full transition-all duration-500`;
+            
+            // Update labels
+            document.getElementById('league-current-label').textContent = data.league_name;
+            document.getElementById('league-next-label').textContent = data.requirements || '';
+            
+        } catch (e) {
+            console.error("Error fetching league data:", e);
+        }
+    }
+    
+    function calculateProgress(data) {
+        const m = data.metrics || {};
+        const league = data.league;
+        
+        // Calculate progress towards next league
+        if (league === 'diamond') return 100;
+        if (league === 'descenso') {
+            // Progress = how close to getting out (DD < 15)
+            return Math.max(0, Math.min(100, (15 - m.drawdown) / 15 * 100));
+        }
+        if (league === 'ascenso') {
+            // Need: win_rate >= 40 AND pnl > 0
+            const wrProgress = Math.min(100, (m.win_rate / 40) * 50);
+            const pnlProgress = m.pnl_7d > 0 ? 50 : 0;
+            return wrProgress + pnlProgress;
+        }
+        if (league === 'silver') {
+            // Need: win_rate >= 50 AND sharpe >= 0.5
+            const wrProgress = Math.min(50, (m.win_rate / 50) * 50);
+            const sharpeProgress = Math.min(50, (m.sharpe / 0.5) * 50);
+            return wrProgress + sharpeProgress;
+        }
+        if (league === 'gold') {
+            // Need: win_rate >= 55, sharpe >= 1.0, dd < 5
+            const wrProgress = Math.min(33, (m.win_rate / 55) * 33);
+            const sharpeProgress = Math.min(33, (m.sharpe / 1.0) * 33);
+            const ddProgress = m.drawdown < 5 ? 34 : Math.max(0, (10 - m.drawdown) / 10 * 34);
+            return wrProgress + sharpeProgress + ddProgress;
+        }
+        return 50;
+    }
+
+    async function fetchStrategyData() {
+        try {
+            const response = await fetch('/api/strategy-data');
+            const data = await response.json();
+            
+            if (!data || !data.latest) return;
+
+            const latest = data.latest;
+            // Data is already an object from FastAPI, no need to JSON.parse if it's not a string
+            const features = (typeof latest.features === 'string') ? JSON.parse(latest.features) : latest.features;
+            const risk = (typeof latest.risk_metrics === 'string') ? JSON.parse(latest.risk_metrics) : latest.risk_metrics;
+            const probs = (typeof latest.agent_probs === 'string') ? JSON.parse(latest.agent_probs) : (latest.agent_probs || [0, 0, 0]);
+
+            const latestTs = latest.timestamp ? new Date(latest.timestamp).toLocaleString() : '';
+            const latestSym = latest.symbol || '';
+            const metaText = `${latestSym}${latestTs ? ' • ' + latestTs : ''}` || 'Waiting for data...';
+            const agentMeta = document.getElementById('agent-latest-meta');
+            const smcMeta = document.getElementById('smc-latest-meta');
+            if (agentMeta) agentMeta.textContent = metaText;
+            if (smcMeta) smcMeta.textContent = metaText;
+
+            // Update Agent State (Probabilities)
+            const actions = ['HOLD', 'LONG', 'SHORT'];
+            const colors = ['bg-gray-500', 'bg-green-500', 'bg-red-500'];
+            let agentHtml = '';
+            
+            probs.forEach((p, i) => {
+                const pct = (p * 100).toFixed(1);
+                agentHtml += `
+                <div class="mb-3">
+                    <div class="flex justify-between text-sm mb-1">
+                        <span class="text-gray-300 font-bold">${actions[i]}</span>
+                        <span class="text-gray-400">${pct}%</span>
+                    </div>
+                    <div class="w-full bg-gray-900 rounded-full h-2.5">
+                        <div class="${colors[i]} h-2.5 rounded-full" style="width: ${pct}%"></div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('agent-state-container').innerHTML = agentHtml;
+
+            // Update SMC Features
+            const smcKeyOrder = [
+                // Core SMC detections
+                'sweep_low', 'sweep_high',
+                'fvg_bull', 'fvg_bear',
+                'ob_bull', 'ob_bear',
+                // Actionable proximity / gating
+                'near_bull_ob', 'near_bear_ob',
+                'allow_long', 'allow_short',
+                // Context
+                'htf_bias', 'htf_trend',
+                // Setup scores + decision summary (still compact)
+                'setup_long_score', 'setup_short_score',
+                'recommendation', 'confidence',
+            ];
+
+            const fmtVal = (k, v) => {
+                if (k === 'htf_trend') {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? n.toFixed(4) : String(v);
+                }
+                if (k === 'htf_bias' || k === 'confidence') {
+                    const n = Number(v);
+                    return Number.isFinite(n) ? n.toFixed(2) : String(v);
+                }
+                if (typeof v === 'string') return v;
+                const n = Number(v);
+                if (Number.isFinite(n)) {
+                    if (Number.isInteger(n)) return String(n);
+                    return n.toFixed(3);
+                }
+                return String(v);
+            };
+
+            const smcLabel = {
+                sweep_low: 'Sweep L',
+                sweep_high: 'Sweep H',
+                fvg_bull: 'FVG Bull',
+                fvg_bear: 'FVG Bear',
+                ob_bull: 'OB Bull',
+                ob_bear: 'OB Bear',
+                near_bull_ob: 'Near OB B',
+                near_bear_ob: 'Near OB S',
+                allow_long: 'Allow L',
+                allow_short: 'Allow S',
+                htf_bias: 'HTF Bias',
+                htf_trend: 'HTF Trend',
+                setup_long_score: 'Setup L',
+                setup_short_score: 'Setup S',
+                recommendation: 'Reco',
+                confidence: 'Conf',
+            };
+
+            let smcHtml = `<div class="grid grid-cols-4 gap-2 text-xs">`;
+            smcKeyOrder.forEach((key) => {
+                if (!(key in (features || {}))) return;
+                const val = features[key];
+
+                // Exclude very long strings from the compact SMC card
+                if (typeof val === 'string' && val.length > 80) return;
+
+                const num = Number(val);
+                const isActive = Number.isFinite(num) ? (num > 0) : Boolean(val);
+                const color = isActive ? 'text-green-400' : 'text-gray-600';
+                const label = smcLabel[key] || key.replace(/_/g, ' ');
+                smcHtml += `<div class="flex justify-between bg-gray-900 px-2 py-1.5 rounded">
+                    <span class="text-gray-400">${label}</span>
+                    <span class="${color} font-bold">${fmtVal(key, val)}</span>
+                </div>`;
+            });
+            smcHtml += `</div>`;
+            document.getElementById('smc-features-container').innerHTML = smcHtml;
+
+            // Update Risk
+            const riskRows = (data.latest_by_symbol || []).map(r => {
+                const rr = (typeof r.risk_metrics === 'string') ? JSON.parse(r.risk_metrics) : (r.risk_metrics || {});
+                return {
+                    symbol: r.symbol,
+                    vol: Number(rr?.volatility),
+                    floor: Number(rr?.cppi_floor),
+                    safeSize: Number(rr?.safe_size ?? rr?.notional_usd ?? rr?.margin_usd ?? 0),
+                };
+            }).sort((a, b) => (a.symbol || '').localeCompare(b.symbol || ''));
+
+            const riskTbody = document.getElementById('risk-table-body');
+            if (!riskRows.length) {
+                riskTbody.innerHTML = `<tr><td colspan="4" class="py-3 text-gray-500">No risk data yet</td></tr>`;
+            } else {
+                riskTbody.innerHTML = riskRows.map(r => {
+                    // Volatility from engine is a normalized feature (0-2 range), not a real %
+                    // Classify as Low/Med/High/Extreme for clarity
+                    let volStr = '--%';
+                    let volColor = 'text-gray-400';
+                    if (Number.isFinite(r.vol)) {
+                        if (r.vol < 0.3) { volStr = 'Baja'; volColor = 'text-green-400'; }
+                        else if (r.vol < 0.7) { volStr = 'Media'; volColor = 'text-yellow-400'; }
+                        else if (r.vol < 1.2) { volStr = 'Alta'; volColor = 'text-orange-400'; }
+                        else { volStr = 'Extrema'; volColor = 'text-red-400'; }
+                        volStr += ` (${r.vol.toFixed(2)})`;
+                    }
+                    const floorStr = Number.isFinite(r.floor) ? '$' + r.floor.toFixed(2) : '$0.00';
+                    const safeStr = Number.isFinite(r.safeSize) ? '$' + r.safeSize.toFixed(2) : '$0.00';
+                    return `
+                        <tr class="hover:bg-gray-800/50 transition">
+                            <td class="py-2 pr-4">
+                                <span class="font-bold text-yellow-400">₿</span>
+                                <span class="font-bold text-blue-300">${r.symbol || ''}</span>
+                            </td>
+                            <td class="py-2 pr-4">
+                                <span class="${volColor}">${volStr}</span>
+                            </td>
+                            <td class="py-2 pr-4 text-gray-300">${floorStr}</td>
+                            <td class="py-2 pr-4 font-bold text-green-400">${safeStr}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Update Timeline (Visual)
+            const timelineContainer = document.getElementById('timeline-container');
+            const tbody = document.getElementById('logs-table-body');
+            tbody.innerHTML = '';
+            
+            let timelineHtml = '';
+            data.history.slice(0, 10).forEach((row, idx) => {
+                const feats = (typeof row.features === 'string') ? JSON.parse(row.features) : row.features;
+                const riskRow = (typeof row.risk_metrics === 'string') ? JSON.parse(row.risk_metrics) : row.risk_metrics;
+                const probs = (typeof row.agent_probs === 'string') ? JSON.parse(row.agent_probs) : (row.agent_probs || [0, 0, 0]);
+                
+                const activeFeats = Object.entries(feats || {})
+                    .filter(([k, v]) => {
+                        if (k === 'close_price') return false;
+                        const n = Number(v);
+                        return Number.isFinite(n) && n > 0;
+                    })
+                    .map(([k]) => k);
+                
+                const time = new Date(row.timestamp);
+                const timeStr = time.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+                const dateStr = time.toLocaleDateString('es-ES', {day: '2-digit', month: 'short'});
+                
+                // Determine action color
+                const maxProb = Math.max(...probs);
+                const action = probs.indexOf(maxProb);
+                const actionNames = ['HOLD', 'LONG', 'SHORT'];
+                const actionColors = ['gray', 'green', 'red'];
+                const actionEmojis = ['⏸️', '📈', '📉'];
+                const actionColor = actionColors[action];
+                
+                // Feature badges
+                const featBadges = activeFeats.slice(0, 4).map(f => {
+                    const label = f.replace(/_/g, ' ').replace('bull', '🟢').replace('bear', '🔴');
+                    return `<span class="bg-gray-700 text-gray-300 text-[10px] px-1.5 py-0.5 rounded">${label}</span>`;
+                }).join(' ');
+                
+                const volPct = riskRow?.volatility ? (riskRow.volatility * 100).toFixed(1) + '%' : '--';
+                
+                timelineHtml += `
+                <div class="flex items-start gap-3 ${idx > 0 ? 'border-t border-gray-700 pt-3' : ''}">
+                    <div class="flex flex-col items-center">
+                        <span class="text-2xl">${actionEmojis[action]}</span>
+                        <span class="text-[10px] text-gray-500">${timeStr}</span>
+                        <span class="text-[9px] text-gray-600">${dateStr}</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-bold text-${actionColor}-400">${actionNames[action]}</span>
+                            <span class="text-xs text-gray-500">(${(maxProb * 100).toFixed(0)}%)</span>
+                            <span class="text-xs text-yellow-400 font-bold">₿ ${row.symbol}</span>
+                            <span class="text-[10px] text-gray-500 ml-auto">Vol: ${volPct}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            ${featBadges || '<span class="text-[10px] text-gray-600">Sin señales SMC</span>'}
+                        </div>
+                    </div>
+                </div>`;
+                
+                // Also populate table (hidden)
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-4 py-2">${new Date(row.timestamp).toLocaleString()}</td>
+                    <td class="px-4 py-2 font-bold text-blue-300">${row.symbol}</td>
+                    <td class="px-4 py-2">${activeFeats.join(', ') || 'None'}</td>
+                    <td class="px-4 py-2">${volPct}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            
+            timelineContainer.innerHTML = timelineHtml || '<div class="text-gray-500 text-center py-4">No hay decisiones registradas aún</div>';
+
+        } catch (e) {
+            console.error("Error fetching strategy data:", e);
+        }
+    }
+
+    // Initial fetch
+    fetchLeagueData();
+    fetchStrategyData();
+    
+    // Poll every 5 seconds for strategy, every 30 seconds for league
+    setInterval(fetchStrategyData, 5000);
+    setInterval(fetchLeagueData, 30000);
+</script>
+{% endblock %}

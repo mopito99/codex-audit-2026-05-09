@@ -1,0 +1,35 @@
+╔══════════════════════════════════════════════════════════╗
+║         QUANTUM PPO — Reporte de Entrenamiento          ║
+║         SOL/USDT · 5m · Futuros · RTX A5000            ║
+╚══════════════════════════════════════════════════════════╝
+📅 Generado: 2026-04-24 09:52:28
+
+🤖 PROCESO: 🔴 DETENIDO
+
+📈 PROGRESO
+   Pasos completados : 10027008 / 10000000
+   Porcentaje        : 100.27%
+   Tiempo transcurrido: 65 min
+   Tiempo restante   : ~0 min
+   Velocidad (FPS)   : 2538
+
+🧠 SALUD DEL CEREBRO: 🔴 BEBÉ (normal al inicio)
+   Recompensa promedio  : -129  ← (>0 = ganando, >-30 = aprendiendo)
+   Duración episodio    : 1.81e+03 velas
+   Entropía (curiosidad): -0.435  ← (ideal: -0.5 a -1.5)
+   Value Loss           : 10.7  ← (debe bajar)
+   Varianza Explicada   : 0.00541  ← (meta: cerca de 1.0)
+
+🖥️  GPU STATUS
+   Utilización : 0%
+   VRAM usada  : 295 MiB / 24564 MiB
+   Temperatura : 39°C
+
+💾 CHECKPOINTS guardados: 4 archivo(s)
+   ✦ agent_ppo_vfinal.zip
+   ✦ best_model.zip
+   ✦ qppo_v3_gpu_4000000_steps.zip
+   ✦ qppo_v3_gpu_8000000_steps.zip
+
+══════════════════════════════════════════════════════════
+Próximo reporte en 10 minutos

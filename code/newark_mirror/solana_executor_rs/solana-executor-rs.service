@@ -1,0 +1,23 @@
+[Unit]
+Description=Solana Executor (Rust) — bot de arbitraje cíclico
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=administrator
+WorkingDirectory=/home/administrator/solana_executor_rs
+ExecStart=/home/administrator/solana_executor_rs/target/release/solana-executor-rs
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/home/administrator/solana_executor_rs/data/run.log
+StandardError=append:/home/administrator/solana_executor_rs/data/run.log
+
+# Env
+EnvironmentFile=/home/administrator/solana_executor/.env
+
+# Limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target

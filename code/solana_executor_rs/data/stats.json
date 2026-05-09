@@ -1,0 +1,61 @@
+{
+  "startedAt": "2026-04-28T11:26:18.022828874+00:00",
+  "paperMode": true,
+  "probesTotal": 46,
+  "probesFailed": 10,
+  "probesApiError": 10,
+  "probesNoRoute": 0,
+  "probesNoProfit": 36,
+  "opsSeen": 36,
+  "opsProfitable": 0,
+  "totalSimProfit": 0.0,
+  "bundlesSent": 0,
+  "bundlesLanded": 0,
+  "bundlesFailed": 0,
+  "bundlesTimeout": 0,
+  "realizedProfit": 0.0,
+  "lastLandedSig": null,
+  "lastLandedAt": null,
+  "byPair": {
+    "SOL@2000": {
+      "probes": 9,
+      "fails": 2,
+      "opsSeen": 7,
+      "opsProfitable": 0,
+      "sumNetProfit": 0.0,
+      "bestNetProfit": 0.12643299999996271
+    },
+    "SOL@500": {
+      "probes": 10,
+      "fails": 2,
+      "opsSeen": 8,
+      "opsProfitable": 0,
+      "sumNetProfit": 0.0,
+      "bestNetProfit": 0.06475999999997793
+    },
+    "JUP@1000": {
+      "probes": 9,
+      "fails": 2,
+      "opsSeen": 7,
+      "opsProfitable": 0,
+      "sumNetProfit": 0.0,
+      "bestNetProfit": 0.0
+    },
+    "JUP@500": {
+      "probes": 9,
+      "fails": 2,
+      "opsSeen": 7,
+      "opsProfitable": 0,
+      "sumNetProfit": 0.0,
+      "bestNetProfit": 0.0
+    },
+    "SOL@1000": {
+      "probes": 9,
+      "fails": 2,
+      "opsSeen": 7,
+      "opsProfitable": 0,
+      "sumNetProfit": 0.0,
+      "bestNetProfit": 0.024516000000005075
+    }
+  }
+}

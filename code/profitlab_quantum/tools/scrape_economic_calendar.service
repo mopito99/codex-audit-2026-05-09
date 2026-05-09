@@ -1,0 +1,15 @@
+[Unit]
+Description=Scrape Economic Calendar from Investing.com
+Wants=network-online.target
+After=network-online.target postgresql.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/profitlab_quantum
+ExecStart=/srv/profitlab_quantum/venv/bin/python /srv/profitlab_quantum/tools/scrape_economic_calendar.py
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

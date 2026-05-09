@@ -1,0 +1,24 @@
+{
+    "venvPath": "/srv/profitlab_quantum",
+    "venv": "venv",
+    "pythonVersion": "3.10",
+    "typeCheckingMode": "basic",
+    "reportMissingTypeStubs": "none",
+    "reportMissingModuleSource": "none",
+    "reportMissingImports": "warning",
+    "reportUnknownMemberType": "none",
+    "reportUnknownVariableType": "none",
+    "reportUnknownArgumentType": "none",
+    "reportUnknownParameterType": "none",
+    "reportUnknownLambdaType": "none",
+    "reportPartiallyUnknown": "none",
+    "include": [
+        "app",
+        "web",
+        "*.py"
+    ],
+    "exclude": [
+        "venv",
+        "**/__pycache__"
+    ]
+}

@@ -1,0 +1,26 @@
+[2026-05-06T12:14:30.502745+00:00] ADP capture starting...
+  ADP upcoming: forecast=99000.0, previous=62000.0 (NOT YET RELEASED)
+  Cannot generate audit yet — actual not published. Will retry.
+  Partial state saved: /home/administrator/poly_sidecar/data/adp_partial_20260506T121430Z.json
+
+[2026-05-06T12:14:30.542109+00:00] Starting post-event capture loop
+  BTC at release: $82,327.80
+  Will capture at T+5min, T+30min, T+60min
+Traceback (most recent call last):
+  File "/home/administrator/poly_sidecar/adp_capture.py", line 329, in <module>
+    main()
+  File "/home/administrator/poly_sidecar/adp_capture.py", line 321, in main
+    asyncio.run(execute_with_post_capture())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/administrator/poly_sidecar/adp_capture.py", line 275, in execute_with_post_capture
+    report_data["btc_response_validation"].update(btc_obs)
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'btc_response_validation'

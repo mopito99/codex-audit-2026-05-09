@@ -1,0 +1,164 @@
+// Constantes y carga de .env.
+
+pub const USDC:    &str = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+pub const SOL:     &str = "So11111111111111111111111111111111111111112";
+pub const JUP:     &str = "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN";
+pub const MSOL:    &str = "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So";
+pub const JITOSOL: &str = "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn";
+pub const BSOL:    &str = "bSo13r4TkiE4KumL71LsHTPpL2euBYLFx6h9HP3piy1";
+pub const BONK:    &str = "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263";
+pub const WIF:     &str = "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm";
+pub const RAY:     &str = "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R";
+pub const USDT:    &str = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB";
+
+pub const JUPITER_QUOTE_URL: &str = "https://api.jup.ag/swap/v1/quote";
+pub const JUPITER_SWAP_URL:  &str = "https://api.jup.ag/swap/v1/swap";
+
+pub const JITO_ENDPOINTS: &[&str] = &[
+    "https://amsterdam.mainnet.block-engine.jito.wtf/api/v1/bundles",
+    "https://frankfurt.mainnet.block-engine.jito.wtf/api/v1/bundles",
+    "https://ny.mainnet.block-engine.jito.wtf/api/v1/bundles",
+];
+
+pub const JITO_TIP_ACCOUNTS: &[&str] = &[
+    "96gYZGLnJYVFmbjzopPSU6QiEV5fGqZNyN9nmNhvrZU5",
+    "HFqU5x63VTqvQss8hp11i4wVV8bD44PvwucfZ2bU7gRe",
+    "Cw8CFyM9FkoMi7K7Crf6HNQqf4uEMzpKw6QNghXLvLkY",
+    "ADaUMid9yfUytqMBgopwjb2DTLSokTSzL1zt6iGPaS49",
+    "DfXygSm4jCyNCybVYYK6DwvWqjKee8pbDmJGcLWNDXjh",
+    "ADuUkR4vqLUMWXxW9gh6D6L8pMSawimctcNZ5pGwDcEt",
+    "DttWaMuVvTiduZRnguLF7jNxTgiMBZ1hyAumKUiL2KRL",
+    "3AVi9Tg9Uo68tJfuvoKvqKNWKkC5wPdSSdeBnizKZ6jT",
+];
+
+pub const WATCH_PROGRAMS: &[&str] = &[
+    "whirLbMiicVdio4qvUfM5KAg6Ct8VwpYzGff3uctyCc",
+    "9W959DqEETiGZocYWCQPaJ6sBmUzgfxXfqGeTEdp3aQP",
+    "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8",
+    "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK",
+    "LBUZKhRxPF3XUpBCjp4YzTKgLccjZhTSDM9YuVaPwxo",
+    "PhoeNiXZ8ByJGLkxNfZRnkUfjvmuYqLR89jjFHGqdXY",
+];
+
+pub fn decimals(mint: &str) -> u8 {
+    match mint {
+        USDC => 6,
+        SOL  => 9,
+        JUP  => 6,
+        MSOL    => 9,
+        JITOSOL => 9,
+        BSOL    => 9,
+        BONK => 5,
+        WIF  => 6,
+        RAY  => 6,
+        "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB" => 6, // USDT
+        _ => 6,
+    }
+}
+
+pub fn name_for(mint: &str) -> &'static str {
+    match mint {
+        USDC    => "USDC",
+        SOL     => "SOL",
+        JUP     => "JUP",
+        MSOL    => "mSOL",
+        JITOSOL => "jitoSOL",
+        BSOL    => "bSOL",
+        BONK    => "BONK",
+        WIF     => "WIF",
+        RAY     => "RAY",
+        "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB" => "USDT",
+        _ => "?",
+    }
+}
+
+// Pares a escanear: (intermediate_mint, [probe_amounts_USDC])
+// LSTs: k (liquidez profunda, spread constante)
+// JUP/RAY: k (ecosistema, volumen constante)
+// Meme (WIF/BONK): 00 (alta volatilidad, menos liquidez)
+pub fn scan_pairs() -> Vec<(&'static str, Vec<f64>)> {
+    // Tier-1 estatico: LSTs + ecosistema Solana + memes con liquidez probada
+    // Jupiter API key: 600 req/min — 8 pares a ~150ms/call = ~1.2s/ciclo, OK
+    vec![
+        (SOL,     vec![1000.0]),  // alta liquidez, competencia maxima
+        (JITOSOL, vec![2000.0]),  // LST, gap jitoSOL/SOL constante
+        (MSOL,    vec![2000.0]),  // LST, spread Marinade
+        (BSOL,    vec![1000.0]),  // LST, BlazeStake — menor competencia que mSOL
+        (JUP,     vec![500.0]),   // ecosistema, volumen alto, slippage 25bps
+        (RAY,     vec![500.0]),   // ecosistema, pool nativo Raydium
+        (BONK,    vec![500.0]),   // meme, alta volatilidad → gaps mas anchos
+        (WIF,     vec![500.0]),   // meme, segunda ola, menos bots que BONK
+    ]
+}
+
+pub fn tier_slippage_bps(mint: &str) -> u32 {
+    match mint {
+        SOL | MSOL | JITOSOL | BSOL => 15, // LSTs y SOL — liquidez alta
+        JUP | RAY => 25,                    // ecosistema — liquidez media
+        WIF | BONK => 50,                   // meme — volatilidad alta
+        _ => 50,
+    }
+}
+
+pub const SLIPPAGE_BPS_DEFAULT: u32 = 50;
+
+// DEXes problematicos: causan timeouts/simulation fails consistentemente
+pub const EXCLUDED_DEXES: &[&str] = &[
+    "GoonFi V2",
+    "GoonFi",
+];
+
+// Filtro de rutas: max hops por leg (rutas mas largas = simulacion frecuentemente falla)
+pub const MAX_HOPS_PER_LEG: usize = 3;
+pub const MIN_PROFIT_USDC: f64 = 0.20;  // bajado: con tip 90% prioridad es landing
+pub const MIN_PROFIT_BPS:  f64 = 1.0;   // bajado: 1 bps con tip agresivo
+pub const POLL_INTERVAL_MS: u64 = 500;
+
+pub fn log_dir() -> String {
+    std::env::var("LOG_DIR").unwrap_or_else(|_| "./data".to_string())
+}
+pub const LOG_DIR: &str = "./data";
+
+pub struct EnvCfg {
+    pub helius_api_key: String,
+    pub helius_rpc: String,
+    pub helius_wss: String,
+    pub helius_gatekeeper: String,
+    pub wallet_private_key: Option<String>,
+    pub paper_mode: bool,
+    pub jupiter_api_key: Option<String>,
+    pub jito_tip_lamports: u64,
+    pub sol_price_usd: f64,
+}
+
+impl EnvCfg {
+    pub fn load() -> Self {
+        for p in &[
+            ".env",
+            "/opt/solana_executor_rs/.env",
+            "/home/ubuntu/solana_executor_rs/.env",
+            "/home/administrator/solana_executor/.env",
+        ] {
+            if dotenvy::from_path(p).is_ok() { break; }
+        }
+        let helius_api_key = std::env::var("HELIUS_API_KEY").unwrap_or_default();
+        let paper_mode = std::env::var("PAPER_MODE").unwrap_or_else(|_| "true".into()) != "false";
+        let jito_tip_lamports = std::env::var("JITO_TIP_LAMPORTS")
+            .ok().and_then(|s| s.parse().ok()).unwrap_or(100_000);
+        let sol_price_usd = std::env::var("SOL_PRICE_USD")
+            .ok().and_then(|s| s.parse().ok()).unwrap_or(175.0);
+        let wallet_private_key = std::env::var("WALLET_PRIVATE_KEY").ok().filter(|s| !s.is_empty());
+        let jupiter_api_key = std::env::var("JUPITER_API_KEY").ok().filter(|s| !s.is_empty());
+        Self {
+            helius_rpc: format!("https://mainnet.helius-rpc.com/?api-key={helius_api_key}"),
+            helius_wss: format!("wss://mainnet.helius-rpc.com/?api-key={helius_api_key}"),
+            helius_gatekeeper: format!("https://beta.helius-rpc.com/?api-key={helius_api_key}"),
+            helius_api_key,
+            wallet_private_key,
+            paper_mode,
+            jupiter_api_key,
+            jito_tip_lamports,
+            sol_price_usd,
+        }
+    }
+}

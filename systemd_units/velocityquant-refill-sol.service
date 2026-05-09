@@ -1,0 +1,9 @@
+[Unit]
+Description=VelocityQuant Auto-refill SOL gas (every 15 min, GaL85 → hot200 4V6f2c3G)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=administrator
+ExecStart=/home/administrator/liquidator/refill_wrapper.sh sol
+TimeoutStartSec=120s

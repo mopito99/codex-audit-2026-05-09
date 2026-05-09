@@ -1,0 +1,2438 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuanDeOro - Institutional Bot</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .card { @apply bg-gray-800 rounded-lg p-4 shadow-lg; }
+        .stat { @apply text-2xl font-bold; }
+        .label { @apply text-gray-400 text-sm; }
+        .positive { @apply text-green-400; }
+        .negative { @apply text-red-400; }
+        .neutral { @apply text-gray-400; }
+        .chart-container { height: 200px; }
+        .chart-container-right { height: 280px; }
+        
+        /* Training Badge Enhanced */
+        .train-status-container { display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:6px; }
+        .train-status-badge { display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:20px; font-size:12px; font-weight:600; transition:all 0.3s; min-width:140px; }
+        .train-status-badge.idle { background:linear-gradient(135deg,#374151,#1f2937); border:1px solid #4B5563; color:#9CA3AF; }
+        .train-status-badge.learning { background:linear-gradient(135deg,#7C3AED,#5B21B6); border:1px solid #8B5CF6; color:white; animation:pulse-l 2s infinite; }
+        .train-status-badge.training { background:linear-gradient(135deg,#F59E0B,#D97706); border:1px solid #FBBF24; color:white; animation:pulse-t 1s infinite; }
+        .train-status-badge.deploying { background:linear-gradient(135deg,#10B981,#059669); border:1px solid #34D399; color:white; animation:pulse-d 0.5s infinite; }
+        .train-status-badge.dreaming { background:linear-gradient(135deg,#EC4899,#DB2777); border:1px solid #F472B6; color:white; animation:pulse-dream 3s infinite; }
+        .train-icon { font-size:18px; }
+        .train-info { display:flex; flex-direction:column; align-items:flex-start; }
+        .train-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; }
+        .train-progress { font-size:12px; opacity:1; color:#D1D5DB; }
+        .train-bar-container { display:flex; flex-direction:column; align-items:center; gap:2px; margin-top:4px; }
+        .train-bar-label { font-size:9px; color:#9CA3AF; text-transform:uppercase; letter-spacing:0.5px; }
+        .train-bar { width:120px; height:4px; background:#374151; border-radius:2px; overflow:hidden; }
+        .train-bar-fill { height:100%; background:linear-gradient(90deg,#8B5CF6,#A78BFA); border-radius:2px; transition:width 0.5s; }
+        @keyframes pulse-l { 0%,100%{box-shadow:0 0 0 0 rgba(139,92,246,0.4)} 50%{box-shadow:0 0 0 8px rgba(139,92,246,0)} }
+        @keyframes pulse-t { 0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4)} 50%{box-shadow:0 0 0 8px rgba(245,158,11,0)} }
+        @keyframes pulse-d { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,0.4)} 50%{box-shadow:0 0 0 8px rgba(16,185,129,0)} }
+        @keyframes pulse-dream { 0%,100%{box-shadow:0 0 0 0 rgba(236,72,153,0.4)} 50%{box-shadow:0 0 0 12px rgba(236,72,153,0)} }
+        
+        .chart-container-sm { height: 150px; }
+        
+        /* Analog Clock Styles */
+        /* Enhanced Clock Styles */
+        .clock-container {
+            width: 56px;
+            height: 56px;
+            position: relative;
+        }
+        .clock-face {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #374151, #1f2937 70%);
+            border: 3px solid #4B5563;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .clock-face::before {
+            content: '';
+            position: absolute;
+            top: 4px; left: 4px; right: 4px; bottom: 4px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        /* Hour markers */
+        .clock-face::after {
+            content: '';
+            position: absolute;
+            top: 6px; left: 50%;
+            width: 2px; height: 4px;
+            background: rgba(255,255,255,0.4);
+            transform: translateX(-50%);
+            box-shadow: 
+                0 40px 0 rgba(255,255,255,0.4),
+                -20px 20px 0 rgba(255,255,255,0.3),
+                20px 20px 0 rgba(255,255,255,0.3);
+        }
+        .clock-face.open { 
+            border-color: #10B981; 
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6), 0 0 30px rgba(16, 185, 129, 0.3), inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .clock-face.closed { 
+            border-color: #EF4444; 
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.3), inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .clock-hand {
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 2px;
+        }
+        .clock-hand.hour {
+            width: 3px;
+            height: 14px;
+            margin-left: -1.5px;
+            background: linear-gradient(to top, #E5E7EB, #F9FAFB);
+            box-shadow: 0 0 3px rgba(0,0,0,0.3);
+        }
+        .clock-hand.minute {
+            width: 2px;
+            height: 20px;
+            margin-left: -1px;
+            background: linear-gradient(to top, #D1D5DB, #F3F4F6);
+            box-shadow: 0 0 2px rgba(0,0,0,0.3);
+        }
+        .clock-center {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, #FFF, #9CA3AF);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 4px rgba(0,0,0,0.4);
+        }
+        .market-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 8px;
+            border-radius: 12px;
+            background: linear-gradient(180deg, #1f2937 0%, #111827 100%);
+            min-width: 75px;
+            border: 1px solid #374151;
+            transition: all 0.3s ease;
+        }
+        .market-indicator:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .market-indicator.open { 
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0.1) 100%);
+            border-color: rgba(16, 185, 129, 0.6);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+        .market-indicator.closed { 
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.02) 100%);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .market-name { font-size: 10px; font-weight: 600; margin-top: 6px; letter-spacing: 0.5px; }
+        .market-time { font-size: 11px; color: #E5E7EB; font-weight: 500; font-family: monospace; }
+        .market-hours { font-size: 9px; color: #9CA3AF; margin-top: 2px; font-weight: 500; }
+        .market-status { 
+            font-size: 8px; 
+            margin-top: 3px; 
+            padding: 2px 8px; 
+            border-radius: 6px; 
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .market-status.open { 
+            background: linear-gradient(135deg, #10B981, #059669); 
+            color: white; 
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+        .market-status.closed { 
+            background: linear-gradient(135deg, #6B7280, #4B5563); 
+            color: #D1D5DB;
+        }
+        
+        /* Help Tooltip Styles */
+        .help-container {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 8px;
+        }
+        .help-icon {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #374151;
+            border: 1px solid #6B7280;
+            color: #9CA3AF;
+            font-size: 11px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            transition: all 0.2s;
+        }
+        .help-icon:hover {
+            background: #4B5563;
+            color: #E5E7EB;
+            border-color: #9CA3AF;
+        }
+        .help-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 10px;
+            padding: 12px 16px;
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            min-width: 280px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+            z-index: 1000;
+        }
+        .help-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 8px solid transparent;
+            border-top-color: #374151;
+        }
+        .help-container:hover .help-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        .help-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #E5E7EB;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #374151;
+            padding-bottom: 6px;
+        }
+        .help-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 11px;
+        }
+        .help-item:last-child { margin-bottom: 0; }
+        .help-color {
+            width: 24px;
+            height: 12px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        .help-color.idle { background: linear-gradient(90deg, #6B7280, #9CA3AF); }
+        .help-color.learning { background: linear-gradient(90deg, #7C3AED, #A78BFA); }
+        .help-color.training { background: linear-gradient(90deg, #F59E0B, #FBBF24); }
+        .help-color.deploying { background: linear-gradient(90deg, #10B981, #34D399); }
+        .help-text { color: #D1D5DB; }
+        .help-desc { color: #9CA3AF; font-size: 10px; } 
+        
+        .mode-badge {
+            padding: 6px 16px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            display: inline-block;
+            text-align: center;
+            min-width: 120px;
+        }
+        .mode-badge.full { 
+            background: linear-gradient(135deg, #10B981, #059669); 
+            color: white; 
+            border-color: #34D399;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+        .mode-badge.conservative { 
+            background: linear-gradient(135deg, #8B5CF6, #7C3AED); 
+            color: white; 
+            border-color: #A78BFA;
+        }
+        .mode-badge.weekend { 
+            background: linear-gradient(135deg, #F59E0B, #D97706); 
+            color: white; 
+            border-color: #FBBF24;
+        }
+        .mode-badge.holiday { 
+            background: linear-gradient(135deg, #EF4444, #DC2626); 
+            color: white; 
+            border-color: #F87171;
+        }
+
+        /* Training Progress Bar */
+        .training-bar {
+            background: linear-gradient(90deg, #1f2937 0%, #374151 100%);
+            border-radius: 8px;
+            height: 32px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #4B5563;
+        }
+        .training-bar-fill {
+            background: linear-gradient(90deg, #7C3AED, #8B5CF6, #A78BFA);
+            height: 100%;
+            transition: width 0.5s ease-out;
+            border-radius: 7px;
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+        }
+        .training-bar-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: normal;
+            color: #1f2937;
+            letter-spacing: 0.3px;
+        }
+        
+        .training-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .training-status-badge.idle {
+            background: rgba(107, 114, 128, 0.3);
+            color: #9CA3AF;
+        }
+        .training-status-badge.learning {
+            background: rgba(59, 130, 246, 0.3);
+            color: #60A5FA;
+            animation: pulse 2s infinite;
+        }
+        .training-status-badge.training {
+            background: rgba(139, 92, 246, 0.3);
+            color: #A78BFA;
+            animation: pulse 1.5s infinite;
+        }
+        .training-status-badge.deploying {
+            background: rgba(16, 185, 129, 0.3);
+            color: #34D399;
+            animation: pulse 1s infinite;
+        }
+        .training-status-badge.dreaming {
+            background: rgba(236, 72, 153, 0.3);
+            color: #F472B6;
+            animation: pulse 3s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        .countdown-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: #F59E0B;
+            margin-top: 6px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Top crypto ticker (Wall Street style) */
+        .ticker-wrap { overflow: hidden; white-space: nowrap; }
+        .ticker-track { display: inline-block; padding-left: 100%; animation: ticker 70s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+
+    <div class="w-[95%] mx-auto px-2 py-6">
+        <!-- Header with Logo and Market Clocks -->
+        <header class="mb-4">
+            <!-- Top Bar: Logo + Mode + Clocks -->
+            <div class="flex items-center justify-between bg-gray-800 rounded-lg p-5 mb-4">
+                <!-- Left: Logo -->
+                <div class="flex items-center gap-4">
+                    <img src="/static/logo.svg" alt="CuanDeOro" class="h-24 w-24 rounded-lg">
+                    <div class="flex flex-col">
+                        <h1 class="text-xl font-bold"><span style="color:#009A44">Celtic Strength</span> / <span style="color:#C8102E" class="font-extrabold">Hispanic Passion</span></h1>
+                        <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-300 to-yellow-200 tracking-wide">CUANDEORO <span class="text-lg font-bold text-yellow-500">ticker: CDO</span></h2>
+                        <p class="text-sm font-bold text-blue-400 mt-1">Ripple Ecosystem</p>
+                        <div class="flex items-center gap-3 mt-1">
+                            <span class="text-xs text-gray-300 italic border-r border-gray-600 pr-3">cuandeoro.io</span>
+                            <span class="text-xs text-gray-500 italic">Paper Trading</span>
+                        </div>
+                        <p class="text-sm text-green-400 font-mono mt-2 font-bold" id="modelVersion">Version 3.0 IA Neuro</p>
+
+                        <!-- Fear & Greed meter -->
+                        <div class="mt-2 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2">
+                            <div class="flex items-center justify-between text-xs text-gray-300">
+                                <span class="font-semibold text-gray-200">Fear &amp; Greed</span>
+                                <span id="fgValue" class="font-bold">--</span>
+                            </div>
+                            <div id="fgLabel" class="text-[11px] text-gray-400 mt-1">Loading...</div>
+                            <div class="relative mt-2 h-2 rounded overflow-hidden border border-gray-700">
+                                <div class="absolute inset-0 flex">
+                                    <div class="w-1/3 bg-red-500/70"></div>
+                                    <div class="w-1/3 bg-yellow-400/70"></div>
+                                    <div class="w-1/3 bg-green-500/70"></div>
+                                </div>
+                                <div id="fgNeedle" class="absolute top-[-4px] w-0.5 h-4 bg-white" style="left:50%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Center: Trading Mode + Training Status -->
+                <div class="flex flex-col items-center justify-center bg-gray-900/40 border border-gray-700/50 rounded-2xl p-4 backdrop-blur-sm min-w-[320px] shadow-xl relative">
+                    <div class="flex items-center gap-2 mb-3 w-full justify-center border-b border-gray-800 pb-2">
+                        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">🤖 SYSTEM STATUS</span>
+                    </div>
+                    
+                    <!-- Market Timer (Absolute Top Right) -->
+                    <div class="absolute top-4 right-4 flex flex-col items-end">
+                        <span class="text-[9px] text-gray-500 uppercase font-bold">Market Timer</span>
+                        <span class="font-mono text-xs font-medium text-gray-300" id="weekendCountdown">--</span>
+                    </div>
+                    
+                    <!-- Centered Badge with Hora Dorada/Plata -->
+                    <div class="flex items-center justify-between w-full mb-4 mt-2 px-4">
+                        <span class="mode-badge full text-sm px-6 py-2 shadow-lg transform hover:scale-105 transition-transform duration-300" id="tradingMode">INITIALIZING...</span>
+                        <div id="hourBadge" class="px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1" style="background: linear-gradient(135deg, #9CA3AF, #6B7280); color: white;">
+                            <span id="hourBadgeIcon">🥈</span>
+                            <span id="hourBadgeText">HORA PLATA</span>
+                        </div>
+                    </div>
+
+                    <!-- Status Buttons with Counters Below -->
+                    <div class="flex gap-3 w-full justify-center" id="trainButtons">
+                        <div id="trainBtnWaiting" class="flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-gray-800/50 border-gray-700 text-gray-500 transition-all min-w-[120px]">
+                            <div class="flex items-center gap-1 text-sm"><span>⏳</span><span>WAIT</span></div>
+                            <span id="trainCountdownWaiting" class="opacity-90 font-mono text-sm h-5">--</span>
+                        </div>
+                        <div id="trainBtnTraining" class="flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-gray-800/50 border-gray-700 text-gray-500 transition-all min-w-[120px]">
+                            <div class="flex items-center gap-1 text-sm"><span>⏱️</span><span>TRAIN</span></div>
+                            <span id="trainCountdownTraining" class="opacity-90 font-mono text-sm h-5">--</span>
+                        </div>
+                        <div id="trainBtnLearning" class="flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-gray-800/50 border-gray-700 text-gray-500 transition-all min-w-[120px]">
+                            <div class="flex items-center gap-1 text-sm"><span>🧠</span><span>LEARN</span></div>
+                            <span id="trainCountdownLearning" class="opacity-90 font-mono text-sm h-5">--</span>
+                        </div>
+                        <div id="trainBtnDreaming" class="flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-gray-800/50 border-gray-700 text-gray-500 transition-all min-w-[120px]">
+                            <div class="flex items-center gap-1 text-sm"><span>🔮</span><span>DREAM</span></div>
+                            <span id="trainCountdownDreaming" class="opacity-90 font-mono text-sm h-5">--</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right: Market Clocks -->
+                <div class="flex flex-col items-end gap-2">
+                    <div class="flex items-center gap-2">
+                    <!-- Tokyo -->
+                    <div class="market-indicator" id="market-tokyo">
+                        <div class="clock-container">
+                            <div class="clock-face" id="clock-tokyo">
+                                <div class="clock-hand hour" id="hour-tokyo"></div>
+                                <div class="clock-hand minute" id="minute-tokyo"></div>
+                                <div class="clock-center"></div>
+                            </div>
+                        </div>
+                        <span class="market-name">🇯🇵 TOKYO</span>
+                        <span class="market-time" id="time-tokyo">--:--</span>
+                        <span class="market-status" id="status-tokyo">--</span>
+                    </div>
+                    
+                    <!-- Hong Kong -->
+                    <div class="market-indicator" id="market-hk">
+                        <div class="clock-container">
+                            <div class="clock-face" id="clock-hk">
+                                <div class="clock-hand hour" id="hour-hk"></div>
+                                <div class="clock-hand minute" id="minute-hk"></div>
+                                <div class="clock-center"></div>
+                            </div>
+                        </div>
+                        <span class="market-name">🇭🇰 HK</span>
+                        <span class="market-time" id="time-hk">--:--</span>
+                        <span class="market-status" id="status-hk">--</span>
+                    </div>
+                    
+                    <!-- London -->
+                    <div class="market-indicator" id="market-london">
+                        <div class="clock-container">
+                            <div class="clock-face" id="clock-london">
+                                <div class="clock-hand hour" id="hour-london"></div>
+                                <div class="clock-hand minute" id="minute-london"></div>
+                                <div class="clock-center"></div>
+                            </div>
+                        </div>
+                        <span class="market-name">🇬🇧 LONDON</span>
+                        <span class="market-time" id="time-london">--:--</span>
+                        <span class="market-hours" id="hours-london">--</span>
+                        <span class="market-status" id="status-london">--</span>
+                    </div>
+                    
+                    <!-- New York -->
+                    <div class="market-indicator" id="market-ny">
+                        <div class="clock-container">
+                            <div class="clock-face" id="clock-ny">
+                                <div class="clock-hand hour" id="hour-ny"></div>
+                                <div class="clock-hand minute" id="minute-ny"></div>
+                                <div class="clock-center"></div>
+                            </div>
+                        </div>
+                        <span class="market-name">🇺🇸 NYSE</span>
+                        <span class="market-time" id="time-ny">--:--</span>
+                        <span class="market-hours" id="hours-ny">--</span>
+                        <span class="market-status" id="status-ny">--</span>
+                    </div>
+                    
+                    <!-- CME -->
+                    <div class="market-indicator" id="market-cme">
+                        <div class="clock-container">
+                            <div class="clock-face" id="clock-cme">
+                                <div class="clock-hand hour" id="hour-cme"></div>
+                                <div class="clock-hand minute" id="minute-cme"></div>
+                                <div class="clock-center"></div>
+                            </div>
+                        </div>
+                        <span class="market-name">📊 CME</span>
+                        <span class="market-time" id="time-cme">--:--</span>
+                        <span class="market-hours" id="hours-cme">--</span>
+                        <span class="market-status" id="status-cme">--</span>
+                    </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Risk (center) -->
+            <div class="flex justify-center mb-4">
+                <div class="flex items-center gap-3">
+                    <div id="eventRiskEconomicBox" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-300 min-w-[260px] text-center">
+                        <div id="eventRiskEconomicTitle" class="font-semibold text-gray-200">⭐ Económico</div>
+                        <div id="eventRiskEconomicText" class="text-gray-400">—</div>
+                    </div>
+
+                    <div id="eventRiskPoliticalBox" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-300 min-w-[260px] text-center">
+                        <div id="eventRiskPoliticalTitle" class="font-semibold text-gray-200">⭐ Político</div>
+                        <div id="eventRiskPoliticalText" class="text-gray-400">—</div>
+                    </div>
+
+                    <div id="marketHoursBox" class="bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-300 min-w-[260px]">
+                        <div class="font-semibold text-gray-200 mb-1 text-center">🕒 Horarios & Estado</div>
+                        <div class="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-[10px]">
+                            <div class="text-gray-500">Londres:</div>
+                            <div class="text-gray-300" id="info-hours-london">08:00 - 16:30 UTC</div>
+                            <div class="text-gray-500">New York:</div>
+                            <div class="text-gray-300" id="info-hours-ny">09:30 - 16:00 ET</div>
+                            <div class="text-gray-500" id="info-label-cme">CME Wknd:</div>
+                            <div class="text-gray-300" id="info-hours-cme">Fri 22:00 - Sun 23:00 UTC</div>
+                            <div class="text-gray-500 mt-1">Bot Mode:</div>
+                            <div id="marketStatusText" class="font-bold text-yellow-400 mt-1">--</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% block content %}
+        <div class="w-[85%] mx-auto self-center">
+        
+        <!-- Actions + Status Row (aligned with banner) -->
+        <div class="flex justify-between items-center mb-3">
+            <div class="flex gap-2">
+                <a href="/strategy" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-sm font-medium transition">📋 Estrategia</a>
+                <a href="/vault/" class="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-lg text-sm font-medium transition">🔷 Vault</a>
+            </div>
+            <div class="text-right">
+                <div class="text-sm text-gray-500" id="lastUpdate">Updating...</div>
+                <div class="text-xs text-gray-600" id="nextScan">Next scan: --</div>
+            </div>
+        </div>
+        
+        <!-- STATUS BANNER (Weekend / Holiday) -->
+        <!-- LUXALGO BANNER -->
+        <div id="luxAlgoBanner" class="bg-pink-900/30 border border-pink-600/50 rounded-lg p-3 mb-6">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🚀</span>
+                    <div>
+                        <h3 class="font-bold text-pink-400">Señales de AI Model Active</h3>
+                        <p class="text-xs text-gray-300">Signals from AI Model take priority.</p>
+                    </div>
+                </div>
+                
+                <!-- Center Status Message -->
+                <div id="luxAlgoStatusMsg_v2" class="hidden"></div>
+
+                <div class="text-right">
+                    <span class="bg-pink-600 text-white text-xs px-2 py-1 rounded font-bold">LIVE</span>
+                </div>
+            </div>
+            <!-- Ticker inside banner -->
+            <div class="ticker-wrap bg-pink-900/20 rounded p-1">
+                <div id="cryptoTicker" class="ticker-track text-sm text-pink-200">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Trading Window (Dashboard-controlled) -->
+        <!-- REMOVED: Horario operativo section as per user request. Quantum is 24/7. -->
+        
+        <!-- Stats Cards Row 1 -->
+        <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-9 gap-3 mb-6">
+            <div class="card">
+                <div class="label">Balance</div>
+                <div class="stat text-xl" id="balance">$0</div>
+            </div>
+            <div class="card">
+                <div class="label">Equity</div>
+                <div class="stat text-xl" id="equity">$0</div>
+            </div>
+            <div class="card">
+                <div class="label">Unrealized</div>
+                <div class="stat text-xl" id="unrealized">$0</div>
+            </div>
+            <div class="card">
+                <div class="label">PnL Total</div>
+                <div class="stat text-xl" id="pnl">0%</div>
+            </div>
+            <div class="card">
+                <div class="label">Drawdown</div>
+                <div class="stat text-xl" id="drawdown">0%</div>
+            </div>
+            <div class="card">
+                <div class="label">Trades</div>
+                <div class="stat text-xl" id="totalTrades">0</div>
+            </div>
+            <div class="card">
+                <div class="label">Win Rate</div>
+                <div class="stat text-xl" id="winRate">0%</div>
+            </div>
+            <div class="card">
+                <div class="label">Wins</div>
+                <div class="stat text-xl text-green-400" id="winning">0</div>
+            </div>
+            <div class="card">
+                <div class="label">Losses</div>
+                <div class="stat text-xl text-red-400" id="losing">0</div>
+            </div>
+            <div class="card">
+                <div class="label">Break Even</div>
+                <div class="stat text-xl text-blue-400" id="beCount">0</div>
+            </div>
+        </div>
+
+        <!-- Main Charts moved next to Open Positions (per request) -->
+
+        <!-- Secondary Charts Row -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <!-- Win/Loss Pie -->
+            <div class="card">
+                <h2 class="text-sm font-bold mb-2">🎯 Win/Loss Ratio</h2>
+                <div class="chart-container-sm">
+                    <canvas id="winLossChart"></canvas>
+                </div>
+            </div>
+            <!-- Actions Distribution -->
+            <div class="card">
+                <h2 class="text-sm font-bold mb-2">🧠 AI Actions</h2>
+                <div class="chart-container-sm">
+                    <canvas id="actionsChart"></canvas>
+                </div>
+            </div>
+            <!-- PnL by Symbol -->
+            <div class="card">
+                <h2 class="text-sm font-bold mb-2">💰 PnL por Símbolo</h2>
+                <div class="chart-container-sm">
+                    <canvas id="pnlBySymbolChart"></canvas>
+                </div>
+            </div>
+            <!-- Trades by Symbol -->
+            <div class="card">
+                <h2 class="text-sm font-bold mb-2">📊 Trades por Símbolo</h2>
+                <div class="chart-container-sm">
+                    <canvas id="tradesBySymbolChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Open Positions + Equity/Drawdown (side-by-side on large screens) -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-3 mb-6">
+            <div class="card lg:col-span-3">
+                <h2 class="text-lg font-bold mb-3">📊 Open Positions</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs">
+                        <thead class="text-gray-400 border-b border-gray-700">
+                            <tr>
+                                <th class="text-left p-0.5">Symbol</th>
+                                <th class="text-left p-0.5">Side</th>
+                                <th class="text-right p-0.5">Margin</th>
+                                <th class="text-right p-0.5">Lev</th>
+                                <th class="text-right p-0.5">Entry</th>
+                                <th class="text-right p-0.5">Current</th>
+                                <th class="text-right p-0.5">SL</th>
+                                <th class="text-right p-0.5">TP1</th>
+                                <th class="text-right p-0.5">PnL</th>
+                                <th class="text-right p-0.5">PnL %</th>
+                                <th class="text-center p-0.5">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="positionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="space-y-3 lg:col-span-2">
+                <div class="card">
+                    <h2 class="text-lg font-bold mb-2">📈 Equity Curve</h2>
+                    <div class="chart-container-right">
+                        <canvas id="equityChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="text-lg font-bold mb-2">📉 Drawdown</h2>
+                    <div class="chart-container-right">
+                        <canvas id="drawdownChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two Column Layout: Decisions & Trades -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+            <!-- LEFT: AI Decisions -->
+            <div class="card">
+                <h2 class="text-lg font-bold mb-3">🧠 Recent AI Decisions</h2>
+                <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                    <table class="w-full text-sm">
+                        <thead class="text-gray-400 sticky top-0 bg-gray-800">
+                            <tr>
+                                <th class="text-left p-2">Time</th>
+                                <th class="text-left p-2">Symbol</th>
+                                <th class="text-center p-2">Action</th>
+                                <th class="text-right p-2">Price</th>
+                                <th class="text-center p-2">Conf.</th>
+                                <th class="text-left p-2">Probs (H/L/S)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="decisionsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- RIGHT: Trade History -->
+            <div class="card">
+                <h2 class="text-lg font-bold mb-3">📜 Trade History</h2>
+                <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                    <table class="w-full text-sm">
+                        <thead class="text-gray-400 sticky top-0 bg-gray-800" id="tradesTableHead">
+                            <tr>
+                                <th class="text-left p-2 cursor-pointer hover:text-white select-none" onclick="sortTrades('time')" data-col="time">Time <span class="sort-icon"></span></th>
+                                <th class="text-left p-2 cursor-pointer hover:text-white select-none" onclick="sortTrades('symbol')" data-col="symbol">Symbol <span class="sort-icon"></span></th>
+                                <th class="text-center p-2">Event</th>
+                                <th class="text-center p-2 cursor-pointer hover:text-white select-none" onclick="sortTrades('side')" data-col="side">Side <span class="sort-icon"></span></th>
+                                <th class="text-right p-2">Entry</th>
+                                <th class="text-right p-2">Exit</th>
+                                <th class="text-right p-2 cursor-pointer hover:text-white select-none" onclick="sortTrades('pnl')" data-col="pnl">PnL <span class="sort-icon"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody id="tradesTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-6">
+            <div class="card text-center">
+                <div class="label">Avg Win</div>
+                <div class="text-lg font-bold text-green-400" id="avgWin">$0</div>
+            </div>
+            <div class="card text-center">
+                <div class="label">Avg Loss</div>
+                <div class="text-lg font-bold text-red-400" id="avgLoss">$0</div>
+            </div>
+            <div class="card text-center">
+                <div class="label">Profit Factor</div>
+                <div class="text-lg font-bold" id="profitFactor">0</div>
+            </div>
+            <div class="card text-center">
+                <div class="label">Best Trade</div>
+                <div class="text-lg font-bold text-green-400" id="bestTrade">$0</div>
+            </div>
+            <div class="card text-center">
+                <div class="label">Worst Trade</div>
+                <div class="text-lg font-bold text-red-400" id="worstTrade">$0</div>
+            </div>
+            <div class="card text-center">
+                <div class="label">Expectancy</div>
+                <div class="text-lg font-bold" id="expectancy">$0</div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-600 text-xs mt-4">
+            ProfitLab AI Paper Trading v1.0
+        </div>
+        </div>
+    </div>
+    {% endblock %}
+
+    <script>
+        function decimalsForPrice(value) {
+            if (value === null || value === undefined || !isFinite(value)) return 2;
+            const abs = Math.abs(value);
+            if (abs >= 1000) return 2;
+            if (abs >= 100) return 2;
+            if (abs >= 10) return 3;
+            if (abs >= 1) return 4;
+            if (abs >= 0.1) return 5;
+            if (abs >= 0.01) return 6;
+            return 8;
+        }
+
+        function fmtPrice(value) {
+            if (value === null || value === undefined || !isFinite(value)) return '-';
+            return '$' + Number(value).toFixed(decimalsForPrice(Number(value)));
+        }
+
+        function decimalsForQty(value) {
+            if (value === null || value === undefined || !isFinite(value)) return 4;
+            const abs = Math.abs(value);
+            if (abs >= 1) return 4;
+            if (abs >= 0.1) return 5;
+            return 6;
+        }
+
+        function fmtQty(value) {
+            if (value === null || value === undefined || !isFinite(value)) return '-';
+            return Number(value).toFixed(decimalsForQty(Number(value)));
+        }
+
+        // Chart instances
+        let charts = {
+            equity: null,
+            drawdown: null,
+            winLoss: null,
+            actions: null,
+            pnlBySymbol: null,
+            tradesBySymbol: null
+        };
+
+        // Action counts for chart
+        let actionCounts = { HOLD: 0, LONG: 0, SHORT: 0, CLOSE: 0 };
+        let symbolPnL = {};
+        let symbolTrades = {};
+        
+        // Sorting state
+        let allTrades = [];
+        let tradeSort = { col: 'time', dir: 'desc' };
+
+        function sortTrades(col) {
+            if (tradeSort.col === col) {
+                tradeSort.dir = tradeSort.dir === 'asc' ? 'desc' : 'asc';
+            } else {
+                tradeSort.col = col;
+                tradeSort.dir = 'desc'; // Default desc for most metrics
+                if (col === 'symbol' || col === 'side') tradeSort.dir = 'asc';
+            }
+            renderTradesTable();
+        }
+
+        function renderTradesTable() {
+            const tbody = document.getElementById('tradesTable');
+            const headers = document.querySelectorAll('#tradesTableHead th');
+            
+            // Update header icons
+            headers.forEach(th => {
+                const col = th.dataset.col;
+                const iconSpan = th.querySelector('.sort-icon');
+                if (iconSpan) {
+                    if (col === tradeSort.col) {
+                        iconSpan.textContent = tradeSort.dir === 'asc' ? ' ▲' : ' ▼';
+                        th.classList.add('text-white');
+                    } else {
+                        iconSpan.textContent = '';
+                        th.classList.remove('text-white');
+                    }
+                }
+            });
+
+            let sorted = [...allTrades];
+            sorted.sort((a, b) => {
+                let valA, valB;
+                switch (tradeSort.col) {
+                    case 'time': 
+                        valA = new Date(a.close_time || a.open_time || 0).getTime(); 
+                        valB = new Date(b.close_time || b.open_time || 0).getTime(); 
+                        break;
+                    case 'symbol': valA = a.symbol || ''; valB = b.symbol || ''; break;
+                    case 'side': valA = a.side || ''; valB = b.side || ''; break;
+                    case 'pnl': valA = a.pnl || -999999; valB = b.pnl || -999999; break;
+                    default: return 0;
+                }
+                
+                if (valA < valB) return tradeSort.dir === 'asc' ? -1 : 1;
+                if (valA > valB) return tradeSort.dir === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-gray-500">No trades yet</td></tr>';
+            } else {
+                tbody.innerHTML = sorted.map(t => {
+                    const pnl = t.pnl || 0;
+                    const pnlColor = pnl >= 0 ? '#10B981' : '#EF4444';
+                    const pnlText = t.pnl !== null && t.pnl !== undefined ? (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2) : '-';
+                    const evt = t.event || '—';
+                    const evtColor = evt === 'CLOSE' ? 'text-orange-400' : evt === 'OPEN' ? 'text-green-400' : evt === 'BE' ? 'text-blue-400' : evt === 'MANUAL' ? 'text-yellow-300' : 'text-gray-500';
+                    const src = '<span class="text-xs font-bold ' + evtColor + '">' + evt + '</span>';
+                    return `
+                    <tr class="border-t border-gray-700 hover:bg-gray-750" data-pos-symbol="${t.symbol}">
+                        <td class="p-2 text-xs text-gray-400">${t.close_time ? new Date(t.close_time).toLocaleTimeString() : '-'}</td>
+                        <td class="p-2 font-mono">${t.symbol}</td>
+                        <td class="p-2 text-center">${src}</td>
+                        <td class="p-2 text-center ${t.side === 'LONG' ? 'text-green-400' : 'text-red-400'} font-bold">${t.side === 'LONG' ? '🟢' : '🔴'} ${t.side}</td>
+                        <td class="p-2 text-right">${fmtPrice(t.entry)}</td>
+                        <td class="p-2 text-right">${fmtPrice(t.exit)}</td>
+                        <td class="p-2 text-right font-bold" style="color: ${pnlColor}">${pnlText}</td>
+                    </tr>
+                `}).join('');
+            }
+        }
+
+        // Countdown timer
+        let countdownInterval = null;
+        let countdownSeconds = 0;
+
+        function startCountdown(seconds) {
+            countdownSeconds = seconds;
+            if (countdownInterval) clearInterval(countdownInterval);
+            updateCountdownDisplay();
+            countdownInterval = setInterval(() => {
+                countdownSeconds--;
+                if (countdownSeconds <= 0) {
+                    countdownSeconds = 0;
+                    clearInterval(countdownInterval);
+                    // Refresh data when scan should happen
+                    setTimeout(fetchData, 5000);
+                }
+                updateCountdownDisplay();
+            }, 1000);
+        }
+
+        function updateCountdownDisplay() {
+            const mins = Math.floor(countdownSeconds / 60);
+            const secs = countdownSeconds % 60;
+            const el = document.getElementById('nextScan');
+            if (!el) return;
+            if (countdownSeconds <= 0) {
+                el.innerHTML = '🔄 <span class="text-green-400">Scanning...</span>';
+            } else if (countdownSeconds <= 60) {
+                el.innerHTML = `⏱️ Next scan: <span class="text-yellow-400 font-bold">${secs}s</span>`;
+            } else {
+                el.innerHTML = `⏱️ Next scan: <span class="text-blue-400">${mins}m ${secs.toString().padStart(2,'0')}s</span>`;
+            }
+        }
+
+        async function fetchData() {
+            try {
+                const resp = await fetch(`/api/stats?_=${Date.now()}`, { cache: 'no-store' });
+                if (!resp.ok) {
+                    const errText = await resp.text().catch(() => 'unknown');
+                    console.error('API returned', resp.status, errText);
+                    var bar = document.getElementById('jsDebugBar');
+                    if (bar) { bar.style.display = 'block'; bar.textContent = 'API_ERR ' + resp.status + ': ' + errText.substring(0, 100); }
+                    return;
+                }
+                const text = await resp.text();
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (parseErr) {
+                    console.error('JSON parse error:', parseErr, 'Response:', text.substring(0, 200));
+                    var bar = document.getElementById('jsDebugBar');
+                    if (bar) { bar.style.display = 'block'; bar.textContent = 'JSON_ERR: ' + text.substring(0, 150); }
+                    return;
+                }
+                try {
+                    updateUI(data);
+                } catch (uiErr) {
+                    console.error('updateUI error:', uiErr);
+                    var bar = document.getElementById('jsDebugBar');
+                    if (bar) { bar.style.display = 'block'; bar.textContent = 'UI_ERR: ' + uiErr.message + ' at ' + (uiErr.stack || '').split('\n')[1]; }
+                    // Still try to update balance
+                    try {
+                        var bEl = document.getElementById('balance');
+                        if (bEl && data.equity) bEl.textContent = '$' + data.equity.balance.toFixed(0);
+                    } catch(e2) {}
+                }
+                // Hide debug bar on success
+                var bar = document.getElementById('jsDebugBar');
+                if (bar && !window._dbgErrors?.length) bar.style.display = 'none';
+            } catch (e) {
+                console.error('Fetch error:', e);
+                var bar = document.getElementById('jsDebugBar');
+                if (bar) { bar.style.display = 'block'; bar.textContent = 'FETCH_ERR: ' + (e.message || e); }
+            }
+        }
+
+        // Initial loads
+        updateFearGreed();
+        setInterval(updateFearGreed, 10 * 60 * 1000);
+
+        async function closePosition(symbol) {
+            if (!confirm(`Are you sure you want to close ${symbol}?`)) return;
+            
+            try {
+                const resp = await fetch('/api/close-position', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ symbol: symbol })
+                });
+                const data = await resp.json();
+                if (data.status === 'ok') {
+                    // alert('Closed ' + symbol);
+                    fetchData(); // Refresh immediately
+                } else {
+                    alert('Error closing: ' + (data.reason || 'Unknown error'));
+                }
+            } catch (e) {
+                alert('Network error: ' + e);
+            }
+        }
+
+        function renderTradingWindow(tw) {
+            const badge = document.getElementById('scheduleBadge');
+            if (!badge) return;
+            
+            if (tw.enabled) {
+                badge.textContent = tw.is_open ? "OPEN" : "CLOSED";
+                badge.className = tw.is_open 
+                    ? "px-3 py-1 rounded-full text-xs font-semibold bg-green-900/30 border border-green-600 text-green-400"
+                    : "px-3 py-1 rounded-full text-xs font-semibold bg-red-900/30 border border-red-600 text-red-400";
+            } else {
+                badge.textContent = "DISABLED";
+                badge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-gray-700/30 border border-gray-600 text-gray-300";
+            }
+        }
+
+        function updateUI(data) {
+            console.log("[DBG] updateUI called, data keys:", Object.keys(data));
+            console.log("[DBG] balance:", data.equity?.balance, "trades:", data.stats?.total_trades);
+            // Model version
+            if (data.model_version) {
+                document.getElementById('modelVersion').textContent = 'Model: ' + data.model_version;
+            }
+
+            // Metaverse Status (New)
+            const metaEl = document.getElementById('metaverseStatus');
+            if (metaEl) {
+                // We can infer metaverse status from time or add a field in API later.
+                // For now, let's assume "Dreaming" if between 04:00 and 05:00 UTC, else "Awake"
+                const now = new Date();
+                const h = now.getUTCHours();
+                const isDreaming = (h === 4); // 04:00-04:59 UTC
+                
+                if (isDreaming) {
+                    metaEl.innerHTML = '🔮 <span class="text-pink-400 font-bold animate-pulse">DREAMING</span>';
+                    metaEl.title = "Training TimeGAN & Generating Scenarios";
+                } else {
+                    metaEl.innerHTML = '👁️ <span class="text-blue-400">AWAKE</span>';
+                    metaEl.title = "Trading Live Markets";
+                }
+            }
+            
+            // V13 SMART: Update trading mode from API
+            if (data.market_status) {
+                const ms = data.market_status;
+                const modeEl = document.getElementById('tradingMode');
+                if (modeEl) {
+                    const modeText = ms.trading_mode.toUpperCase().replace('_', ' ');
+                    modeEl.textContent = modeText + (ms.is_cme_weekend ? ' (CME CLOSED)' : '');
+                    
+                    // Update badge color based on mode
+                    if (ms.trading_mode === 'full') {
+                        modeEl.className = 'mode-badge full';
+                    } else if (ms.trading_mode === 'conservative') {
+                        modeEl.className = 'mode-badge conservative';
+                    } else if (ms.trading_mode === 'weekend' || ms.is_cme_weekend) {
+                        modeEl.className = 'mode-badge weekend';
+                    } else if (ms.trading_mode === 'pause') {
+                        modeEl.className = 'mode-badge holiday';
+                    } else {
+                        modeEl.className = 'mode-badge weekend';
+                    }
+                }
+
+                // Update Market Status Text in the new box
+                const statusTextEl = document.getElementById('marketStatusText');
+                if (statusTextEl) {
+                    let statusMsg = ms.trading_mode.toUpperCase();
+                    if (ms.is_us_holiday) statusMsg = "US HOLIDAY (" + statusMsg + ")";
+                    else if (ms.is_europe_holiday) statusMsg = "EU HOLIDAY (" + statusMsg + ")";
+                    else if (ms.is_cme_weekend) statusMsg = "CME CLOSED (" + statusMsg + ")";
+                    
+                    statusTextEl.textContent = statusMsg;
+                    
+                    // Color coding
+                    if (ms.trading_mode === 'full' || ms.trading_mode === 'normal') {
+                        statusTextEl.className = 'font-bold text-green-400 mt-1';
+                    } else if (ms.trading_mode === 'pause') {
+                        statusTextEl.className = 'font-bold text-red-400 mt-1';
+                    } else {
+                        statusTextEl.className = 'font-bold text-yellow-400 mt-1';
+                    }
+                }
+
+                // Status Banner Logic (Inside LuxAlgo Banner)
+                const luxMsg = document.getElementById('luxAlgoStatusMsg_v2');
+                const luxBanner = document.getElementById('luxAlgoBanner');
+                
+                if (luxMsg) {
+                    let showMsg = false;
+                    let msgClass = '';
+                    let msgHtml = '';
+                    let bannerBorderClass = 'border-pink-600/50'; // default
+
+                    if (ms.is_us_holiday) {
+                        showMsg = true;
+                        msgClass = 'bg-purple-900/80 border-purple-500 text-purple-100 border';
+                        const d = new Date();
+                        if (d.getMonth() === 11 && d.getDate() === 24) {
+                            msgHtml = '\\uD83C\\uDF84 US Holiday Mode (Early Close: 13:00 ET)';
+                        } else {
+                            msgHtml = '\\uD83C\\uDF84 US Holiday Mode Active (All Day)';
+                        }
+                        bannerBorderClass = 'border-purple-500';
+                    } else if (ms.is_cme_weekend) {
+                        showMsg = true;
+                        msgClass = 'bg-blue-900/80 border-blue-500 text-blue-100 border';
+                        msgHtml = '💤 Weekend Mode (CME Closed • Fri 22:00 - Sun 23:00 UTC)';
+                        bannerBorderClass = 'border-blue-500';
+                    }
+
+                    if (showMsg) {
+                        luxMsg.className = `text-xs font-bold px-3 py-1 rounded mx-2 text-center ${msgClass}`;
+                        luxMsg.innerHTML = msgHtml;
+                        luxMsg.classList.remove('hidden');
+                        
+                        // Update banner border color if needed
+                        if (luxBanner) {
+                            luxBanner.className = `bg-pink-900/30 border ${bannerBorderClass} rounded-lg p-3 mb-6`;
+                        }
+                    } else {
+                        luxMsg.classList.add('hidden');
+                        // Reset banner border
+                        if (luxBanner) {
+                            luxBanner.className = `bg-pink-900/30 border border-pink-600/50 rounded-lg p-3 mb-6`;
+                        }
+                    }
+                }
+
+
+                // If we're on a non-dashboard page (e.g. /strategy), stop here after updating header/status.
+                // The rest of the dashboard UI expects many elements that won't exist in other templates.
+                const balanceEl = document.getElementById('balance');
+                if (!balanceEl) {
+                    const lastUpdateEl = document.getElementById('lastUpdate');
+                    if (lastUpdateEl) lastUpdateEl.textContent = 'Updated: ' + new Date().toLocaleTimeString();
+
+                    if (data.next_scan_seconds !== undefined && document.getElementById('nextScan')) {
+                        startCountdown(data.next_scan_seconds);
+                    }
+                    return;
+                }
+                // Event Risk: Económico / Político (top-right)
+                const econBox = document.getElementById('eventRiskEconomicBox');
+                const econTitle = document.getElementById('eventRiskEconomicTitle');
+                const econText = document.getElementById('eventRiskEconomicText');
+                const polBox = document.getElementById('eventRiskPoliticalBox');
+                const polTitle = document.getElementById('eventRiskPoliticalTitle');
+                const polText = document.getElementById('eventRiskPoliticalText');
+                if (econBox && econText && polBox && polText) {
+                    const active = !!ms.event_risk_active;
+                    const stars = ms.event_risk_stars || 0;
+                    const ev = ms.event_risk_event || '';
+                    const minutesTo = Number(ms.event_risk_minutes_to || 0);
+                    const timestamp = Number(ms.event_risk_timestamp || 0);
+                    const mult = (ms.position_multiplier !== undefined && ms.position_multiplier !== null)
+                        ? Number(ms.position_multiplier)
+                        : 1.0;
+
+                    let tStr;
+                    if (timestamp > 0) {
+                        const d = new Date(timestamp * 1000);
+                        const mo = d.toLocaleString('en-US', { month: 'short' });
+                        const da = d.getDate();
+                        const ho = d.getHours().toString().padStart(2, '0');
+                        const mi = d.getMinutes().toString().padStart(2, '0');
+                        tStr = `${mo} ${da} ${ho}:${mi}`;
+                    } else {
+                        tStr = minutesTo >= 0
+                            ? `T-${Math.round(minutesTo)}m`
+                            : `T+${Math.round(Math.abs(minutesTo))}m`;
+                    }
+
+                    const isPolitical = /election|vote|parliament|president|prime minister|senate|congress|government|geopolit|war|conflict|sanction|referendum|impeach|coup|minister|cabinet/i.test(ev);
+                    const isHoliday = /holiday|festivo|cierre|closed/i.test(ev);
+
+                    if (econTitle) {
+                        if (isHoliday) {
+                            econTitle.textContent = `⭐ Festivo / Holiday`;
+                        } else {
+                            econTitle.textContent = `⭐ Económico ${stars}★`;
+                        }
+                    }
+                    if (polTitle) polTitle.textContent = `⭐ Político ${stars}★`;
+
+                    const activeClass = 'bg-gray-900 border border-yellow-600 rounded-lg px-3 py-2 text-xs text-gray-200 min-w-[260px] text-right';
+                    const offClass = 'bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-xs text-gray-300 min-w-[260px] text-right';
+
+                    if (active && stars >= 3 && ev) {
+                        if (isPolitical) {
+                            polBox.className = activeClass;
+                            polText.textContent = `ACTIVE • ${tStr} • size x${mult.toFixed(2)} • ${ev}`;
+                            econBox.className = offClass;
+                            econText.textContent = 'OFF';
+                        } else {
+                            econBox.className = activeClass;
+                            econText.textContent = `ACTIVE • ${tStr} • size x${mult.toFixed(2)} • ${ev}`;
+                            polBox.className = offClass;
+                            polText.textContent = 'OFF';
+                        }
+                    } else if (ev) {
+                        // Show upcoming event
+                        const upcomingClass = 'bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-xs text-gray-400 min-w-[260px] text-right';
+                        
+                        // Calculate time difference for display
+                        let timeDisplay = tStr;
+                        if (minutesTo > 60) {
+                            const hours = Math.floor(minutesTo / 60);
+                            const mins = Math.round(minutesTo % 60);
+                            timeDisplay = `T-${hours}h ${mins}m`;
+                        } else if (minutesTo > 1440) { // > 24h
+                             const days = Math.floor(minutesTo / 1440);
+                             timeDisplay = `T-${days}d`;
+                        }
+
+                        if (isPolitical) {
+                            polBox.className = upcomingClass;
+                            polText.textContent = `UPCOMING • ${timeDisplay} • ${ev}`;
+                            econBox.className = offClass;
+                            econText.textContent = 'OFF';
+                        } else {
+                            econBox.className = upcomingClass;
+                            econText.textContent = `UPCOMING • ${timeDisplay} • ${ev}`;
+                            polBox.className = offClass;
+                            polText.textContent = 'OFF';
+                        }
+                    } else {
+                        econBox.className = offClass;
+                        econText.textContent = 'OFF';
+                        polBox.className = offClass;
+                        polText.textContent = 'OFF';
+                    }
+                }
+            }
+            
+            // Stats - Balance & Equity with color
+            const balVal = data.equity.balance;
+            const balEl = document.getElementById('balance');
+            balEl.textContent = '$' + balVal.toFixed(2);
+            balEl.className = 'stat text-xl ' + (balVal >= 1000 ? 'text-green-400' : 'text-red-400');
+
+            const eqVal = data.equity.equity;
+            const eqEl = document.getElementById('equity');
+            eqEl.textContent = '$' + eqVal.toFixed(2);
+            eqEl.className = 'stat text-xl ' + (eqVal >= 1000 ? 'text-green-400' : 'text-red-400');
+            
+            // Unrealized PnL
+            const unrealized = data.equity.unrealized || 0;
+            const unrealizedEl = document.getElementById('unrealized');
+            unrealizedEl.textContent = (unrealized >= 0 ? '+$' : '-$') + Math.abs(unrealized).toFixed(2);
+            unrealizedEl.className = 'stat text-xl ' + (unrealized > 0 ? 'text-green-400' : unrealized < 0 ? 'text-red-400' : 'text-gray-400');
+            
+            const pnlPct = data.stats.pnl_pct;
+            const pnlEl = document.getElementById('pnl');
+            pnlEl.textContent = (pnlPct >= 0 ? '+' : '') + pnlPct.toFixed(2) + '%';
+            pnlEl.className = 'stat text-xl ' + (pnlPct >= 0 ? 'text-green-400' : 'text-red-400');
+            
+            const ddVal = data.equity.drawdown;
+            const ddEl = document.getElementById('drawdown');
+            ddEl.textContent = ddVal.toFixed(2) + '%';
+            ddEl.className = 'stat text-xl ' + (ddVal > 0 ? 'text-red-400' : 'text-green-400');
+            
+            document.getElementById('totalTrades').textContent = data.stats.total_trades;
+
+            const wrVal = data.stats.win_rate;
+            const wrEl = document.getElementById('winRate');
+            wrEl.textContent = wrVal.toFixed(1) + '%';
+            wrEl.className = 'stat text-xl ' + (wrVal >= 50 ? 'text-green-400' : wrVal >= 40 ? 'text-yellow-400' : 'text-red-400');
+
+            const winEl = document.getElementById('winning');
+            winEl.textContent = data.stats.winning;
+            winEl.className = 'stat text-xl text-green-400';
+
+            const loseEl = document.getElementById('losing');
+            loseEl.textContent = data.stats.losing;
+            loseEl.className = 'stat text-xl text-red-400';
+
+            const beEl = document.getElementById('beCount');
+            beEl.textContent = data.stats.be_count || 0;
+            beEl.className = 'stat text-xl text-blue-400';
+            
+            document.getElementById('lastUpdate').textContent = 'Updated: ' + new Date().toLocaleTimeString();
+
+            // Trading window badge
+            if (data.trading_window) {
+                renderTradingWindow(data.trading_window);
+            }
+
+            // Next scan countdown
+            if (data.next_scan_seconds !== undefined) {
+                startCountdown(data.next_scan_seconds);
+            }
+
+            // Top crypto ticker
+            updateCryptoTicker(data);
+
+            // Trades with real PnL for metrics (CLOSE + TP1)
+            const closedTrades = (data.trades || []).filter(t => t.event === 'CLOSE' || t.event === 'TP1');
+            const wins = closedTrades.filter(t => t.pnl > 0);
+            const losses = closedTrades.filter(t => t.pnl < 0);
+            
+            const avgWin = wins.length ? wins.reduce((s, t) => s + t.pnl, 0) / wins.length : 0;
+            const avgLoss = losses.length ? Math.abs(losses.reduce((s, t) => s + t.pnl, 0) / losses.length) : 0;
+            const profitFactor = avgLoss > 0 ? (avgWin * wins.length) / (avgLoss * losses.length) : 0;
+            const bestTrade = closedTrades.length ? Math.max(...closedTrades.map(t => t.pnl || 0)) : 0;
+            const worstTrade = closedTrades.length ? Math.min(...closedTrades.map(t => t.pnl || 0)) : 0;
+            const expectancy = closedTrades.length ? closedTrades.reduce((s, t) => s + (t.pnl || 0), 0) / closedTrades.length : 0;
+
+            const avgWinEl = document.getElementById('avgWin');
+            avgWinEl.textContent = '+$' + avgWin.toFixed(2);
+            avgWinEl.className = 'text-lg font-bold text-green-400';
+
+            const avgLossEl = document.getElementById('avgLoss');
+            avgLossEl.textContent = '-$' + avgLoss.toFixed(2);
+            avgLossEl.className = 'text-lg font-bold text-red-400';
+
+            const pfEl = document.getElementById('profitFactor');
+            pfEl.textContent = profitFactor.toFixed(2);
+            pfEl.className = 'text-lg font-bold ' + (profitFactor >= 1.0 ? 'text-green-400' : 'text-red-400');
+
+            const btEl = document.getElementById('bestTrade');
+            btEl.textContent = '+$' + Math.abs(bestTrade).toFixed(2);
+            btEl.className = 'text-lg font-bold text-green-400';
+
+            const wtEl = document.getElementById('worstTrade');
+            wtEl.textContent = '-$' + Math.abs(worstTrade).toFixed(2);
+            wtEl.className = 'text-lg font-bold text-red-400';
+
+            const expEl = document.getElementById('expectancy');
+            expEl.textContent = (expectancy >= 0 ? '+$' : '-$') + Math.abs(expectancy).toFixed(2);
+            expEl.className = 'text-lg font-bold ' + (expectancy >= 0 ? 'text-green-400' : 'text-red-400');
+
+            // Positions table
+            const posTable = document.getElementById('positionsTable');
+            if (data.positions.length === 0) {
+                posTable.innerHTML = '<tr><td colspan="11" class="p-2 text-center text-gray-500">No open positions - AI waiting for opportunity</td></tr>';
+            } else {
+                posTable.innerHTML = data.positions.map(p => {
+                    const pnlPct = p.entry > 0 ? ((p.current - p.entry) / p.entry * 100 * (p.direction === 'LONG' ? 1 : -1)) : 0;
+                    const pnlValue = p.pnl || 0;
+                    const pnlClass = pnlValue >= 0 ? 'text-green-400' : 'text-red-400';
+                    const pnlPctClass = pnlPct >= 0 ? 'text-green-400' : 'text-red-400';
+                    const margin = p.margin || 0;
+                    const leverage = p.leverage || 3;
+
+                    const tp1 = (p.tp1 !== null && p.tp1 !== undefined) ? p.tp1 : null;
+                    const tp1Done = !!p.tp1_done;
+                    const beActive = !!p.be_active;
+                    const be2Active = !!p.be2_active;
+                    const tsActive = !!p.ts_active;
+
+                    const beLabel = be2Active ? 'BE2' : (beActive ? 'BE' : null);
+
+                    const entryHtml = beLabel
+                        ? `${fmtPrice(p.entry)} <span class="text-xs text-gray-400">${beLabel}</span>`
+                        : `${fmtPrice(p.entry)}`;
+
+                    const slHtml = `${fmtPrice(p.sl)}${tsActive ? ' <span class="text-xs text-gray-400">TS</span>' : ''}`;
+
+                    return `
+                    <tr class="border-t border-gray-700 hover:bg-gray-750">
+                        <td class="p-0.5 font-mono font-bold">${p.symbol}</td>
+                        <td class="p-0.5 ${p.direction === 'LONG' ? 'text-green-400' : 'text-red-400'} font-bold">${p.direction === 'LONG' ? '🟢 LONG' : '🔴 SHORT'}</td>
+                        <td class="p-0.5 text-right text-yellow-400">$${margin.toFixed(2)}</td>
+                        <td class="p-0.5 text-right text-blue-400">${leverage}x</td>
+                        <td class="p-0.5 text-right">${entryHtml}</td>
+                        <td class="p-0.5 text-right pos-current">${fmtPrice(p.current || p.entry)}</td>
+                        <td class="p-0.5 text-right text-red-400">${slHtml}</td>
+                        <td class="p-0.5 text-right text-green-400">${tp1 !== null ? (fmtPrice(tp1) + (tp1Done ? ' 🚀' : '')) : '-'}</td>
+                        <td class="p-0.5 text-right font-bold ${pnlClass}">$${pnlValue.toFixed(2)}</td>
+                        <td class="p-0.5 text-right font-bold ${pnlPctClass}">${pnlPct >= 0 ? '+' : ''}${pnlPct.toFixed(2)}%</td>
+                        <td class="p-0.5 text-center">
+                            <button onclick="closePosition('${p.symbol}')" class="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded text-xs transition">Close</button>
+                        </td>
+                    </tr>
+                `}).join('');
+            }
+
+            // Count actions for pie chart
+            actionCounts = { HOLD: 0, LONG: 0, SHORT: 0, CLOSE: 0 };
+            (data.decisions || []).forEach(d => {
+                const rec = d.recommendation || 'HOLD';
+                if (actionCounts.hasOwnProperty(rec)) {
+                    actionCounts[rec]++;
+                }
+            });
+
+            // PnL and trades by symbol (CLOSE + TP1 events)
+            symbolPnL = {};
+            symbolTrades = {};
+            closedTrades.forEach(t => {
+                if (!symbolPnL[t.symbol]) {
+                    symbolPnL[t.symbol] = 0;
+                    symbolTrades[t.symbol] = 0;
+                }
+                symbolPnL[t.symbol] += t.pnl || 0;
+                symbolTrades[t.symbol]++;
+            });
+
+            // Decisions table
+            const decTable = document.getElementById('decisionsTable');
+            if (data.decisions && data.decisions.length > 0) {
+                decTable.innerHTML = data.decisions.slice(0, 30).map(d => {
+                    const rec = d.recommendation || 'HOLD';
+                    const actionIcon = rec === 'LONG' ? '🟢' : rec === 'SHORT' ? '🔴' : rec === 'CLOSE' ? '⚪' : '⏸️';
+                    const actionClass = rec === 'LONG' ? 'text-green-400' : rec === 'SHORT' ? 'text-red-400' : 'text-gray-400';
+                    const conf = d.confidence !== undefined ? (d.confidence * 100).toFixed(0) + '%' : '—';
+                    const probs = d.agent_probs || [];
+                    const probStr = probs.length === 3 ? `H:${(probs[0]*100).toFixed(0)} L:${(probs[1]*100).toFixed(0)} S:${(probs[2]*100).toFixed(0)}` : '';
+                    return `
+                    <tr class="border-t border-gray-700 hover:bg-gray-750">
+                        <td class="p-2 text-xs text-gray-400">${new Date(d.ts).toLocaleTimeString()}</td>
+                        <td class="p-2 font-mono">${d.symbol}</td>
+                        <td class="p-2 text-center ${actionClass} font-bold">${actionIcon} ${rec}</td>
+                        <td class="p-2 text-right">${fmtPrice(d.price)}</td>
+                        <td class="p-2 text-center text-blue-400 text-xs">${conf}</td>
+                        <td class="p-2 text-xs text-gray-300" title="${probStr}">${probStr || '—'}</td>
+                    </tr>
+                `}).join('');
+            } else {
+                decTable.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Waiting for AI decisions...</td></tr>';
+            }
+
+            // Trades table — show all events except OPEN (includes BE, TP1, CLOSE)
+            allTrades = (data.trades || []).filter(t => t.event !== 'OPEN');
+            renderTradesTable();
+
+            // Update all charts
+            updateEquityChart(data.equity_history);
+            updateDrawdownChart(data.equity_history);
+            updateWinLossChart(data.stats.winning, data.stats.losing, data.stats.be_count || 0);
+            updateActionsChart();
+            updatePnLBySymbolChart();
+            updateTradesBySymbolChart();
+        }
+
+        function updateEquityChart(history) {
+            const ctx = document.getElementById('equityChart').getContext('2d');
+            const labels = history.map(h => new Date(h.ts).toLocaleTimeString());
+            const values = history.map(h => h.equity);
+            
+            if (charts.equity) {
+                charts.equity.data.labels = labels;
+                charts.equity.data.datasets[0].data = values;
+                charts.equity.update('none');
+            } else {
+                charts.equity = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Equity',
+                            data: values,
+                            borderColor: '#10B981',
+                            borderWidth: 1,
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { grid: { color: '#374151' }, ticks: { color: '#9CA3AF' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateDrawdownChart(history) {
+            const ctx = document.getElementById('drawdownChart').getContext('2d');
+            const labels = history.map(h => new Date(h.ts).toLocaleTimeString());
+            const values = history.map(h => Math.abs(h.dd || 0));
+            
+            if (charts.drawdown) {
+                charts.drawdown.data.labels = labels;
+                charts.drawdown.data.datasets[0].data = values;
+                charts.drawdown.update('none');
+            } else {
+                charts.drawdown = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Drawdown',
+                            data: values,
+                            borderColor: '#EF4444',
+                            borderWidth: 1,
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            fill: true,
+                            tension: 0.3,
+                            pointRadius: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { beginAtZero: true, grid: { color: '#374151' }, ticks: { color: '#9CA3AF', callback: v => v + '%' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateWinLossChart(wins, losses, be) {
+            const ctx = document.getElementById('winLossChart').getContext('2d');
+            be = be || 0;
+            
+            if (charts.winLoss) {
+                charts.winLoss.data.datasets[0].data = [wins, losses, be];
+                charts.winLoss.update('none');
+            } else {
+                charts.winLoss = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Wins', 'Losses', 'BE'],
+                        datasets: [{
+                            data: [wins, losses, be],
+                            backgroundColor: ['#10B981', '#EF4444', '#3B82F6'],
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: true, position: 'bottom', labels: { color: '#9CA3AF', boxWidth: 12 } }
+                        },
+                        cutout: '60%',
+                    }
+                });
+            }
+        }
+
+        function updateActionsChart() {
+            const ctx = document.getElementById('actionsChart').getContext('2d');
+            
+            if (charts.actions) {
+                charts.actions.data.datasets[0].data = [actionCounts.HOLD, actionCounts.LONG, actionCounts.SHORT, actionCounts.CLOSE];
+                charts.actions.update('none');
+            } else {
+                charts.actions = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['HOLD', 'LONG', 'SHORT', 'CLOSE'],
+                        datasets: [{
+                            data: [actionCounts.HOLD, actionCounts.LONG, actionCounts.SHORT, actionCounts.CLOSE],
+                            backgroundColor: ['#6B7280', '#10B981', '#EF4444', '#F59E0B'],
+                            borderWidth: 0,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { 
+                            legend: { display: true, position: 'bottom', labels: { color: '#9CA3AF', boxWidth: 12, font: { size: 10 } } }
+                        },
+                        cutout: '60%',
+                    }
+                });
+            }
+        }
+
+        function updatePnLBySymbolChart() {
+            const ctx = document.getElementById('pnlBySymbolChart').getContext('2d');
+            const symbols = Object.keys(symbolPnL);
+            const values = symbols.map(s => symbolPnL[s]);
+            const colors = values.map(v => v >= 0 ? '#10B981' : '#EF4444');
+            
+            if (charts.pnlBySymbol) {
+                charts.pnlBySymbol.data.labels = symbols;
+                charts.pnlBySymbol.data.datasets[0].data = values;
+                charts.pnlBySymbol.data.datasets[0].backgroundColor = colors;
+                charts.pnlBySymbol.update('none');
+            } else {
+                charts.pnlBySymbol = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: symbols.length ? symbols : [],
+                        datasets: [{
+                            data: values.length ? values : [],
+                            backgroundColor: colors.length ? colors : '#374151',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#9CA3AF', font: { size: 9 } } },
+                            y: { grid: { color: '#374151' }, ticks: { color: '#9CA3AF', callback: v => '$' + Number(v).toFixed(2) } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateTradesBySymbolChart() {
+            const ctx = document.getElementById('tradesBySymbolChart').getContext('2d');
+            const symbols = Object.keys(symbolTrades);
+            const values = symbols.map(s => symbolTrades[s]);
+            
+            if (charts.tradesBySymbol) {
+                charts.tradesBySymbol.data.labels = symbols;
+                charts.tradesBySymbol.data.datasets[0].data = values;
+                charts.tradesBySymbol.update('none');
+            } else {
+                charts.tradesBySymbol = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: symbols.length ? symbols : [],
+                        datasets: [{
+                            data: values.length ? values : [],
+                            backgroundColor: '#3B82F6',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { color: '#9CA3AF', font: { size: 9 } } },
+                            y: { grid: { color: '#374151' }, ticks: { color: '#9CA3AF' } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============ MARKET CLOCKS ============
+        const markets = {
+            tokyo: { tz: 'Asia/Tokyo', open: 9, close: 15, name: 'Tokyo', displayHours: '09:00 - 15:00 JST' },
+            hk: { tz: 'Asia/Hong_Kong', open: 9.5, close: 16, name: 'Hong Kong', displayHours: '09:30 - 16:00 HKT' },
+            london: { tz: 'Europe/London', open: 8, close: 16.5, name: 'London', displayHours: '08:00 - 16:30 UTC' },
+            ny: { tz: 'America/New_York', open: 9.5, close: 16, name: 'NYSE', displayHours: '09:30 - 16:00 ET' },
+            cme: { tz: 'America/Chicago', open: 17, close: 16, isCME: true, name: 'CME', displayHours: '17:00 - 16:00 CT' }
+        };
+
+        // Holiday Logic (Auto-detect)
+        (function() {
+            const now = new Date();
+            // Check for Dec 24 (Christmas Eve)
+            if (now.getMonth() === 11 && now.getDate() === 24) {
+                // London: Early Close 12:30
+                markets.london.close = 12.5;
+                markets.london.displayHours = '08:00 - 12:30 UTC 🎄';
+                
+                // NYSE: Early Close 13:00
+                markets.ny.close = 13;
+                markets.ny.displayHours = '09:30 - 13:00 ET 🎄';
+
+                // CME: Early Close 12:00 (approx)
+                markets.cme.close = 12; 
+                markets.cme.displayHours = '17:00 - 12:00 CT 🎄';
+                markets.cme.earlyClose = true; 
+                
+                // Update CME Label in Info Panel
+                const cmeLabel = document.getElementById('info-label-cme');
+                if (cmeLabel) cmeLabel.textContent = 'CME Holiday:';
+            }
+            
+            // Check for Dec 25 (Christmas Day)
+            if (now.getMonth() === 11 && now.getDate() === 25) {
+                Object.keys(markets).forEach(k => {
+                    markets[k].displayHours = 'CLOSED 🎄';
+                    markets[k].open = 99; // Force closed
+                    markets[k].close = -1;
+                });
+            }
+
+            // Check for Jan 1 (New Year's Day)
+            if (now.getMonth() === 0 && now.getDate() === 1) {
+                Object.keys(markets).forEach(k => {
+                    markets[k].displayHours = 'CLOSED 🎉';
+                    markets[k].open = 99; // Force closed
+                    markets[k].close = -1;
+                });
+            }
+        })();
+
+        let currentTradingWindowConfig = null;
+
+        function updateSessionIndicators() {
+            // Highlight the preset button that matches the CURRENT CONFIGURATION
+            // This provides feedback on what mode is selected, regardless of current time.
+            
+            const presets = {
+                'london_ny': { start: "13:00", end: "16:00", id: 'btn-preset-london_ny' },
+                'us_stocks': { start: "13:30", end: "20:00", id: 'btn-preset-us_stocks' },
+                'full_day': { start: "07:00", end: "21:00", id: 'btn-preset-full_day' },
+                'asian': { start: "00:00", end: "08:00", id: 'btn-preset-asian' }
+            };
+
+            // Reset all buttons
+            Object.keys(presets).forEach(key => {
+                const p = presets[key];
+                const btn = document.getElementById(p.id);
+                if (!btn) return;
+                
+                // Reset to default style
+                btn.classList.remove('ring-2', 'ring-purple-400', 'bg-purple-600', 'text-white', 'ring-yellow-400', 'bg-yellow-600', 'ring-blue-400', 'bg-blue-600', 'ring-green-400', 'bg-green-600');
+                if (key === 'full_day') {
+                    btn.classList.add('bg-purple-900/40', 'text-purple-200');
+                } else if (key === 'asian') {
+                    btn.classList.add('bg-yellow-900/40', 'text-yellow-200');
+                } else {
+                    btn.classList.add('bg-blue-900/40', 'text-blue-200');
+                }
+            });
+
+            if (!currentTradingWindowConfig || !currentTradingWindowConfig.enabled || !currentTradingWindowConfig.intervals || currentTradingWindowConfig.intervals.length === 0) {
+                return;
+            }
+
+            // Check if current config matches a preset
+            const interval = currentTradingWindowConfig.intervals[0];
+            if (!interval) return;
+
+            Object.keys(presets).forEach(key => {
+                const p = presets[key];
+                if (interval.start === p.start && interval.end === p.end) {
+                    const btn = document.getElementById(p.id);
+                    if (btn) {
+                        // Highlight as SELECTED
+                        btn.classList.remove('bg-purple-900/40', 'text-purple-200', 'bg-yellow-900/40', 'text-yellow-200', 'bg-blue-900/40', 'text-blue-200');
+                        
+                        if (key === 'full_day') {
+                            btn.classList.add('ring-2', 'ring-purple-400', 'bg-purple-600', 'text-white');
+                        } else if (key === 'asian') {
+                            btn.classList.add('ring-2', 'ring-yellow-400', 'bg-yellow-600', 'text-white');
+                        } else {
+                            btn.classList.add('ring-2', 'ring-blue-400', 'bg-blue-600', 'text-white');
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateClocks() {
+            updateSessionIndicators(); 
+            const now = new Date();
+            let openCount = 0;
+            let isCMEWeekend = false;
+
+            Object.keys(markets).forEach(key => {
+                const market = markets[key];
+                const localTime = new Date(now.toLocaleString('en-US', { timeZone: market.tz }));
+                const hours = localTime.getHours();
+                const minutes = localTime.getMinutes();
+                const dayOfWeek = localTime.getDay();
+
+                // Update clock hands
+                const hourDeg = (hours % 12) * 30 + minutes * 0.5;
+                const minuteDeg = minutes * 6;
+                
+                const hourHand = document.getElementById(`hour-${key}`);
+                const minuteHand = document.getElementById(`minute-${key}`);
+                if (hourHand) hourHand.style.transform = `rotate(${hourDeg}deg)`;
+                if (minuteHand) minuteHand.style.transform = `rotate(${minuteDeg}deg)`;
+
+                // Update time display
+                const timeEl = document.getElementById(`time-${key}`);
+                if (timeEl) timeEl.textContent = localTime.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+                // Update hours display
+                const hoursEl = document.getElementById(`hours-${key}`);
+                if (hoursEl) hoursEl.textContent = market.displayHours;
+
+                // Update info panel hours
+                const infoHoursEl = document.getElementById(`info-hours-${key}`);
+                if (infoHoursEl) infoHoursEl.textContent = market.displayHours;
+
+                // Check if market is open
+                let isOpen = false;
+                const currentHour = hours + minutes / 60;
+
+                if (market.isCME) {
+                    // CME: Sunday 5pm CT to Friday 4pm CT (with daily break 4-5pm)
+                    const isWeekend = (dayOfWeek === 6) || (dayOfWeek === 0 && currentHour < 17) || (dayOfWeek === 5 && currentHour >= 16);
+                    isCMEWeekend = isWeekend;
+                    
+                    if (market.earlyClose && currentHour >= market.close) {
+                        isOpen = false;
+                    } else {
+                        isOpen = !isWeekend && !(currentHour >= 16 && currentHour < 17);
+                    }
+                } else {
+                    // Regular market hours (Mon-Fri)
+                    const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+                    isOpen = isWeekday && currentHour >= market.open && currentHour < market.close;
+                }
+
+                // Update UI
+                const clockFace = document.getElementById(`clock-${key}`);
+                const statusEl = document.getElementById(`status-${key}`);
+                const container = document.getElementById(`market-${key}`);
+
+                if (clockFace) clockFace.className = `clock-face ${isOpen ? 'open' : 'closed'}`;
+                if (statusEl) {
+                    statusEl.textContent = isOpen ? 'OPEN' : 'CLOSED';
+                    statusEl.className = `market-status ${isOpen ? 'open' : 'closed'}`;
+                }
+                if (container) container.className = `market-indicator ${isOpen ? 'open' : 'closed'}`;
+
+                if (isOpen) openCount++;
+            });
+
+            // Update trading mode badge
+            const modeEl = document.getElementById('tradingMode');
+            if (modeEl) {
+                // If API provided status, respect it first (handled in updateUI)
+                // Otherwise fallback to clock logic
+                if (modeEl.textContent === 'LOADING...') {
+                    if (isCMEWeekend) {
+                        modeEl.textContent = 'WEEKEND MODE';
+                        modeEl.className = 'mode-badge weekend';
+                    } else if (openCount === 0) {
+                        modeEl.textContent = 'LOW LIQUIDITY';
+                        modeEl.className = 'mode-badge holiday';
+                    } else if (openCount >= 2) {
+                        modeEl.textContent = 'FULL MARKETS';
+                        modeEl.className = 'mode-badge full';
+                    } else {
+                        modeEl.textContent = `${openCount} MARKET`;
+                        modeEl.className = 'mode-badge weekend';
+                    }
+                }
+            }
+        }
+
+        // Update clocks every second
+        updateClocks();
+        setInterval(updateClocks, 1000);
+
+        // Bind Trading Window
+        const twForm = document.getElementById('tradingWindowForm');
+        if (twForm) twForm.addEventListener('submit', submitTradingWindow);
+
+        // Load trading window config
+        if (document.getElementById('twEnabled')) loadTradingWindow();
+
+        // Initial fetch
+        fetchData();
+        // Refresh every 30 seconds (works for dashboard + header-only pages like /strategy)
+        setInterval(fetchData, 30000);
+
+        // ============ LIVE PRICE UPDATER (every 10s) ============
+        let _lastLivePrices = {};
+        async function fetchLivePrices() {
+            try {
+                const r = await fetch("/api/live-prices?_=" + Date.now(), {cache: "no-store"});
+                if (!r.ok) return;
+                const d = await r.json();
+                if (!d.prices || typeof d.prices !== "object") return;
+                _lastLivePrices = d.prices;
+                // Update ticker items in-place
+                const el = document.getElementById("cryptoTicker");
+                if (el) {
+                    const spans = el.querySelectorAll("span.inline-flex");
+                    spans.forEach(sp => {
+                        const symEl = sp.querySelector("span.text-pink-100.font-semibold");
+                        const priceEl = sp.querySelector("span.text-pink-100.tabular-nums");
+                        if (symEl && priceEl) {
+                            const sym = symEl.textContent;
+                            const lp = d.prices[sym];
+                            if (lp && lp > 0) {
+                                priceEl.textContent = lp >= 100 ? lp.toFixed(0) : lp.toFixed(4);
+                            }
+                        }
+                    });
+                }
+                // Update position current prices and PnL
+                document.querySelectorAll("[data-pos-symbol]").forEach(row => {
+                    const sym = row.getAttribute("data-pos-symbol");
+                    const lp = d.prices[sym];
+                    if (!lp || lp <= 0) return;
+                    const curEl = row.querySelector(".pos-current");
+                    if (curEl) curEl.textContent = lp >= 100 ? lp.toFixed(2) : lp.toFixed(6);
+                });
+            } catch(e) { /* silent */ }
+        }
+        fetchLivePrices();
+        setInterval(fetchLivePrices, 10000);
+
+
+        // ============ TRAINING COUNTDOWN ============
+        const TRAINING_INTERVAL_MS = 2 * 60 * 60 * 1000; // 2 hours
+        let lastTrainingTime = null;
+        let nextTrainingTime = null;
+        let trainingIntervalMs = TRAINING_INTERVAL_MS;
+        let trainingStatus = null;
+        let trainingPhase = null;
+        
+        async function fetchTrainingStatus() {
+            try {
+                const response = await fetch('/api/training_status');
+                const data = await response.json();
+                lastTrainingTime = new Date(data.last_training);
+                trainingStatus = data.status || null;
+                trainingPhase = data.phase || null;
+
+                if (data.next_training) {
+                    nextTrainingTime = new Date(data.next_training);
+                    const delta = nextTrainingTime - lastTrainingTime;
+                    trainingIntervalMs = (delta > 0) ? delta : TRAINING_INTERVAL_MS;
+                } else {
+                    nextTrainingTime = new Date(lastTrainingTime.getTime() + TRAINING_INTERVAL_MS);
+                    trainingIntervalMs = TRAINING_INTERVAL_MS;
+                }
+            } catch (e) {
+                console.error('Failed to fetch training status:', e);
+            }
+        }
+
+        function setTrainButtons(activeState, countdownLabel) {
+            const btnWaiting = document.getElementById('trainBtnWaiting');
+            const btnTraining = document.getElementById('trainBtnTraining');
+            const btnLearning = document.getElementById('trainBtnLearning');
+            const btnDreaming = document.getElementById('trainBtnDreaming'); // New
+            
+            const cdW = document.getElementById('trainCountdownWaiting');
+            const cdT = document.getElementById('trainCountdownTraining');
+            const cdL = document.getElementById('trainCountdownLearning');
+            const cdD = document.getElementById('trainCountdownDreaming'); // New
+            
+            if (!btnWaiting || !btnTraining || !btnLearning) return;
+
+            const inactive = 'flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-gray-800/50 border-gray-700 text-gray-500 transition-all opacity-60 min-w-[120px]';
+            const activeWaiting = 'flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-red-600/20 border-red-500 text-red-200 shadow-[0_0_15px_rgba(220,38,38,0.3)] scale-105 min-w-[120px]';
+            const activeTraining = 'flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-green-600/20 border-green-500 text-green-200 shadow-[0_0_15px_rgba(22,163,74,0.3)] scale-105 min-w-[120px]';
+            const activeLearning = 'flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-yellow-500/20 border-yellow-400 text-yellow-200 shadow-[0_0_15px_rgba(234,179,8,0.3)] scale-105 min-w-[120px]';
+            const activeDreaming = 'flex-1 justify-center px-6 py-6 rounded-xl text-xs font-bold border flex flex-col items-center gap-2 bg-pink-600/20 border-pink-500 text-pink-200 shadow-[0_0_15px_rgba(219,39,119,0.3)] scale-105 min-w-[120px]';
+
+            btnWaiting.className = (activeState === 'waiting') ? activeWaiting : inactive;
+            btnTraining.className = (activeState === 'training') ? activeTraining : inactive;
+            btnLearning.className = (activeState === 'learning') ? activeLearning : inactive;
+            if (btnDreaming) btnDreaming.className = (activeState === 'dreaming') ? activeDreaming : inactive;
+
+            // Reset all to placeholder
+            if (cdW) cdW.textContent = "--";
+            if (cdT) cdT.textContent = "--";
+            if (cdL) cdL.textContent = "--";
+            if (cdD) cdD.textContent = "--";
+
+            // Set only active
+            if (activeState === 'waiting' && cdW) cdW.textContent = countdownLabel;
+            if (activeState === 'training' && cdT) cdT.textContent = countdownLabel;
+            if (activeState === 'learning' && cdL) cdL.textContent = countdownLabel;
+            if (activeState === 'dreaming' && cdD) cdD.textContent = countdownLabel;
+        }
+        
+        function updateTrainingCountdown() {
+            if (!lastTrainingTime) return;
+            
+            const now = new Date();
+            const nextTraining = nextTrainingTime || new Date(lastTrainingTime.getTime() + TRAINING_INTERVAL_MS);
+            const remaining = nextTraining - now;
+            const elapsed = now - lastTrainingTime;
+            // Bar FILLS UP as we get closer to training (0% = just trained, 100% = about to train)
+            const denom = trainingIntervalMs || TRAINING_INTERVAL_MS;
+            const progress = Math.min(100, Math.max(0, (elapsed / denom) * 100));
+
+            const remainingSafe = Math.max(0, remaining);
+            const hours = Math.floor(remainingSafe / 3600000);
+            const mins = Math.floor((remainingSafe % 3600000) / 60000);
+            // const secs = Math.floor((remainingSafe % 60000) / 1000);
+            const timeStr = hours > 0
+                ? `${hours}h ${mins}m`
+                : `${mins}m`;
+            const countdownLabel = `${timeStr}`;
+
+            let activeState = 'waiting';
+            
+            // Check for Dreaming state (04:00 UTC)
+            const h = now.getUTCHours();
+            if (h === 4) {
+                activeState = 'dreaming';
+            } else if (trainingStatus === 'running') {
+                if (trainingPhase === 'learning') activeState = 'learning';
+                else if (trainingPhase === 'training') activeState = 'training';
+                else activeState = 'training';
+            } else {
+                // Waiting
+                activeState = 'waiting';
+            }
+            
+            // Force waiting if status is explicitly idle
+            if (trainingStatus === 'idle') {
+                activeState = 'waiting';
+            }
+
+            setTrainButtons(activeState, countdownLabel);
+            
+            // Debug info
+            const debugEl = document.getElementById('debugStatus');
+            if (debugEl) {
+                debugEl.textContent = `Status: ${trainingStatus} | Phase: ${trainingPhase} | Active: ${activeState}`;
+            }
+
+            // Refresh training status shortly after cycle boundary (debounced)
+            if (remaining <= 0 && remaining > -60000 && trainingStatus !== 'running' && !window._trainFetchPending) {
+                window._trainFetchPending = true;
+                setTimeout(() => { fetchTrainingStatus(); window._trainFetchPending = false; }, 15000);
+            }
+        }
+        
+        // Initial fetch and then update every 30s
+        fetchTrainingStatus();
+        setInterval(fetchTrainingStatus, 30000);
+        
+        // ============ WEEKEND COUNTDOWN ============
+        function updateWeekendCountdown() {
+            const countdownEl = document.getElementById('weekendCountdown');
+            if (!countdownEl) return;
+            
+            // Get current time in Chicago (CME timezone)
+            const now = new Date();
+            const chicagoTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+            const dayOfWeek = chicagoTime.getDay();
+            const hours = chicagoTime.getHours();
+            const minutes = chicagoTime.getMinutes();
+            const seconds = chicagoTime.getSeconds();
+            
+            // CME closes Friday 4pm CT, opens Sunday 5pm CT
+            // Weekend = Saturday all day, Sunday until 5pm, Friday after 4pm
+            
+            const isWeekend = (dayOfWeek === 6) || 
+                              (dayOfWeek === 0 && hours < 17) || 
+                              (dayOfWeek === 5 && hours >= 16);
+            
+            if (isWeekend) {
+                // Calculate time until market opens (Sunday 5pm CT)
+                let hoursUntilOpen;
+                if (dayOfWeek === 5 && hours >= 16) {
+                    // Friday after close: ~49 hours until Sunday 5pm
+                    hoursUntilOpen = (24 - hours - 1) + 24 + 17; // Rest of Friday + Saturday + Sunday until 5pm
+                    const minsLeft = 60 - minutes;
+                    hoursUntilOpen += minsLeft / 60;
+                } else if (dayOfWeek === 6) {
+                    // Saturday: 24 + 17 hours until Sunday 5pm
+                    hoursUntilOpen = (24 - hours) + 17 - minutes/60;
+                } else {
+                    // Sunday before 5pm
+                    hoursUntilOpen = 17 - hours - minutes/60;
+                }
+                
+                const h = Math.floor(hoursUntilOpen);
+                const m = Math.floor((hoursUntilOpen - h) * 60);
+                countdownEl.textContent = `📈 Abre en ${h}h ${m}m`;
+                countdownEl.style.color = '#10B981';
+            } else {
+                // Calculate time until weekend (Friday 4pm CT)
+                let hoursUntilClose;
+                const daysUntilFriday = (5 - dayOfWeek + 7) % 7;
+                
+                if (daysUntilFriday === 0) {
+                    // It's Friday, before 4pm
+                    hoursUntilClose = 16 - hours - minutes/60;
+                } else {
+                    hoursUntilClose = daysUntilFriday * 24 + (16 - hours) - minutes/60;
+                }
+                
+                if (hoursUntilClose < 0) hoursUntilClose = 0;
+                
+                const h = Math.floor(hoursUntilClose);
+                const m = Math.floor((hoursUntilClose - h) * 60);
+                
+                if (h < 24) {
+                    countdownEl.textContent = `⏱️ Cierra en ${h}h ${m}m`;
+                    countdownEl.style.color = '#F59E0B';
+                } else {
+                    const days = Math.floor(h / 24);
+                    const remainingHours = h % 24;
+                    countdownEl.textContent = `⏱️ ${days}d ${remainingHours}h`;
+                    countdownEl.style.color = '#9CA3AF';
+                }
+            }
+        }
+
+        // Update training countdown every second
+        updateTrainingCountdown();
+        setInterval(updateTrainingCountdown, 1000);
+
+        // Update weekend countdown every second
+        updateWeekendCountdown();
+        setInterval(updateWeekendCountdown, 1000);
+
+        // ============ GOLDEN HOUR BADGE ============
+        function updateGoldenHourBadge() {
+            const now = new Date();
+            const utcHour = now.getUTCHours();
+            const utcMin = now.getUTCMinutes();
+            const currentMinutes = utcHour * 60 + utcMin; // Total minutes since midnight UTC
+            const day = now.getUTCDay(); // 0=Sun, 6=Sat
+            
+            const badge = document.getElementById('hourBadge');
+            const badgeIcon = document.getElementById('hourBadgeIcon');
+            const badgeText = document.getElementById('hourBadgeText');
+            
+            if (!badge || !badgeIcon || !badgeText) return;
+
+            // Weekend Check
+            if (day === 0 || day === 6) {
+                 badge.style.background = 'linear-gradient(135deg, #374151, #1f2937)';
+                 badge.style.boxShadow = 'none';
+                 badge.style.animation = 'none';
+                 badgeIcon.textContent = '🏖️';
+                 badgeText.textContent = 'FIN DE SEMANA';
+                 return;
+            }
+            
+            // Define time windows (in minutes from midnight UTC)
+            const windows = [
+                { name: 'silver1', start: 7*60, end: 9*60, icon: '🥈', label: 'HORA PLATA', gradient: 'linear-gradient(135deg, #9CA3AF, #6B7280)' },
+                { name: 'golden', start: 14*60+30, end: 17*60, icon: '🪙', label: 'HORA DORADA', gradient: 'linear-gradient(135deg, #F59E0B, #D97706)' },
+                { name: 'silver2', start: 21*60, end: 23*60, icon: '🥈', label: 'HORA PLATA', gradient: 'linear-gradient(135deg, #9CA3AF, #6B7280)' },
+            ];
+            
+            // Check if we're in any active window
+            let activeWindow = null;
+            for (const w of windows) {
+                if (currentMinutes >= w.start && currentMinutes <= w.end) {
+                    activeWindow = w;
+                    break;
+                }
+            }
+            
+            if (activeWindow) {
+                // Show active badge
+                badge.style.background = activeWindow.gradient;
+                badge.style.boxShadow = activeWindow.name === 'golden' ? '0 0 15px rgba(245, 158, 11, 0.5)' : 'none';
+                badge.style.animation = 'pulse 2s infinite';
+                badgeIcon.textContent = activeWindow.icon;
+                badgeText.textContent = `${activeWindow.label} ✨`;
+                return;
+            }
+            
+            // Find next window
+            let nextWindow = null;
+            let minWait = Infinity;
+            
+            for (const w of windows) {
+                let waitMinutes = w.start - currentMinutes;
+                if (waitMinutes < 0) {
+                    waitMinutes += 24 * 60; // Next day
+                }
+                if (waitMinutes < minWait) {
+                    minWait = waitMinutes;
+                    nextWindow = w;
+                }
+            }
+            
+            if (nextWindow) {
+                // Format countdown
+                const hours = Math.floor(minWait / 60);
+                const mins = minWait % 60;
+                let countdown = hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+                
+                // Show the badge for the next window with countdown
+                badge.style.background = nextWindow.gradient;
+                badge.style.boxShadow = 'none';
+                badge.style.animation = 'none';
+                badgeIcon.textContent = nextWindow.icon;
+                badgeText.textContent = `${nextWindow.label} en ${countdown}`;
+            }
+        }
+        
+        updateGoldenHourBadge();
+        setInterval(updateGoldenHourBadge, 30000); // Check every 30 seconds
+
+        function updateCryptoTicker(data) {
+            const el = document.getElementById('cryptoTicker');
+            if (!el) return;
+
+            const items = [];
+
+            // Prefer backend ticker (has % change)
+            if (Array.isArray(data.ticker) && data.ticker.length) {
+                data.ticker.slice(0, 20).forEach(t => {
+                    const sym = t.symbol;
+                    const price = Number(t.price);
+                    const chg = Number(t.change_pct);
+                    if (!sym || !Number.isFinite(price) || !Number.isFinite(chg)) return;
+                    const up = chg >= 0;
+                    const cls = up ? 'text-green-400' : 'text-red-400';
+                    const arrow = up ? '▲' : '▼';
+                    const pStr = price.toFixed(price >= 100 ? 0 : 4);
+                    const pct = Math.abs(chg).toFixed(2);
+                    items.push(
+                        `<span class=\"inline-flex items-center gap-2 px-2\">` +
+                            `<span class=\"text-pink-100 font-semibold\">${sym}</span>` +
+                            `<span class=\"${cls} font-bold\">${arrow}</span>` +
+                            `<span class=\"text-pink-100 tabular-nums\">${pStr}</span>` +
+                            `<span class=\"${cls} tabular-nums\">${up ? '+' : '-'}${pct}%</span>` +
+                        `</span>`
+                    );
+                });
+            }
+
+            // Fallback: use live prices from open positions / decisions (no % change)
+            if (!items.length) {
+                const seen = new Set();
+                const add = (symbol, price) => {
+                    if (!symbol || seen.has(symbol)) return;
+                    seen.add(symbol);
+                    if (price !== undefined && price !== null && !Number.isNaN(Number(price))) {
+                        const p = Number(price);
+                        items.push(`${symbol} ${p.toFixed(p >= 100 ? 0 : 4)}`);
+                    } else {
+                        items.push(`${symbol}`);
+                    }
+                };
+                (data.positions || []).forEach(p => add(p.symbol, p.current));
+                (data.decisions || []).forEach(d => add(d.symbol, d.price));
+            }
+
+            if (items.length === 0) {
+                el.textContent = 'BTC-USDT • ETH-USDT • SOL-USDT • BNB-USDT • XRP-USDT • LTC-USDT';
+                return;
+            }
+
+            const line = items.join('   •   ');
+            // Duplicate for smoother loop
+            el.innerHTML = `${line}   •   ${line}`;
+        }
+
+        // ============ FEAR & GREED (REAL) ============
+        async function updateFearGreed() {
+            const vEl = document.getElementById('fgValue');
+            const lEl = document.getElementById('fgLabel');
+            const nEl = document.getElementById('fgNeedle');
+            if (!vEl || !lEl || !nEl) return;
+            try {
+                const r = await fetch('/api/fear_greed');
+                const d = await r.json();
+                const v = Number(d.value);
+                if (!Number.isFinite(v)) {
+                    vEl.textContent = '--';
+                    lEl.textContent = 'No data';
+                    return;
+                }
+                const cl = (d.classification || '').toString();
+                vEl.textContent = `${Math.round(v)}/100`;
+                lEl.textContent = cl || '—';
+                const pct = Math.max(0, Math.min(100, v));
+                nEl.style.left = pct + '%';
+            } catch (e) {
+                vEl.textContent = '--';
+                lEl.textContent = 'No data';
+            }
+        }
+
+        // ============ TRADING WINDOW (NEW) ============
+        let intervalCount = 0;
+
+        function addIntervalRow(start = "", end = "") {
+            intervalCount++;
+            const id = intervalCount;
+            const container = document.getElementById('intervalsContainer');
+            const div = document.createElement('div');
+            div.className = "flex items-center gap-2 interval-row";
+            div.id = `interval-${id}`;
+            div.innerHTML = `
+                <input type="time" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm text-gray-200 focus:border-blue-500 outline-none" name="start" value="${start}" required>
+                <span class="text-gray-400 text-xs">to</span>
+                <input type="time" class="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm text-gray-200 focus:border-blue-500 outline-none" name="end" value="${end}" required>
+                <button type="button" onclick="removeIntervalRow(${id})" class="text-red-400 hover:text-red-300 px-2">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function removeIntervalRow(id) {
+            const el = document.getElementById(`interval-${id}`);
+            if (el) el.remove();
+        }
+
+        function clearIntervals() {
+            document.getElementById('intervalsContainer').innerHTML = '';
+        }
+
+        function applyPreset(name) {
+            const tzInput = document.getElementById('twTz');
+            const weekendSelect = document.getElementById('twWeekend');
+            const enabledCheck = document.getElementById('twEnabled');
+            
+            // All presets use UTC for simplicity in this implementation
+            tzInput.value = "UTC";
+            // Auto-enable when selecting a preset
+            enabledCheck.checked = true;
+            
+            clearIntervals();
+
+            if (name === 'london_ny') {
+                // 13:00 - 16:00 UTC
+                addIntervalRow("13:00", "16:00");
+                weekendSelect.value = "block";
+            } else if (name === 'us_stocks') {
+                // 13:30 - 20:00 UTC
+                addIntervalRow("13:30", "20:00");
+                weekendSelect.value = "block";
+            } else if (name === 'full_day') {
+                // 07:00 - 21:00 UTC
+                addIntervalRow("07:00", "21:00");
+                weekendSelect.value = "allow";
+            } else if (name === 'asian') {
+                // 00:00 - 08:00 UTC
+                addIntervalRow("00:00", "08:00");
+                weekendSelect.value = "allow";
+            }
+        }
+
+        async function loadTradingWindow() {
+            try {
+                const res = await fetch('/api/trading-window');
+                const data = await res.json();
+                
+                currentTradingWindowConfig = data; // Store global config for UI highlighting
+
+                document.getElementById('twEnabled').checked = data.enabled;
+                document.getElementById('twTz').value = data.tz || "UTC";
+                document.getElementById('twWeekend').value = data.weekend_mode || "allow";
+                
+                const badge = document.getElementById('scheduleBadge');
+                const statusDiv = document.getElementById('scheduleStatus');
+                
+                if (data.enabled) {
+                    badge.textContent = data.is_open ? "OPEN" : "CLOSED";
+                    badge.className = data.is_open 
+                        ? "px-3 py-1 rounded-full text-xs font-semibold bg-green-900/30 border border-green-600 text-green-400"
+                        : "px-3 py-1 rounded-full text-xs font-semibold bg-red-900/30 border border-red-600 text-red-400";
+                    statusDiv.textContent = `${data.reason || ''}. Local: ${data.local_time} (${data.tz})`;
+                } else {
+                    badge.textContent = "DISABLED";
+                    badge.className = "px-3 py-1 rounded-full text-xs font-semibold bg-gray-700/30 border border-gray-600 text-gray-300";
+                    statusDiv.textContent = `Sin horario activo (no bloquea entradas). Local: ${data.local_time} (${data.tz}).`;
+                }
+
+                clearIntervals();
+                if (data.intervals && data.intervals.length > 0) {
+                    data.intervals.forEach(iv => addIntervalRow(iv.start, iv.end));
+                } else {
+                    if (data.enabled && (!data.intervals || data.intervals.length === 0)) {
+                        addIntervalRow();
+                    }
+                }
+                
+                // Force update indicators immediately
+                updateSessionIndicators();
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function submitTradingWindow(e) {
+            e.preventDefault();
+            const statusEl = document.getElementById('scheduleSaveStatus');
+            statusEl.textContent = "Saving...";
+            
+            const enabled = document.getElementById('twEnabled').checked;
+            const tz = document.getElementById('twTz').value;
+            const weekend_mode = document.getElementById('twWeekend').value;
+            
+            // Gather intervals
+            const rows = document.querySelectorAll('.interval-row');
+            const intervals = [];
+            rows.forEach(row => {
+                const start = row.querySelector('input[name="start"]').value;
+                const end = row.querySelector('input[name="end"]').value;
+                if (start && end) {
+                    intervals.push({ start, end });
+                }
+            });
+
+            try {
+                const res = await fetch('/api/trading-window', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        enabled: enabled,
+                        tz: tz,
+                        weekend_mode: weekend_mode,
+                        intervals: intervals
+                    })
+                });
+                const data = await res.json();
+                if (data.status === 'ok') {
+                    statusEl.textContent = "Saved!";
+                    statusEl.className = "text-xs text-green-400";
+                    loadTradingWindow();
+                } else {
+                    statusEl.textContent = "Error: " + data.detail;
+                    statusEl.className = "text-xs text-red-400";
+                }
+            } catch (e) {
+                statusEl.textContent = "Error saving";
+                statusEl.className = "text-xs text-red-400";
+            }
+            
+            setTimeout(() => { statusEl.textContent = ""; }, 3000);
+        }
+
+        </script>
+    <div id="debugStatus" class="fixed bottom-1 right-1 text-[10px] text-gray-600 font-mono pointer-events-none opacity-50"></div>
+</body>
+</html>

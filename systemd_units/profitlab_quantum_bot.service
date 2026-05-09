@@ -1,0 +1,24 @@
+[Unit]
+Description=ProfitLab Quantum Bot (Paper Trading)
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+WorkingDirectory=/srv/profitlab_quantum
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=/srv/profitlab_quantum/.env
+Environment=USE_WS_FEED=1
+Environment=USE_ORDERBOOK=1
+Environment=ORDERBOOK_LIMIT=20
+Environment=BINGX_FEE_TAKER=0.001
+Environment=BINGX_SLIPPAGE_BPS=10.0
+Environment=AGENT_TYPE=ppo_transformer
+Environment=PPO_AUTOSAVE_EVERY_UPDATES=25
+Environment=PPO_AUTOSAVE_PATH=/srv/profitlab_quantum/artifacts/ppo/ppo.pt
+ExecStart=/srv/profitlab_quantum/venv/bin/python -u main.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

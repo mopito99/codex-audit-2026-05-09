@@ -1,0 +1,87 @@
+{
+  "audit_id": "ADP_2026-05-06_12-15-00Z",
+  "audit_type": "ADP_stress_test_audit",
+  "spec_version": "r92_2026-05-06",
+  "event_metadata": {
+    "event": "ADP",
+    "actual": 130000,
+    "forecast": 99000,
+    "previous_original": 62000,
+    "previous_revised": 65000,
+    "revision_delta": 3000,
+    "source_provider": "FMP",
+    "release_ts_utc": "2026-05-06T12:15:00Z",
+    "received_by_sidecar_ts_utc": "2026-05-06T12:15:02.987Z",
+    "lag_release_to_received_seconds": 2.987
+  },
+  "sf_calculation": {
+    "sigma_robust_FRED": 1.0,
+    "sigma_robust_source": "macro_calendar.json fred_calibration kappa-adjusted (ADP)",
+    "beta_revision_propagation": 0.5,
+    "revision_delta": 3000,
+    "revision_significant": false,
+    "forecast_adjusted": 100500.0,
+    "sf_naive": 31000.0,
+    "sf_adjusted": 29500.0,
+    "sf_used_for_decision": 31000.0,
+    "sf_used_source": "max(|sf_naive|, |sf_adjusted|)",
+    "absolute_sf_value": 31000.0
+  },
+  "mode_transitions_during_event": [],
+  "p99_audit_window": {
+    "window_start_utc": "2026-05-06T11:15:00Z",
+    "window_end_utc": "2026-05-06T13:15:00Z",
+    "scan_tick_duration_p99_ms": 4500,
+    "scan_tick_duration_p95_ms": 3200,
+    "scan_tick_duration_p50_ms": 1100,
+    "back_pressure_drops_count": 0,
+    "stream_reconnect_events": 0,
+    "slot_lag_p95": 6,
+    "n_samples": 36000,
+    "verdict_per_criteria": {
+      "p99_under_8000ms": true,
+      "back_pressure_drops_zero": true,
+      "no_reconnects": true,
+      "slot_lag_p95_under_10": true,
+      "sufficient_samples": false
+    }
+  },
+  "btc_response_validation": {
+    "expected_beta_per_sigma": 0.18,
+    "actual_btc_move_5min_pct": 0.05,
+    "actual_btc_move_30min_pct": 0.12,
+    "actual_btc_move_60min_pct": 0.08,
+    "beta_observed": 0.21,
+    "beta_expected": 0.18,
+    "match_within_tolerance": true,
+    "tolerance_pct": 30.0,
+    "severity": "SOFT_WARNING"
+  },
+  "macro_layer_health_during_event": {
+    "tau_final_at_release": 0.604,
+    "tau_final_max_during_window": 0.715,
+    "rho_at_release": 0.024,
+    "rho_min_during_window": -0.041,
+    "stale_level_during_event": "L0",
+    "v3_v4_disagreement_count": 0,
+    "v4_decision_allowed_pct": 100.0,
+    "runtime_version": "V3.5-SHADOW-r93"
+  },
+  "burn_in_total_hours_completed": 4.5,
+  "burn_in_includes_NFP_stress": false,
+  "burn_in_includes_CPI_stress": false,
+  "runtime_version": "V3.5-SHADOW-r93",
+  "verdict": {
+    "all_criteria_pass": false,
+    "criteria_failed": [
+      "p99_audit_window.criteria",
+      "burn_in_hours (4.5 < 72)",
+      "NFP_stress_test_not_passed",
+      "CPI_stress_test_not_passed"
+    ],
+    "soft_warnings": [],
+    "authorize_LIVE": false,
+    "next_action": "RESET_BURN_IN",
+    "if_LIVE_authorized": null
+  }
+}

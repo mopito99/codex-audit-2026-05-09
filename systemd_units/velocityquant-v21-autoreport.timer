@@ -1,0 +1,11 @@
+[Unit]
+Description=Trigger V2.1 official report at 2026-05-03 22:44:30 UTC (00:44:30 CEST)
+
+[Timer]
+OnCalendar=2026-05-03 22:44:30
+AccuracySec=2s
+Persistent=true
+Unit=velocityquant-v21-autoreport.service
+
+[Install]
+WantedBy=timers.target

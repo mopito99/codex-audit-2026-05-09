@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#D4AF37;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D4AF37;stop-opacity:1" />
+    </linearGradient>
+    <clipPath id="innerClip">
+      <circle cx="100" cy="100" r="70" />
+    </clipPath>
+  </defs>
+
+  <!-- Outer Ring (Gold) -->
+  <!-- Ring from r=70 to r=95 (Width 25) -->
+  <circle cx="100" cy="100" r="95" fill="url(#goldGrad)" stroke="black" stroke-width="3"/>
+  
+  <!-- Inner Circle (Black) -->
+  <circle cx="100" cy="100" r="70" fill="black" stroke="url(#goldGrad)" stroke-width="2"/>
+
+  <!-- Waves (Blue) - Clipped to Inner Circle -->
+  <g clip-path="url(#innerClip)">
+      <!-- Deep Blue Background for water -->
+      <rect x="0" y="100" width="200" height="100" fill="#0F263E" />
+      
+      <!-- Stylized Waves -->
+      <path d="M -10 140 C 20 130 40 110 70 130 S 130 160 210 130 V 200 H -10 Z" fill="#275599" />
+      <path d="M -10 150 C 20 140 40 120 70 140 S 130 170 210 140 V 200 H -10 Z" fill="#3D72B8" opacity="0.6"/>
+      
+      <!-- Big Curling Wave on Left -->
+      <path d="M 20 140 Q 40 100 70 120 T 120 140" fill="none" stroke="#639CD4" stroke-width="3" />
+      <path d="M 30 150 Q 50 110 80 130 T 130 150" fill="none" stroke="#639CD4" stroke-width="2" />
+  </g>
+
+  <!-- Ship's Wheel (Gold) -->
+  <g transform="translate(100, 80)" fill="url(#goldGrad)">
+     <!-- Rim -->
+     <circle cx="0" cy="0" r="22" fill="none" stroke="url(#goldGrad)" stroke-width="4" />
+     <!-- Hub -->
+     <circle cx="0" cy="0" r="6" />
+     <!-- Spokes -->
+     <g stroke="url(#goldGrad)" stroke-width="4" stroke-linecap="round">
+        <line x1="0" y1="-30" x2="0" y2="30" />
+        <line x1="-30" y1="0" x2="30" y2="0" />
+        <line x1="-21" y1="-21" x2="21" y2="21" />
+        <line x1="21" y1="-21" x2="-21" y2="21" />
+     </g>
+     <!-- Handles -->
+     <circle cx="0" cy="-32" r="3" />
+     <circle cx="0" cy="32" r="3" />
+     <circle cx="-32" cy="0" r="3" />
+     <circle cx="32" cy="0" r="3" />
+     <circle cx="22" cy="-22" r="3" />
+     <circle cx="22" cy="22" r="3" />
+     <circle cx="-22" cy="-22" r="3" />
+     <circle cx="-22" cy="22" r="3" />
+  </g>
+
+  <!-- Key Shaft (Gold) -->
+  <rect x="96" y="80" width="8" height="65" fill="url(#goldGrad)" />
+  <!-- Key Teeth -->
+  <path d="M 104 130 H 116 V 135 H 104 V 138 H 116 V 143 H 104" fill="url(#goldGrad)" />
+
+  <!-- Text: EST. 2024 -->
+  <text x="100" y="45" text-anchor="middle" font-family="serif" font-weight="bold" font-size="12" fill="url(#goldGrad)" letter-spacing="1">EST. 2024</text>
+
+  <!-- Text: CUAN ÓIR -->
+  <!-- Path Radius: 82.5 (Center of 70-95 band) -->
+  <!-- Font Size: 18 (Fits better in 25px band) -->
+  <!-- dominant-baseline: middle (Centers text vertically on path) -->
+  <path id="textPath" d="M 30 145 A 82.5 82.5 0 0 0 170 145" fill="none" />
+  <text font-family="sans-serif" font-weight="bold" font-size="18" fill="black" letter-spacing="3" dominant-baseline="middle">
+    <textPath href="#textPath" startOffset="50%" text-anchor="middle">CUAN ÓIR</textPath>
+  </text>
+</svg>

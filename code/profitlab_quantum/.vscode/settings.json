@@ -1,0 +1,22 @@
+{
+    "python.defaultInterpreterPath": "/srv/profitlab_quantum/venv/bin/python3",
+    "python.terminal.activateEnvironment": true,
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "python.analysis.extraPaths": [
+        "/srv/profitlab_quantum"
+    ],
+    "python.analysis.venvPath": "/srv/profitlab_quantum",
+    "python.analysis.venv": "venv",
+    "python.analysis.typeCheckingMode": "off",
+    "terminal.integrated.env.linux": {
+        "VIRTUAL_ENV": "/srv/profitlab_quantum/venv",
+        "PATH": "/srv/profitlab_quantum/venv/bin:${env:PATH}"
+    },
+    "python.interpreter.infoVisibility": "never",
+    "python.showStartPage": false,
+    "python.analysis.diagnosticMode": "openFilesOnly",
+    "python.analysis.indexing": false,
+    "python.analysis.background.indexing": false,
+    "python.analysis.autoSearchPaths": false,
+    "python.analysis.userFileIndexingLimit": 0
+}
