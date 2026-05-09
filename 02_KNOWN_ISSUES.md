@@ -288,7 +288,7 @@ Durante la generación del bundle Codex, encontré **dos secret leaks críticos*
 
 **Patrón**:
 ```python
-api_key = os.environ.get("ANTHROPIC_API_KEY") or "sk-ant-api03-TbVkZIK..."
+api_key = os.environ.get("ANTHROPIC_API_KEY") or "<REDACTED-PREFIX>"
 ```
 
 GitHub Secret Scanning detectó el secret al intentar push y bloqueó el repo. **El key debe ser rotado en Anthropic console urgentemente** + cambiar el patrón a `os.environ["ANTHROPIC_API_KEY"]` (sin fallback).

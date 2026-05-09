@@ -16,6 +16,7 @@ import asyncio
 import datetime as dt
 import json
 import logging
+import re
 import signal
 import time
 from collections import deque
@@ -46,11 +47,96 @@ logging.basicConfig(
         logging.FileHandler("/home/administrator/poly_sidecar/data/sidecar.log"),
     ],
 )
+
+
+# [r152-M1] Redact API keys/tokens from log records (Codex M-02 fix)
+# httpx loggea URLs completas con query strings · FRED/BLS keys quedaban
+# en disco (sidecar.log + journald). Filter aplica a todos los handlers root.
+_REDACT_PATTERN = re.compile(
+    r"(api_key|registrationkey|token|secret|password)=[A-Za-z0-9._-]{8,}",
+    re.IGNORECASE,
+)
+
+
+class _RedactSecretsFilter(logging.Filter):
+    """Redact secrets in log records.
+
+    httpx logs `HTTP Request: %s %s "%s %d %s"` with `request.url` as a
+    httpx.URL object (NOT str). Lazy formatting renders URL via str()
+    AFTER filter runs · key se filtra plaintext.
+
+    Estrategia: para non-str args, comprobar si su str() contiene un
+    secret pattern. Si sí, reemplazar por la versión redactada (string).
+    Si no, mantener el objeto original (preserva tipos int/float para %d).
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        if isinstance(record.msg, str):
+            record.msg = _REDACT_PATTERN.sub(r"\1=<REDACTED>", record.msg)
+        if record.args:
+            try:
+                new_args = []
+                for a in record.args:
+                    if isinstance(a, str):
+                        new_args.append(_REDACT_PATTERN.sub(r"\1=<REDACTED>", a))
+                    else:
+                        sa = str(a)
+                        if _REDACT_PATTERN.search(sa):
+                            new_args.append(_REDACT_PATTERN.sub(r"\1=<REDACTED>", sa))
+                        else:
+                            new_args.append(a)
+                record.args = tuple(new_args)
+            except Exception:
+                pass
+        return True
+
+
+_redact_filter = _RedactSecretsFilter()
+for _h in logging.getLogger().handlers:
+    _h.addFilter(_redact_filter)
+# httpx logger es separado · agregar también
+logging.getLogger("httpx").addFilter(_redact_filter)
+
 logger = logging.getLogger("poly_sidecar.main")
 
 CALENDAR_FILE = Path("/home/administrator/poly_sidecar/macro_calendar.json")
 RISK_CONFIG_FILE = Path("/home/administrator/poly_sidecar/risk_config.json")
 DEFAULT_INTERVAL_S = 300
+
+
+# [r152-M2] Codex C-01 fix · ventana absoluta T-30min → T+15min
+# Firmado Gemma hash GEMMA4-SR-QUANT-B31-M2-FIX-C01-OK-20260509T1215Z
+def _next_or_recent_tracked(events, recent_window_s: int = 900):
+    """Return tracked event con menor |delta| dentro de ventana T-30min → T+recent_window_s.
+
+    delta > 0  → evento futuro · seconds remaining
+    delta < 0  → evento reciente pasado · |delta| = seconds since release
+    delta None → ningún evento dentro de ventana
+
+    Args:
+        events: lista MacroEvent del FMP cache
+        recent_window_s: cuántos segundos post-release seguimos en HIGH (default 900 = 15min)
+
+    Returns:
+        (event, delta_secs) o (None, None) si ningún evento en ventana.
+    """
+    now = dt.datetime.now(dt.timezone.utc)
+    candidates = []
+    for ev in events:
+        if not FMPClient.is_tracked(ev):
+            continue
+        try:
+            ts = dt.datetime.fromisoformat(ev.date.replace("Z", "+00:00"))
+        except (ValueError, AttributeError):
+            continue
+        delta = (ts - now).total_seconds()
+        if -recent_window_s <= delta <= 1800:
+            candidates.append((delta, ev))
+    if not candidates:
+        return None, None
+    candidates.sort(key=lambda x: abs(x[0]))
+    delta, ev = candidates[0]
+    return ev, delta
 
 
 # ── r144 firma Gemma Q4 — Adaptive polling backoff Polymarket ────────────────
@@ -281,26 +367,32 @@ async def run_once(
     # Fetch BTC spot in parallel with Polymarket
     btc_task = asyncio.create_task(btc_feed.get_price())
 
-    # [P3.6.5] FMP polling adaptativo · firmado Gemma r150-novum
-    # LOW_FREQUENCY = 3600s · default fuera de ventana T-30min
-    # HIGH_FREQUENCY = 30s · cuando seconds_to_event de next tracked < 1800s
-    # Razón: Mar 12 12:30 UTC CPI gate necesita capture <120s post-release
+    # [P3.6.5-v2] FMP polling adaptativo · firmado Gemma r152
+    # HIGH_FREQUENCY = 30s · ventana T-30min → T+15min del próximo tracked event
+    # LOW_FREQUENCY  = 3600s · fuera de ventana
+    # Razón: Codex C-01 fix · captura BLS post-release SLA <120s garantizada
+    # hash GEMMA4-SR-QUANT-B31-M2-FIX-C01-OK-20260509T1215Z
     if fmp.configured:
         cached_for_poll = fmp.cached_events()
-        _, sec_to_next_cached = (
-            time_to_next_event(cached_for_poll) if cached_for_poll else (None, None)
+        next_or_recent_ev, secs_window = (
+            _next_or_recent_tracked(cached_for_poll, recent_window_s=900)
+            if cached_for_poll else (None, None)
         )
-        in_t30_window = (
-            sec_to_next_cached is not None and 0 < sec_to_next_cached < 1800
+        in_high_window = (
+            next_or_recent_ev is not None
+            and -900 <= secs_window <= 1800
         )
-        poll_interval = 30 if in_t30_window else 3600
+        poll_interval = 30 if in_high_window else 3600
         if (time.time() - fmp_last_fetch_ts[0]) > poll_interval:
             try:
                 await fmp.fetch_calendar(days_ahead=14, days_behind=0)
                 fmp_last_fetch_ts[0] = time.time()
-                if in_t30_window:
+                if in_high_window:
                     logger.info(
-                        f"[P3.6.5] HIGH_FREQUENCY poll · sec_to_next={sec_to_next_cached:.0f}s"
+                        f"[P3.6.5-v2] HIGH_FREQUENCY poll · "
+                        f"evt={next_or_recent_ev.event} "
+                        f"secs_window={secs_window:.0f}s "
+                        f"(neg=post-release)"
                     )
             except Exception as e:
                 logger.warning(f"FMP fetch error: {e}")

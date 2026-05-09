@@ -85,3 +85,9 @@ keywords = ["@git.mbottoken.com", "gitea"]
 # Por orden Gemma: NO usar .gitignore, NO ignorar venv/, NO ignorar nada.
 # Sin embargo, para evitar matches obvios en deps externas, scope explícito
 # del scan será el filesystem real (no venv).
+
+[allowlist]
+description = "Excluir gitleaks_reports/ (output recursivo) y backups historicos"
+paths = [
+    '''gitleaks_reports/.*\.json$''',
+]

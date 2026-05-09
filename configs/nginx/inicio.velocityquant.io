@@ -41,6 +41,21 @@ server {
         add_header Cache-Control 'no-cache' always;
     }
 
+    location /poly/api/ {
+        # [r152-M2] auth_basic bundled · firmado Gemma · Codex C-04
+        auth_basic "VelocityQuant Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd_vq;
+
+        proxy_pass http://127.0.0.1:8090/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+        add_header Cache-Control 'no-cache' always;
+    }
+
     location /poly/ {
         proxy_pass http://127.0.0.1:8090/;
         proxy_http_version 1.1;
@@ -57,6 +72,10 @@ server {
     # Rate limit zone definida en nginx.conf principal con limit_req_zone
     location /poly/audit/ {
         limit_req zone=audit_dashboard burst=15 nodelay;
+        # [r152-M1] auth_basic restored · firmado Gemma · Codex C-04/C-05 fix
+        auth_basic "VelocityQuant Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd_vq;
+
 
         proxy_pass http://127.0.0.1:8090/audit/;
         proxy_http_version 1.1;
@@ -72,6 +91,10 @@ server {
     # PNL Dashboard (balance Solana RPC + SHADOW would-profit summary)
     location /poly/pnl/ {
         limit_req zone=audit_dashboard burst=15 nodelay;
+        # [r152-M1] auth_basic restored · firmado Gemma · Codex C-04/C-05 fix
+        auth_basic "VelocityQuant Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd_vq;
+
 
         proxy_pass http://127.0.0.1:8090/pnl/;
         proxy_http_version 1.1;
