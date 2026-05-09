@@ -78,8 +78,8 @@ El drop de would_send% no entra en branch "binary regression" del decision tree 
 
 | Wallet | Capital | Status |
 |---|---|---|
-| Hot cyclic (`4V6f2c3GWewMAA6HWnbuXeopCRVrVyctF2pSB3QBsZTy`) | $200 USDC SHADOW | intacto on-chain ✅ |
-| Master (`GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh`) | $4160 USDC | intacto, no relacionado con bot ✅ |
+| Hot cyclic (`<REDACTED-WALLET-HOT200>`) | $200 USDC SHADOW | intacto on-chain ✅ |
+| Master (`<REDACTED-WALLET-MASTER>`) | $4160 USDC | intacto, no relacionado con bot ✅ |
 | LIVE expuesto | **$0** | LIQ_CYCLIC_EXECUTE_LIVE=false confirmed ✅ |
 
 ---

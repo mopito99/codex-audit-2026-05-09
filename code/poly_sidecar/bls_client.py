@@ -189,30 +189,52 @@ class BLSClient:
 
     # ────────────────────────────────────────────────────────────────────
 
-    def get_latest_actual(self, category: str) -> dict[str, Any] | None:
+    def get_latest_actual(
+        self,
+        category: str,
+        force_refresh: bool = False,
+    ) -> dict[str, Any] | None:
         """Compute "actual surprise input" for a category.
 
         For NFP: returns dict with `month_change_thousands` (current - previous).
         For CPI: returns dict with `mom_pct_change` and `yoy_pct_change`.
         For UNEMPLOYMENT: returns level percent.
 
-        Returns None if data insufficient or category unknown.
+        Args:
+            category: NFP/CPI/CPI_CORE/UNEMPLOYMENT.
+            force_refresh: si True bypassa cache + aggressive_ttl · forza HTTP call BLS.
+                Activado por sidecar durante macro window T-30→T+15min para garantizar
+                SLA <120s post-release (Codex CRITICAL-NEW-02 fix · firmado Gemma r152-M2-bis).
+
+        Returns None si data insufficient o category unknown.
         """
         series_id = SERIES_BY_CATEGORY.get(category)
         if not series_id:
             return None
 
-        # [P3.6.5] Cache TTL adaptativo
-        # - default TTL: 300s (5min)
-        # - aggressive TTL: 3600s (1h) si hash datos parseados igual al previo
-        ttl = 3600 if self._cat_aggressive_ttl.get(category, False) else 300
-        last_fetch = self._cat_last_fetch_ts.get(category, 0.0)
-        cached = self._cache.get(series_id)
-        if not cached or (time.time() - last_fetch) > ttl:
+        # [r152-M2-bis] BLS TTL bypass durante macro window
+        # firmado Gemma · Codex CRITICAL-NEW-02 fix
+        if force_refresh:
             cached = self.fetch_series(series_id)
             if not cached:
                 return None
             self._cat_last_fetch_ts[category] = time.time()
+            LOGGER.info(
+                f"[r152-M2-bis] {category} force_refresh=True · BLS HTTP call forced "
+                f"(macro window) · cache + aggressive_ttl bypassed"
+            )
+        else:
+            # [P3.6.5] Cache TTL adaptativo (LOW frequency · fuera de macro window)
+            # - default TTL: 300s (5min)
+            # - aggressive TTL: 3600s (1h) si hash datos parseados igual al previo
+            ttl = 3600 if self._cat_aggressive_ttl.get(category, False) else 300
+            last_fetch = self._cat_last_fetch_ts.get(category, 0.0)
+            cached = self._cache.get(series_id)
+            if not cached or (time.time() - last_fetch) > ttl:
+                cached = self.fetch_series(series_id)
+                if not cached:
+                    return None
+                self._cat_last_fetch_ts[category] = time.time()
 
         cur_year = max(o.year for o in cached)
         # Sort descending by (year, month)

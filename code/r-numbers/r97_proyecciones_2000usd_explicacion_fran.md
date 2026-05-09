@@ -675,7 +675,7 @@ Esperado: archivo de >500 MB con timestamps continuos del último mes.
 
 ## 7.3 Verificar el wallet on-chain
 
-URL: https://solscan.io/account/GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh
+URL: https://solscan.io/account/<REDACTED-WALLET-MASTER>
 
 Esperado: balance ~$4,164 al 2026-04-28 (3 SOL + 2,790 USDC + 1,119 USDT).
 Verificar que NO ha habido transacciones de trading recientes
@@ -811,7 +811,7 @@ ayer (push-back r92 documentado en `/home/administrator/r92_*.md`).
 - Memorias del proyecto: `/home/administrator/.claude/projects/-srv/memory/`
 - Código sidecar: `/home/administrator/poly_sidecar/`
 - Código bot Solana: `/home/ubuntu/liquidator_rs/` (Newark) bajo NDA
-- Wallet: `GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh` (Solscan público)
+- Wallet: `<REDACTED-WALLET-MASTER>` (Solscan público)
 - Empresa: Cuandeoro Ltd, Ireland CRO 813028 (core.cro.ie)
 - Portal: https://inicio.velocityquant.io/
 

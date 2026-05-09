@@ -56,7 +56,24 @@ server {
         add_header Cache-Control 'no-cache' always;
     }
 
+    # [r152-M1-bis] Deny-by-Default · firmado Gemma · Codex CRITICAL-NEW-01
+    # Bloquear admin namespace explícitamente ANTES del catch-all
+    location /poly/admin/ {
+        return 404;
+    }
+    # Bloquear health/metrics públicos
+    location = /poly/health {
+        return 401;
+    }
+    location /poly/metrics {
+        return 401;
+    }
+
     location /poly/ {
+        # [r152-M1-bis] Deny-by-Default · auth_basic en catch-all
+        auth_basic "VelocityQuant Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd_vq;
+
         proxy_pass http://127.0.0.1:8090/;
         proxy_http_version 1.1;
         proxy_set_header Host $host;

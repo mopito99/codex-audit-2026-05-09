@@ -136,13 +136,28 @@ class FMPClient:
         self,
         days_ahead: int = 14,
         days_behind: int = 7,
+        force_refresh_bls: bool = False,
     ) -> list[MacroEvent]:
-        """Sync code wrapped in async to match FMP signature."""
+        """Sync code wrapped in async to match FMP signature.
+
+        Args:
+            days_ahead/days_behind: ventana FRED calendar.
+            force_refresh_bls: si True, propaga a BLSClient.get_latest_actual()
+                forzando HTTP call · activado por sidecar durante macro window
+                T-30→T+15min para garantizar SLA <120s (Codex CRITICAL-NEW-02 fix).
+        """
         loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, self._sync_fetch, days_ahead, days_behind)
+        await loop.run_in_executor(
+            None, self._sync_fetch, days_ahead, days_behind, force_refresh_bls,
+        )
         return list(self._cache)
 
-    def _sync_fetch(self, days_ahead: int, days_behind: int) -> None:
+    def _sync_fetch(
+        self,
+        days_ahead: int,
+        days_behind: int,
+        force_refresh_bls: bool = False,
+    ) -> None:
         """Pull FRED calendar + BLS actuals, populate cache as MacroEvent list."""
         try:
             for rid in RELEASE_TO_CATEGORY:
@@ -156,11 +171,14 @@ class FMPClient:
             self.last_error = f"FRED fetch error: {exc}"
             LOGGER.warning(self.last_error)
 
-        # Refresh BLS actuals for relevant categories
+        # [r152-M2-bis] propagar force_refresh durante macro window
+        # firmado Gemma · Codex CRITICAL-NEW-02 fix
         bls_actuals: dict[str, dict[str, Any] | None] = {}
         for cat in ("NFP", "CPI", "PCE", "UNEMPLOYMENT"):
             try:
-                bls_actuals[cat] = self._bls.get_latest_actual(cat)
+                bls_actuals[cat] = self._bls.get_latest_actual(
+                    cat, force_refresh=force_refresh_bls,
+                )
             except Exception as exc:
                 LOGGER.debug(f"BLS get_latest_actual {cat}: {exc}")
                 bls_actuals[cat] = None

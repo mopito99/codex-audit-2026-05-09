@@ -383,7 +383,7 @@ mod tests {
     }
 
     fn cfg() -> SafetyConfig {
-        SafetyConfig::default_for(pk("GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh"))
+        SafetyConfig::default_for(pk("<REDACTED-WALLET-MASTER>"))
     }
 
     fn tok(mint: &str, value_usd: f64) -> WalletToken {

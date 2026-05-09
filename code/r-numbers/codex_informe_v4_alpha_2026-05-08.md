@@ -77,8 +77,8 @@ Ningún waiver permitido en checks bloqueantes (firma cloud).
 ## §3 · Estado real actual (vie 8 may ~15:00 UTC, sin ningún número inventado)
 
 ### Capital
-- **Hot cyclic wallet** `4V6f2c3GWewMAA6HWnbuXeopCRVrVyctF2pSB3QBsZTy`: **$200 USDC** SHADOW · intacto on-chain
-- **Master wallet** `GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh`: **$4,160 USDC** · sin relación con bot · intacto
+- **Hot cyclic wallet** `<REDACTED-WALLET-HOT200>`: **$200 USDC** SHADOW · intacto on-chain
+- **Master wallet** `<REDACTED-WALLET-MASTER>`: **$4,160 USDC** · sin relación con bot · intacto
 - **LIVE expuesto**: **$0**
 - **Realized profit total LIVE**: **$0.00**
 - **Realized trades LIVE total**: **0**

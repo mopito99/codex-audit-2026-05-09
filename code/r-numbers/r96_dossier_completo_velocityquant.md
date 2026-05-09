@@ -772,7 +772,7 @@ nada está garantizado.
 - hot200 wallet: $200 USDC (cuando Marco autorice flag)
 
 **Lo que está en reserva (no LIVE, no en juego):**
-- Master wallet `GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh`:
+- Master wallet `<REDACTED-WALLET-MASTER>`:
   ~$4,164 (al 2026-04-28 — verificar antes de operar)
   - 3 SOL
   - 2,790 USDC
@@ -1000,7 +1000,7 @@ auditable.
 
 ## L.2 Wallets on-chain
 
-- **Master:** `GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh`
+- **Master:** `<REDACTED-WALLET-MASTER>`
   - Verificable en Solscan, SolanaFM, Birdeye
 - **hot200 (LIVE planeado):** dirección a publicar cuando Marco autorice
   primera transacción real.

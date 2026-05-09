@@ -94,7 +94,7 @@ existen y tienen consistencia?
   - Director(es) registrados — ¿coincide con identidad de Marco?
   - Estado activo (no struck off, no liquidation)
 - **Wallet GaL85:** Solscan verificación
-  - `https://solscan.io/account/GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh`
+  - `https://solscan.io/account/<REDACTED-WALLET-MASTER>`
   - Balance ~$4,164 al 2026-04-28 (verifica)
   - Transacciones recientes coherentes con SHADOW (sin trades activos)
   - Token holdings (3 SOL + 2,790 USDC + 1,119 USDT) razonables

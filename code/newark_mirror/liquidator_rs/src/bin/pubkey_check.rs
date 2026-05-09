@@ -24,7 +24,7 @@ fn main() -> Result<()> {
         ("Raydium CLMM program", "CAMMCzo5YL8w4VFF8KVHrK22GGUsp5VTaW7grrKgrWqK"),
         ("Orca SOL/USDC pool (G33)", "Czfq3xZZDmsdGdUyrNLtRhGc47cXcZtLG4crryfu44zE"),
         ("Raydium SOL/USDC pool", "8sLbNZoA1cfnvMJLPfp98ZLAnFSYCFApfJKMbiXNLwxj"),
-        ("Hot wallet (R17 op)", "GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh"),
+        ("Hot wallet (R17 op)", "<REDACTED-WALLET-MASTER>"),
     ];
 
     for (name, addr) in targets {

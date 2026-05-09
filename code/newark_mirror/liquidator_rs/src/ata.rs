@@ -48,7 +48,7 @@ mod tests {
 
     #[test]
     fn ata_derivation_deterministic() {
-        let owner = pubkey!("GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh");
+        let owner = pubkey!("<REDACTED-WALLET-MASTER>");
         let usdc_mint = pubkey!("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v");
         let a1 = derive_ata(&owner, &usdc_mint, &SPL_TOKEN_PROGRAM);
         let a2 = derive_ata(&owner, &usdc_mint, &SPL_TOKEN_PROGRAM);

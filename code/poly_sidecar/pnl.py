@@ -30,8 +30,8 @@ USDT_MINT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
 TOKEN_PROGRAM = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
 
 WALLETS = [
-    {"label": "master", "pubkey": "GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh"},
-    {"label": "hot200", "pubkey": "4V6f2c3GWewMAA6HWnbuXeopCRVrVyctF2pSB3QBsZTy"},
+    {"label": "master", "pubkey": "<REDACTED-WALLET-PUBKEY>"},
+    {"label": "hot200", "pubkey": "<REDACTED-WALLET-PUBKEY>"},
 ]
 
 

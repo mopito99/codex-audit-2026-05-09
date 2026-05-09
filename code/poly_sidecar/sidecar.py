@@ -385,14 +385,21 @@ async def run_once(
         poll_interval = 30 if in_high_window else 3600
         if (time.time() - fmp_last_fetch_ts[0]) > poll_interval:
             try:
-                await fmp.fetch_calendar(days_ahead=14, days_behind=0)
+                # [r152-M2-bis] force_refresh_bls=True durante high window
+                # bypass cache TTL · garantiza SLA <120s post-release
+                # firmado Gemma · Codex CRITICAL-NEW-02 fix
+                await fmp.fetch_calendar(
+                    days_ahead=14,
+                    days_behind=0,
+                    force_refresh_bls=in_high_window,
+                )
                 fmp_last_fetch_ts[0] = time.time()
                 if in_high_window:
                     logger.info(
                         f"[P3.6.5-v2] HIGH_FREQUENCY poll · "
                         f"evt={next_or_recent_ev.event} "
                         f"secs_window={secs_window:.0f}s "
-                        f"(neg=post-release)"
+                        f"(neg=post-release · BLS force_refresh=True)"
                     )
             except Exception as e:
                 logger.warning(f"FMP fetch error: {e}")

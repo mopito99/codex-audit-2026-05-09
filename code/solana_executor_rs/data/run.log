@@ -1,12 +1,12 @@
 ================================================================
  SOLANA EXECUTOR · RUST · PAPER MODE
  pares: 2 | sol_price: $175 | tip: $0.0175 | base_fees: $0.0018 | total_cost: $0.0193
- wallet: GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh
+ wallet: <REDACTED-WALLET-MASTER>
 ================================================================
 ================================================================
  SOLANA EXECUTOR · RUST · PAPER MODE
  pares: 2 | sol_price: $175 | tip: $0.0175 | base_fees: $0.0018 | total_cost: $0.0193
- wallet: GaL85ykdeJ9g5JeXE2Yvar92yMktVCzvi5vGJB77wbTh
+ wallet: <REDACTED-WALLET-MASTER>
 ================================================================
 [stats] probes=15 api_err=0 no_route=0 no_profit=15 ops=0/15 hit=0.00% sim_profit=$0.0000 bundles_sent=0 landed=0
 [stats] probes=24 api_err=1 no_route=0 no_profit=23 ops=0/23 hit=0.00% sim_profit=$0.0000 bundles_sent=0 landed=0
